@@ -56,13 +56,16 @@ class OscalBundle:
 
     def get_params(self, control_id: str, param_ids: list[str] | None = None) -> dict[str, str]:
         control = self.controls.get(control_id)
-        merged = dict(self.params)
-        if control:
-            merged.update(control.params)
+        merged = dict(control.params) if control else {}
+        # Profile and component-definition set-parameters overlay the catalog.
+        merged.update(self.params)
         if not param_ids:
-            return {k: v for k, v in merged.items() if control and k in control.params} or {
-                k: v for k, v in merged.items() if k.startswith(control_id)
+            scoped = {
+                key: value
+                for key, value in merged.items()
+                if (control and key in control.params) or key.startswith(control_id)
             }
+            return scoped
         return {pid: merged[pid] for pid in param_ids if pid in merged}
 
 
