@@ -1,0 +1,7 @@
+{
+  "iam": {
+    "account_review_days": 180,
+    "lockout_threshold": 20,
+    "privileged_review_days": 365
+  }
+}

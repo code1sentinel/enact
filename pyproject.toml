@@ -1,0 +1,46 @@
+[project]
+name = "enact"
+version = "0.1.0"
+description = "Turn OSCAL controls into runnable checks and OSCAL assessment results."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "GRC Engineering Club" }]
+keywords = ["oscal", "opa", "rego", "compliance", "fedramp", "codify"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Security",
+]
+dependencies = [
+  "jsonschema>=4.23",
+  "typer>=0.15",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+]
+
+[project.scripts]
+enact = "enact.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/code1sentinel"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/enact"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"schemas" = "enact/schemas"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

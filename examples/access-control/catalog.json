@@ -1,0 +1,139 @@
+{
+  "catalog": {
+    "uuid": "7a2c1d90-4b11-4e2a-9f08-6c3d1e5a9b20",
+    "metadata": {
+      "title": "Acme access-control statements",
+      "last-modified": "2026-10-03T00:00:00Z",
+      "version": "1.0",
+      "oscal-version": "1.1.2",
+      "props": [
+        {
+          "name": "generator",
+          "ns": "https://grcengineering.club/ns/codify",
+          "value": "Codify 0.1 (example catalog for Enact)"
+        }
+      ]
+    },
+    "groups": [
+      {
+        "id": "s-5",
+        "title": "Access Control",
+        "controls": [
+          {
+            "id": "c-ac-2",
+            "title": "Review user accounts at least every 90 days",
+            "props": [
+              { "name": "label", "value": "5.1" },
+              { "name": "legacy-clause", "ns": "https://grcengineering.club/ns/codify", "value": "5.1" },
+              { "name": "status", "ns": "https://grcengineering.club/ns/codify", "value": "accepted" },
+              { "name": "rule-id", "ns": "https://grcengineering.club/ns/enact", "value": "ac-account-review" },
+              { "name": "check-type", "ns": "https://grcengineering.club/ns/enact", "value": "automated" },
+              { "name": "engine", "ns": "https://grcengineering.club/ns/enact", "value": "opa" },
+              { "name": "policy-path", "ns": "https://grcengineering.club/ns/enact", "value": "policies/account_review.rego" },
+              { "name": "ksi-id", "ns": "https://grcengineering.club/ns/enact", "value": "KSI-IAM-AAM" }
+            ],
+            "params": [
+              {
+                "id": "c-ac-2_prm_1",
+                "label": "time period (days)",
+                "values": ["90"]
+              }
+            ],
+            "parts": [
+              {
+                "id": "c-ac-2_smt",
+                "name": "statement",
+                "prose": "Review user accounts at least every {{ insert: param, c-ac-2_prm_1 }} days."
+              },
+              {
+                "id": "c-ac-2_legacy",
+                "name": "legacy-text",
+                "ns": "https://grcengineering.club/ns/codify",
+                "prose": "User accounts shall be reviewed regularly and access that is no longer required shall be removed as appropriate."
+              }
+            ]
+          },
+          {
+            "id": "c-ac-7",
+            "title": "Lock an account after 5 failed attempts",
+            "props": [
+              { "name": "label", "value": "5.2" },
+              { "name": "legacy-clause", "ns": "https://grcengineering.club/ns/codify", "value": "5.2" },
+              { "name": "status", "ns": "https://grcengineering.club/ns/codify", "value": "accepted" },
+              { "name": "rule-id", "ns": "https://grcengineering.club/ns/enact", "value": "ac-login-lockout" },
+              { "name": "check-type", "ns": "https://grcengineering.club/ns/enact", "value": "automated" },
+              { "name": "engine", "ns": "https://grcengineering.club/ns/enact", "value": "opa" },
+              { "name": "policy-path", "ns": "https://grcengineering.club/ns/enact", "value": "policies/login_lockout.rego" },
+              { "name": "ksi-id", "ns": "https://grcengineering.club/ns/enact", "value": "KSI-IAM-AAM" }
+            ],
+            "params": [
+              {
+                "id": "c-ac-7_prm_1",
+                "label": "number of attempts",
+                "values": ["5"]
+              }
+            ],
+            "parts": [
+              {
+                "id": "c-ac-7_smt",
+                "name": "statement",
+                "prose": "Lock an account after {{ insert: param, c-ac-7_prm_1 }} consecutive failed login attempts."
+              },
+              {
+                "id": "c-ac-7_gdn",
+                "name": "guidance",
+                "prose": "The lockout threshold is an OSCAL parameter. The check reads the same value the policy author set."
+              }
+            ]
+          },
+          {
+            "id": "c-ac-8",
+            "title": "Obtain signed access agreements",
+            "props": [
+              { "name": "label", "value": "5.3" },
+              { "name": "legacy-clause", "ns": "https://grcengineering.club/ns/codify", "value": "5.3" },
+              { "name": "rule-id", "ns": "https://grcengineering.club/ns/enact", "value": "ac-access-agreements" },
+              { "name": "check-type", "ns": "https://grcengineering.club/ns/enact", "value": "manual" },
+              { "name": "evidence-needed", "ns": "https://grcengineering.club/ns/enact", "value": "Signed access agreements for every user with a system account." }
+            ],
+            "parts": [
+              {
+                "id": "c-ac-8_smt",
+                "name": "statement",
+                "prose": "Obtain a signed access agreement before granting a person a system account."
+              }
+            ]
+          },
+          {
+            "id": "c-ac-2p",
+            "title": "Review privileged accounts every 30 days",
+            "props": [
+              { "name": "label", "value": "5.4" },
+              { "name": "legacy-clause", "ns": "https://grcengineering.club/ns/codify", "value": "5.4" },
+              { "name": "rule-id", "ns": "https://grcengineering.club/ns/enact", "value": "ac-privileged-review" },
+              { "name": "check-type", "ns": "https://grcengineering.club/ns/enact", "value": "hybrid" },
+              { "name": "engine", "ns": "https://grcengineering.club/ns/enact", "value": "opa" },
+              { "name": "policy-path", "ns": "https://grcengineering.club/ns/enact", "value": "policies/privileged_review.rego" },
+              { "name": "ksi-id", "ns": "https://grcengineering.club/ns/enact", "value": "KSI-IAM-AAM" },
+              { "name": "evidence-needed", "ns": "https://grcengineering.club/ns/enact", "value": "Reviewer sign-off that the privileged-account listing was examined." }
+            ],
+            "params": [
+              {
+                "id": "c-ac-2p_prm_1",
+                "label": "time period (days)",
+                "values": ["30"]
+              }
+            ],
+            "parts": [
+              {
+                "id": "c-ac-2p_smt",
+                "name": "statement",
+                "prose": "Review privileged accounts at least every {{ insert: param, c-ac-2p_prm_1 }} days and record a reviewer sign-off."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
