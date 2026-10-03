@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install OPA
+        run: |
+          curl -fsSL -o /usr/local/bin/opa \
+            https://openpolicyagent.org/downloads/v1.8.0/opa_linux_amd64_static
+          chmod +x /usr/local/bin/opa
+          opa version
+
+      - name: Install package
+        run: uv sync --extra dev
+
+      - name: Tests
+        run: uv run pytest
+
+      - name: Example (passing config)
+        run: |
+          uv run enact run \
+            --oscal examples/access-control/catalog.json \
+            --manifest examples/access-control/manifest.json \
+            --input examples/access-control/inputs/passing.json \
+            --workdir examples/access-control \
+            --out /tmp/enact-pass \
+            --title "Access-control example (passing)"
+
+      - name: Example (failing config)
+        run: |
+          set +e
+          uv run enact run \
+            --oscal examples/access-control/catalog.json \
+            --manifest examples/access-control/manifest.json \
+            --input examples/access-control/inputs/failing.json \
+            --workdir examples/access-control \
+            --out /tmp/enact-fail \
+            --title "Access-control example (failing)"
+          status=$?
+          set -e
+          test "$status" -eq 1
+          uv run enact validate \
+            --assessment-results /tmp/enact-fail/assessment-results.json \
+            --poam /tmp/enact-fail/poam.json \
+            --catalog examples/access-control/catalog.json
