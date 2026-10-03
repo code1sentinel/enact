@@ -1,0 +1,14 @@
+agent-tools/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+dist/
+build/
+*.egg-info/
+out/
+_site/
+.ruff_cache/
+.coverage
+htmlcov/
+.DS_Store

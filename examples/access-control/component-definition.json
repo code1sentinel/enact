@@ -1,0 +1,56 @@
+{
+  "component-definition": {
+    "uuid": "b6e0c2a1-3d44-4f8a-91c0-2a7d5e6f8011",
+    "metadata": {
+      "title": "Acme IAM component",
+      "last-modified": "2026-10-03T00:00:00Z",
+      "version": "1.0",
+      "oscal-version": "1.1.2"
+    },
+    "components": [
+      {
+        "uuid": "0f3a91d2-88b4-4c1e-a7d3-5c2b9e10a441",
+        "type": "software",
+        "title": "Acme identity service",
+        "description": "Local example of a component-definition that maps controls to Enact rule IDs.",
+        "control-implementations": [
+          {
+            "uuid": "11aa22bb-33cc-44dd-55ee-66ff77889900",
+            "source": "catalog.json",
+            "description": "Implemented access-control statements.",
+            "implemented-requirements": [
+              {
+                "uuid": "aaaaaaaa-1111-2222-3333-444444444401",
+                "control-id": "c-ac-2",
+                "description": "Account review cadence enforced in IAM config.",
+                "props": [
+                  { "name": "Rule_Id", "value": "ac-account-review" },
+                  { "name": "check-type", "ns": "https://grcengineering.club/ns/enact", "value": "automated" },
+                  { "name": "engine", "ns": "https://grcengineering.club/ns/enact", "value": "opa" },
+                  { "name": "policy-path", "ns": "https://grcengineering.club/ns/enact", "value": "policies/account_review.rego" },
+                  { "name": "ksi-id", "ns": "https://grcengineering.club/ns/enact", "value": "KSI-IAM-AAM" }
+                ],
+                "set-parameters": [
+                  { "param-id": "c-ac-2_prm_1", "values": ["90"] }
+                ]
+              },
+              {
+                "uuid": "aaaaaaaa-1111-2222-3333-444444444402",
+                "control-id": "c-ac-7",
+                "description": "Login lockout threshold.",
+                "props": [
+                  { "name": "Rule_Id", "value": "ac-login-lockout" },
+                  { "name": "check-type", "ns": "https://grcengineering.club/ns/enact", "value": "automated" },
+                  { "name": "policy-path", "ns": "https://grcengineering.club/ns/enact", "value": "policies/login_lockout.rego" }
+                ],
+                "set-parameters": [
+                  { "param-id": "c-ac-7_prm_1", "values": ["5"] }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
