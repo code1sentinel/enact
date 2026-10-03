@@ -2,9 +2,11 @@
 
 **Turn OSCAL controls into runnable checks, and checks back into OSCAL assessment results.**
 
+**Live demo:** https://code1sentinel.github.io/enact/
+
 [Codify](https://github.com/code1sentinel/policy-golden-path) is for policy authors: it turns legacy clauses into OSCAL 1.1.2 control statements and exports a catalog. Enact is for engineers running those controls in CI. The two stay separate. Codify defines the input contract — an OSCAL catalog (or any catalog, profile, or component-definition). Enact maps rule IDs and parameters onto check engines, runs the checks locally, and writes OSCAL assessment results with every pass or fail traced to a control ID.
 
-Nothing leaves the machine. There are no third-party calls.
+Nothing leaves the machine. There are no third-party calls. The demo site is the bundled access-control example: CI runs Enact on a passing and a failing IAM config and publishes the HTML reports plus the raw OSCAL `assessment-results` and POA&M JSON.
 
 ## What it does
 
@@ -32,8 +34,8 @@ local config + Rego policies    ──┘
 Python 3.10+ and the [OPA](https://www.openpolicyagent.org/docs/latest/#running-opa) binary on `PATH`.
 
 ```bash
-git clone <this-repo>
-cd <this-repo>
+git clone https://github.com/code1sentinel/enact.git
+cd enact
 pip install -e ".[dev]"   # or: uv sync --extra dev
 ```
 
@@ -184,6 +186,12 @@ uv run pytest
 ```
 
 CI (`.github/workflows/ci.yml`) installs OPA, runs the tests, and executes both example configs. Output is validated against the vendored NIST 1.1.2 schemas.
+
+Pushes to `main` also build the [live demo](https://code1sentinel.github.io/enact/) (`.github/workflows/pages.yml`) by running Enact on the example and deploying with `actions/deploy-pages`. Pages source should be **GitHub Actions**.
+
+```bash
+uv run python scripts/build_site.py --out _site
+```
 
 ## License
 

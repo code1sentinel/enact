@@ -7,6 +7,7 @@ dist/
 build/
 *.egg-info/
 out/
+_site/
 .ruff_cache/
 .coverage
 htmlcov/

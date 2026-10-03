@@ -29,7 +29,8 @@ dev = [
 enact = "enact.cli:app"
 
 [project.urls]
-Homepage = "https://github.com/code1sentinel"
+Homepage = "https://github.com/code1sentinel/enact"
+Documentation = "https://code1sentinel.github.io/enact/"
 
 [build-system]
 requires = ["hatchling"]
