@@ -1,0 +1,20 @@
+{
+  "rule_id": "ac-account-review",
+  "title": "Review user accounts on a schedule",
+  "description": "Someone should look at every account at least as often as the policy says, and remove access that is no longer needed.",
+  "check_type": "automated",
+  "category": "access-control",
+  "suggested_controls": [
+    "AC-2"
+  ],
+  "params": [
+    {
+      "id": "ac-account-review_prm_1",
+      "label": "Review at least every (days)",
+      "values": [
+        "90"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-IAM-AAM"
+}

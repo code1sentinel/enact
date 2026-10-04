@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Any, Callable
 
 from enact.engines import EngineError, EngineRegistry
+from enact.library import normalize_control_id
 from enact.manifest import Manifest, merge_or_load
 from enact.models import AssessmentRun, CheckOutcome, CheckSpec, Evidence
-from enact.oscal_io import OscalBundle, load_bundle, load_json
+from enact.oscal_io import ControlRecord, OscalBundle, load_bundle, load_json
 
 Clock = Callable[[], datetime]
 
@@ -27,10 +28,13 @@ def run_assessment(
     title: str | None = None,
     engines: EngineRegistry | None = None,
     clock: Clock = utcnow,
+    param_overrides: dict[str, str] | None = None,
 ) -> tuple[AssessmentRun, OscalBundle]:
     if not oscal_paths:
         raise ValueError("at least one OSCAL document is required")
     bundle = load_bundle(oscal_paths)
+    if param_overrides:
+        bundle.params.update(param_overrides)
     manifest = merge_or_load(bundle, manifest_path)
     workdir = workdir or (manifest_path.parent if manifest_path else oscal_paths[0].parent)
     default_input = _load_input(input_path) if input_path else {}
@@ -63,7 +67,7 @@ def _run_one(
     input_path: Path | None,
     registry: EngineRegistry,
 ) -> CheckOutcome:
-    params = bundle.get_params(spec.control_id, spec.params or None)
+    params = _resolve_params(spec, bundle)
     if spec.check_type == "manual":
         needed = spec.evidence_needed or "This control is not automated. Attach reviewer evidence."
         evidence = []
@@ -108,6 +112,38 @@ def _run_one(
             raw=outcome.raw,
         )
     return outcome
+
+
+def _find_control(bundle: OscalBundle, control_id: str) -> ControlRecord | None:
+    if control_id in bundle.controls:
+        return bundle.controls[control_id]
+    wanted = normalize_control_id(control_id)
+    for record in bundle.controls.values():
+        if normalize_control_id(record.control_id) == wanted:
+            return record
+    return None
+
+
+def _resolve_params(spec: CheckSpec, bundle: OscalBundle) -> dict[str, str]:
+    """Return library param ids plus catalog values, aliasing when the ids differ."""
+    control = _find_control(bundle, spec.control_id)
+    merged = dict(control.params) if control else {}
+    merged.update(bundle.params)
+    params: dict[str, str] = {}
+    wanted = list(spec.params or [])
+    for pid in wanted:
+        if pid in merged:
+            params[pid] = merged[pid]
+    if control:
+        extras = [value for key, value in control.params.items() if key not in wanted]
+        extra_index = 0
+        for pid in wanted:
+            if pid not in params and extra_index < len(extras):
+                params[pid] = extras[extra_index]
+                extra_index += 1
+        for key, value in control.params.items():
+            params.setdefault(key, merged.get(key, value))
+    return params
 
 
 def _hybrid_pending(spec: CheckSpec, params: dict[str, str], message: str) -> CheckOutcome:

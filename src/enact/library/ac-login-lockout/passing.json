@@ -1,0 +1,5 @@
+{
+  "iam": {
+    "lockout_threshold": 3
+  }
+}

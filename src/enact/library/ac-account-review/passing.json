@@ -1,0 +1,5 @@
+{
+  "iam": {
+    "account_review_days": 30
+  }
+}

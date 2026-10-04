@@ -1,0 +1,22 @@
+{
+  "rule_id": "ac-privileged-review",
+  "title": "Review privileged accounts (hybrid)",
+  "description": "Administrators and other powerful accounts need a tighter review cycle. The automated half checks the configured cadence. A person still signs off that they looked at the listing.",
+  "check_type": "hybrid",
+  "category": "access-control",
+  "suggested_controls": [
+    "AC-2(7)",
+    "AC-6"
+  ],
+  "params": [
+    {
+      "id": "ac-privileged-review_prm_1",
+      "label": "Privileged review every (days)",
+      "values": [
+        "30"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-IAM-AAM",
+  "evidence_needed": "Reviewer sign-off that the privileged-account listing was examined."
+}

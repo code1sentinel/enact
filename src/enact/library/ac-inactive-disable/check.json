@@ -1,0 +1,20 @@
+{
+  "rule_id": "ac-inactive-disable",
+  "title": "Disable unused accounts in time",
+  "description": "Accounts that nobody has used should be disabled after a set number of days so leftover access cannot linger.",
+  "check_type": "automated",
+  "category": "access-control",
+  "suggested_controls": [
+    "AC-2"
+  ],
+  "params": [
+    {
+      "id": "ac-inactive-disable_prm_1",
+      "label": "Idle days before disable",
+      "values": [
+        "90"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-IAM-AAM"
+}

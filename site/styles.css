@@ -191,7 +191,25 @@ a:hover { color: #115e59; }
 .strip b { display: block; margin-bottom: 0.25rem; }
 .strip p { margin: 0; color: var(--muted); }
 
-.demo, .install { padding: 2.4rem 1.25rem 0; }
+.guided, .demo, .install { padding: 2.4rem 1.25rem 0; }
+.guided__shot {
+  margin: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.guided__shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--bg);
+}
+.guided__shot figcaption {
+  padding: 0.85rem 1.1rem 1rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
 h2 { margin: 0 0 0.5rem; font-size: 1.35rem; letter-spacing: -0.02em; }
 .note { color: var(--muted); margin: 0 0 1.1rem; }
 .runs {

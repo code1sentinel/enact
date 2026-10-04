@@ -1,0 +1,5 @@
+{
+  "iam": {
+    "password_min_length": 14
+  }
+}

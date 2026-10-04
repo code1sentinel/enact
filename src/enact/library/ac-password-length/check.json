@@ -1,0 +1,21 @@
+{
+  "rule_id": "ac-password-length",
+  "title": "Passwords meet a minimum length",
+  "description": "Short passwords are easy to guess. Compare the configured minimum length to the OSCAL parameter.",
+  "check_type": "automated",
+  "category": "access-control",
+  "suggested_controls": [
+    "IA-5(1)",
+    "IA-5"
+  ],
+  "params": [
+    {
+      "id": "ac-password-length_prm_1",
+      "label": "Minimum password length",
+      "values": [
+        "14"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-IAM-AAM"
+}

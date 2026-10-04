@@ -1,0 +1,5 @@
+{
+  "crypto": {
+    "encryption_at_rest": false
+  }
+}
