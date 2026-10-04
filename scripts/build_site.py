@@ -32,12 +32,12 @@ NAV = """<nav class="demo-nav" aria-label="Demo">
 <style>
   .demo-nav {
     display: flex; flex-wrap: wrap; justify-content: space-between; gap: .6rem;
-    max-width: 1100px; margin: 0 auto; padding: .85rem 1.25rem;
-    font: 15px/1.5 "Iowan Old Style", "Palatino Linotype", Palatino, serif;
-    color: #57534e;
+    max-width: 1100px; margin: 0 auto; padding: .9rem 1.25rem .2rem;
+    font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
+    color: #52525b;
   }
-  .demo-nav a { color: #1c1917; text-decoration: none; border-bottom: 1px solid #e7e0d6; }
-  .demo-nav a:hover { border-color: #9a3412; color: #9a3412; }
+  .demo-nav a { color: #0f766e; text-decoration: none; }
+  .demo-nav a:hover { text-decoration: underline; }
   .demo-nav code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .86em; }
 </style>
 """
