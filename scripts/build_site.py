@@ -15,6 +15,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from enact.theme import write_theme_assets
+
 ROOT = Path(__file__).resolve().parent.parent
 EXAMPLE = ROOT / "examples" / "access-control"
 STATIC = ROOT / "site"
@@ -33,12 +35,12 @@ NAV = """<nav class="demo-nav" aria-label="Demo">
   .demo-nav {
     display: flex; flex-wrap: wrap; justify-content: space-between; gap: .6rem;
     max-width: 1100px; margin: 0 auto; padding: .9rem 1.25rem .2rem;
-    font: 14px/1.5 ui-sans-serif, system-ui, sans-serif;
-    color: #52525b;
+    font: 14px/1.5 var(--font);
+    color: var(--muted);
   }
-  .demo-nav a { color: #0f766e; text-decoration: none; }
-  .demo-nav a:hover { text-decoration: underline; }
-  .demo-nav code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .86em; }
+  .demo-nav a { color: var(--accent); text-decoration: none; }
+  .demo-nav a:hover { color: var(--accent-hover); text-decoration: underline; }
+  .demo-nav code { font-family: var(--mono); font-size: .86em; }
 </style>
 """
 
@@ -63,6 +65,7 @@ def _run(cmd: list[str], *, expect_fail: bool = False) -> None:
 
 
 def _copy_static(out: Path) -> None:
+    write_theme_assets(STATIC)
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)

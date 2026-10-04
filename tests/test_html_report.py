@@ -71,6 +71,7 @@ def test_landing_page_keeps_relative_demo_links_and_codify() -> None:
         "examples/fail/assessment-results.json",
         "examples/fail/poam.json",
         "styles.css",
+        "theme.css",
         "https://code1sentinel.github.io/policy-golden-path/",
     ):
         assert f'href="{href}"' in html

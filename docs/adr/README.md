@@ -11,3 +11,4 @@ Numbered documents in this folder. Start from `docs/templates/adr-template.md`.
 | [0005](0005-pluggable-writers-fedramp-sdr-reserved.md) | Pluggable writers; FedRAMP SDR reserved | accepted |
 | [0006](0006-github-is-the-source-of-truth.md) | GitHub is the source of truth | accepted |
 | [0007](0007-local-only-privacy-model.md) | Local-only privacy model | accepted |
+| [0008](0008-css-theme-tokens.md) | Shared CSS theme tokens and a System-first toggle | accepted |

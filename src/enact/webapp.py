@@ -25,7 +25,10 @@ from enact.manifest import dump_manifest
 from enact.oscal_io import detect_kind, load_bundle
 from enact.project import project_zip
 from enact.runner import run_assessment
+from enact.theme import theme_js, theme_stylesheet, ui_csp
 from enact.writers import HtmlWriter, MarkdownWriter, OscalAssessmentResultsWriter, OscalPoamWriter
+
+CSP = ui_csp()
 
 STATIC = Path(__file__).resolve().parent / "static"
 MAX_BODY = 2_000_000
@@ -217,6 +220,7 @@ def _json_response(handler: BaseHTTPRequestHandler, payload: Any, status: int = 
     handler.send_header("Content-Type", "application/json; charset=utf-8")
     handler.send_header("Content-Length", str(len(body)))
     handler.send_header("Cache-Control", "no-store")
+    handler.send_header("Content-Security-Policy", CSP)
     handler.end_headers()
     handler.wfile.write(body)
 
@@ -262,6 +266,10 @@ class UiHandler(BaseHTTPRequestHandler):
                 return self._static("app.css", "text/css; charset=utf-8")
             if path == "/app.js":
                 return self._static("app.js", "application/javascript; charset=utf-8")
+            if path == "/theme.css":
+                return self._bytes(theme_stylesheet().encode("utf-8"), "text/css; charset=utf-8")
+            if path == "/theme.js":
+                return self._bytes(theme_js().encode("utf-8"), "application/javascript; charset=utf-8")
             if path == "/api/library":
                 checks = [check_as_dict(check, include_samples=True) for check in list_checks()]
                 return _json_response(self, {"checks": checks})
@@ -342,9 +350,14 @@ class UiHandler(BaseHTTPRequestHandler):
             self.send_error(404, "Not found")
             return
         body = path.read_bytes()
+        self._bytes(body, content_type)
+
+    def _bytes(self, body: bytes, content_type: str) -> None:
         self.send_response(200)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Content-Security-Policy", CSP)
+        self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
 

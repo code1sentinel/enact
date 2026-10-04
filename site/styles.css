@@ -1,24 +1,3 @@
-:root {
-  --bg: #f4f4f5;
-  --card: #ffffff;
-  --ink: #18181b;
-  --muted: #52525b;
-  --line: #e4e4e7;
-  --accent: #0f766e;
-  --accent-soft: #ccfbf1;
-  --pass: #166534;
-  --pass-bg: #dcfce7;
-  --fail: #9f1239;
-  --fail-bg: #ffe4e6;
-  --wait: #854d0e;
-  --wait-bg: #fef3c7;
-  --terminal: #111113;
-  --radius: 12px;
-  --max: 1100px;
-  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
-
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
@@ -29,15 +8,15 @@ body {
   color: var(--ink);
 }
 a { color: var(--accent); }
-a:hover { color: #115e59; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a:hover { color: var(--accent-hover); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 .skip {
   position: absolute;
   left: -9999px;
   top: 8px;
   background: var(--ink);
-  color: #fff;
+  color: var(--bg);
   padding: 0.4rem 0.7rem;
   border-radius: 6px;
   z-index: 10;
@@ -78,7 +57,7 @@ a:hover { color: #115e59; }
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.top__links { display: flex; gap: 1rem; }
+.top__links { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
 .top__links a { color: var(--muted); text-decoration: none; }
 .top__links a:hover { color: var(--ink); }
 
@@ -115,18 +94,18 @@ a:hover { color: #115e59; }
   align-items: center;
   padding: 0.55rem 0.95rem;
   border-radius: 999px;
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   text-decoration: none;
   font-weight: 650;
 }
-.btn:hover { color: #fff; background: #115e59; }
+.btn:hover { color: var(--on-accent); background: var(--accent-fill-hover); }
 .btn--ghost {
   background: var(--card);
   color: var(--ink);
   border: 1px solid var(--line);
 }
-.btn--ghost:hover { color: var(--ink); background: #fafafa; }
+.btn--ghost:hover { color: var(--ink); background: var(--ghost-hover); }
 
 .terminal {
   margin: 0;

@@ -49,6 +49,28 @@ def test_serve_rejects_non_localhost() -> None:
         serve(host="0.0.0.0", port=43174, open_browser=False)
 
 
+def test_ui_serves_theme_tokens_and_toggle(ui_server: str) -> None:
+    from enact.theme import STORAGE_KEY, theme_js, theme_stylesheet, ui_csp
+
+    status, body, content_type = _request(ui_server, "GET", "/")
+    assert status == 200
+    html = body.decode("utf-8") if isinstance(body, bytes) else body
+    assert "text/html" in content_type
+    assert "Appearance" in html
+    assert 'data-theme-choice="system"' in html
+    assert STORAGE_KEY in html
+    status, css, css_type = _request(ui_server, "GET", "/theme.css")
+    assert status == 200
+    assert "text/css" in css_type
+    assert css.decode("utf-8") == theme_stylesheet() if isinstance(css, bytes) else css == theme_stylesheet()
+    status, js, js_type = _request(ui_server, "GET", "/theme.js")
+    assert status == 200
+    assert "javascript" in js_type
+    text = js.decode("utf-8") if isinstance(js, bytes) else js
+    assert text == theme_js()
+    assert ui_csp().split("script-src", 1)[0]
+
+
 def test_library_and_example_endpoints(ui_server: str) -> None:
     status, data, _ = _request(ui_server, "GET", "/api/library")
     assert status == 200
