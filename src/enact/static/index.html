@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Enact — guided assessment</title>
   <meta name="description" content="Walk through an OSCAL catalog, pick checks, add evidence, and run Enact on this machine.">
+  <script>(function(){var k="enact-theme",m="system";try{var s=localStorage.getItem(k);if(s==="light"||s==="dark"||s==="system")m=s;}catch(e){}var d=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;var t=m==="dark"||(m!=="light"&&d)?"dark":"light";var r=document.documentElement;r.setAttribute("data-theme",t);r.setAttribute("data-theme-mode",m);r.style.colorScheme=t;})();</script>
+  <link rel="stylesheet" href="/theme.css">
   <link rel="stylesheet" href="/app.css">
 </head>
 <body>
@@ -15,7 +17,17 @@
         <p class="brand">Enact</p>
         <p class="tag">Guided assessment — local only</p>
       </div>
-      <p class="privacy">Nothing is uploaded. This page talks only to 127.0.0.1.</p>
+      <div class="top__meta">
+        <p class="privacy">Nothing is uploaded. This page talks only to 127.0.0.1.</p>
+        <div class="theme-toggle">
+          <p class="theme-toggle__label" id="theme-toggle-label">Appearance</p>
+          <div class="theme-toggle__group" role="radiogroup" aria-labelledby="theme-toggle-label">
+            <button type="button" role="radio" aria-checked="false" data-theme-choice="light">Light</button>
+            <button type="button" role="radio" aria-checked="false" data-theme-choice="dark">Dark</button>
+            <button type="button" role="radio" aria-checked="true" data-theme-choice="system">System</button>
+          </div>
+        </div>
+      </div>
     </div>
     <nav class="stepper wrap" aria-label="Steps">
       <button type="button" data-go="catalog" aria-current="step">1 Catalog</button>
@@ -115,6 +127,7 @@
     </div>
   </aside>
 
+  <script src="/theme.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

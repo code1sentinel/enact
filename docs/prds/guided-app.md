@@ -1,6 +1,6 @@
 # PRD: Guided app, check library, and command panel
 
-- Status: in progress (PR #3, not merged)
+- Status: shipped (PR #3, merged 2026-10-04)
 - Date: 2026-10-04
 - Related ADRs: 0004, 0007
 - Parent: [docs/prd.md](../prd.md)
@@ -50,4 +50,4 @@ Stepper: **1 Catalog** → **2 Checks** → **3 Evidence** → **4 Run**. Light 
 
 - [x] Library pass/fail tests, `enact init` tests, `/api/run` tests (on PR #3)
 - [x] README section and landing screenshot (on PR #3)
-- [ ] Merged, CHANGELOG on `main`, issue closed (blocked on review of #3)
+- [x] Merged, CHANGELOG on `main` ([PR #3](https://github.com/code1sentinel/enact/pull/3))

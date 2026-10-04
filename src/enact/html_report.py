@@ -7,6 +7,13 @@ import html
 from enact import __version__
 from enact.models import AssessmentRun, CheckOutcome, OutcomeStatus
 from enact.oscal_io import OscalBundle
+from enact.theme import (
+    report_csp,
+    theme_bootstrap_script_tag,
+    theme_js,
+    theme_stylesheet,
+    theme_toggle_html,
+)
 
 HTML_STATUS: dict[OutcomeStatus, str] = {
     "pass": "Passed",
@@ -17,25 +24,6 @@ HTML_STATUS: dict[OutcomeStatus, str] = {
 }
 
 REPORT_CSS = """
-:root {
-  --bg: #f4f4f5;
-  --card: #ffffff;
-  --ink: #18181b;
-  --muted: #52525b;
-  --line: #e4e4e7;
-  --accent: #0f766e;
-  --accent-soft: #ccfbf1;
-  --pass: #166534;
-  --pass-bg: #dcfce7;
-  --fail: #9f1239;
-  --fail-bg: #ffe4e6;
-  --wait: #854d0e;
-  --wait-bg: #fef3c7;
-  --radius: 12px;
-  --max: 1100px;
-  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-}
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body {
@@ -46,7 +34,8 @@ body {
   color: var(--ink);
 }
 a { color: var(--accent); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a:hover { color: var(--accent-hover); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .wrap { max-width: var(--max); margin: 0 auto; padding: 1.5rem 1.25rem 2.5rem; }
 .kicker {
   margin: 0 0 .35rem;
@@ -58,6 +47,11 @@ a { color: var(--accent); }
 }
 h1 { margin: 0 0 .45rem; font-size: 1.7rem; letter-spacing: -.02em; }
 .lede { margin: 0 0 1.25rem; color: var(--muted); max-width: 46rem; }
+.report-head {
+  display: flex; flex-wrap: wrap; justify-content: space-between;
+  gap: .8rem; align-items: flex-start; margin-bottom: .35rem;
+}
+.report-head h1 { margin: 0 0 .45rem; }
 .cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -90,7 +84,7 @@ h1 { margin: 0 0 .45rem; font-size: 1.7rem; letter-spacing: -.02em; }
 .pill.not_automated, .pill.needs_evidence, .pill.wait { background: var(--wait-bg); color: var(--wait); }
 .bar {
   margin-top: .7rem; height: 8px; border-radius: 999px;
-  background: #e4e4e7; overflow: hidden;
+  background: var(--track); overflow: hidden;
 }
 .bar > span { display: block; height: 100%; background: var(--accent); border-radius: inherit; }
 .toolbar {
@@ -120,8 +114,10 @@ table { width: 100%; border-collapse: collapse; }
 th, td { text-align: left; padding: .75rem .85rem; border-bottom: 1px solid var(--line); }
 th {
   font-size: .72rem; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--muted); font-weight: 650; background: #fafafa;
+  color: var(--muted); font-weight: 650; background: var(--table-head);
 }
+tr.check:nth-child(odd of .check) td { background: var(--card); }
+tr.check:nth-child(even of .check) td { background: var(--zebra); }
 tr.check:last-child td, tr.finding:last-child td { border-bottom: 0; }
 tr.check[hidden], tr.finding[hidden] { display: none; }
 code { font-family: var(--mono); font-size: .86em; }
@@ -130,12 +126,12 @@ code { font-family: var(--mono); font-size: .86em; }
 }
 .expand {
   appearance: none; width: 1.5rem; height: 1.5rem; margin-right: .4rem;
-  border: 1px solid var(--line); border-radius: 6px; background: #fafafa;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--ghost);
   color: var(--ink); cursor: pointer; vertical-align: middle; font-size: .75rem;
 }
 .expand[aria-expanded="true"] { background: var(--accent-soft); border-color: var(--accent); }
 .ctrl { white-space: nowrap; }
-.finding td { background: #fafafa; padding: .4rem .85rem 1rem; }
+.finding td { background: var(--table-head); padding: .4rem .85rem 1rem; }
 .finding-list { display: grid; gap: .55rem; }
 .finding-item {
   display: flex; gap: .7rem; align-items: flex-start;
@@ -144,7 +140,7 @@ code { font-family: var(--mono); font-size: .86em; }
 }
 .dot {
   width: .7rem; height: .7rem; border-radius: 999px; margin-top: .35rem;
-  background: #d4d4d8; flex: none;
+  background: var(--line); flex: none;
 }
 .dot.fail { background: var(--fail); }
 .finding-item h3 { margin: 0 0 .15rem; font-size: .92rem; }
@@ -342,13 +338,20 @@ def render_html(run: AssessmentRun, bundle: OscalBundle | None = None) -> str:
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="{report_csp()}">
   <title>{html.escape(run.title)}</title>
-  <style>{REPORT_CSS}</style>
+  {theme_bootstrap_script_tag()}
+  <style>{theme_stylesheet()}{REPORT_CSS}</style>
 </head>
 <body>
   <div class="wrap">
-    <p class="kicker">Enact assessment</p>
-    <h1>{html.escape(run.title)}</h1>
+    <div class="report-head">
+      <div>
+        <p class="kicker">Enact assessment</p>
+        <h1>{html.escape(run.title)}</h1>
+      </div>
+      {theme_toggle_html()}
+    </div>
     <p class="lede">Each row is a check. Pass and fail come from automation. Manual and not-checked controls still need a person — that is not a failure.</p>
     <div class="cards" aria-label="Result counts">
       <article class="card">
@@ -410,7 +413,7 @@ def render_html(run: AssessmentRun, bundle: OscalBundle | None = None) -> str:
       Ran locally; nothing was sent off this machine.
     </footer>
   </div>
-  <script>{REPORT_JS}</script>
+  <script>{theme_js()}{REPORT_JS}</script>
 </body>
 </html>
 """

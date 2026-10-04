@@ -8,6 +8,8 @@
 
 Nothing leaves the machine. There are no third-party calls. The demo site is the bundled access-control example: CI runs Enact on a passing and a failing IAM config and publishes the HTML reports plus the raw OSCAL `assessment-results` and POA&M JSON. The hosted Pages site stays a static showcase — it does not run the guided app.
 
+Appearance defaults to the operating system (`prefers-color-scheme`) on the landing page, the HTML report, and `enact ui`. A Light / Dark / System control is in each header; the choice stays in `localStorage` and never leaves the browser. Generated `summary.html` files are still a single offline document — open them from disk with no network.
+
 ## No terminal? Start here
 
 If you are more comfortable in a browser than a shell, install Enact once (Python 3.10+ and the OPA binary, same as below) and then:

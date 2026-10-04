@@ -2,7 +2,7 @@
 
 - Status: shipped (v0.1 on `main`)
 - Date: 2026-10-04
-- Related ADRs: 0001–0007
+- Related ADRs: 0001–0008
 
 Enact turns OSCAL controls into runnable checks and writes the results back as OSCAL.
 
@@ -59,7 +59,7 @@ enact run \
 
 ## In flight
 
-- Guided local app, check library, and CLI teaching panel: [docs/prds/guided-app.md](prds/guided-app.md) (PR #3).
+- Dark mode (Light / Dark / System) on the Pages landing, HTML report, and `enact ui`: [docs/prds/dark-mode.md](prds/dark-mode.md).
 
 ## Acceptance (product-level)
 

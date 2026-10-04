@@ -13,6 +13,7 @@ REQUIRED_HREFS = (
     "examples/fail/assessment-results.json",
     "examples/fail/poam.json",
     "styles.css",
+    "theme.css",
 )
 
 
@@ -28,3 +29,8 @@ def test_landing_page_uses_relative_demo_links() -> None:
     assert 'src="guided-app.png"' in html
     assert "This Pages site stays a static showcase" in html or "does not host the app" in html
     assert (ROOT / "site" / "guided-app.png").is_file()
+    assert (ROOT / "site" / "theme.css").is_file()
+    assert (ROOT / "site" / "theme.js").is_file()
+    assert "Appearance" in html
+    assert 'data-theme-choice="system"' in html
+    assert "fonts.googleapis" not in html
