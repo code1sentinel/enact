@@ -5,66 +5,95 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Enact — OSCAL controls to runnable checks</title>
   <meta name="description" content="Enact turns OSCAL controls into OPA/Rego checks and writes OSCAL 1.1.2 assessment results and POA&amp;M items.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c1917'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' fill='%23faf7f2' font-family='Georgia, serif'%3EE%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f766e'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' fill='%23ffffff' font-family='ui-sans-serif, system-ui, sans-serif'%3EE%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
-  <header>
-    <div class="brand">
-      <p class="brand__name">Enact</p>
-      <nav class="brand__links" aria-label="Project">
+  <header class="top">
+    <div class="wrap top__row">
+      <p class="brand">Enact</p>
+      <nav class="top__links" aria-label="Project">
         <a href="https://github.com/code1sentinel/enact">GitHub</a>
-        <a href="https://github.com/code1sentinel/policy-golden-path">Codify</a>
+        <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
       </nav>
-    </div>
-    <div class="hero">
-      <h1>OSCAL controls become runnable checks, then assessment results.</h1>
-      <p class="lede">
-        Enact is a local Python CLI. It loads an OSCAL catalog plus a check manifest,
-        runs OPA/Rego (and records manual or hybrid work), and writes NIST OSCAL 1.1.2
-        assessment results and POA&amp;M items — with HTML and Markdown reports.
-        Nothing leaves the machine.
-      </p>
-    </div>
-    <div class="pipeline" aria-label="How Enact works">
-      <div class="step">
-        <b>OSCAL controls</b>
-        <p>Catalog, profile, or component-definition. Parameters stay in OSCAL.</p>
-      </div>
-      <div class="arrow" aria-hidden="true">→</div>
-      <div class="step">
-        <b>Runnable checks</b>
-        <p>A manifest maps each <code>rule_id</code> to a <code>control_id</code>, engine, and type.</p>
-      </div>
-      <div class="arrow" aria-hidden="true">→</div>
-      <div class="step">
-        <b>Results and POA&amp;M</b>
-        <p>OSCAL assessment-results JSON, POA&amp;M items for automated failures, plus reports.</p>
-      </div>
     </div>
   </header>
 
   <main id="main">
-    <section aria-labelledby="demo-title">
+    <section class="hero wrap">
+      <div class="hero__copy">
+        <p class="kicker">Local-first compliance CLI</p>
+        <h1>OSCAL controls become runnable checks, then assessment results.</h1>
+        <p class="lede">
+          Load a catalog and a check manifest. Run OPA/Rego locally.
+          Write NIST OSCAL 1.1.2 assessment results and POA&amp;M items.
+          Nothing leaves the machine.
+        </p>
+        <div class="hero__actions">
+          <a class="btn" href="examples/pass/summary.html">View a passing report</a>
+          <a class="btn btn--ghost" href="https://code1sentinel.github.io/policy-golden-path/">Open Codify</a>
+        </div>
+      </div>
+      <figure class="terminal" aria-label="Example enact run">
+        <figcaption class="terminal__bar">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="terminal__title">enact run</span>
+        </figcaption>
+        <pre><code><span class="cmt"># Passing IAM config from the bundled example</span>
+<span class="cmd">$</span> enact run \
+    --oscal examples/access-control/catalog.json \
+    --manifest examples/access-control/manifest.json \
+    --input examples/access-control/inputs/passing.json \
+    --workdir examples/access-control \
+    --out out/pass \
+    --title "Access-control example (passing)"
+
+<span class="ok">4 checks: 2 passed, 0 failed, 2 need evidence, 0 errors.</span>
+wrote out/pass/assessment-results.json
+wrote out/pass/poam.json
+wrote out/pass/summary.md
+wrote out/pass/summary.html</code></pre>
+      </figure>
+    </section>
+
+    <section class="wrap steps" aria-labelledby="how-title">
+      <h2 id="how-title" class="visually-hidden">How Enact works</h2>
+      <ol class="strip">
+        <li>
+          <span class="num">01</span>
+          <b>OSCAL controls</b>
+          <p>Catalog, profile, or component-definition. Parameters stay in OSCAL.</p>
+        </li>
+        <li>
+          <span class="num">02</span>
+          <b>OPA checks</b>
+          <p>A manifest maps each <code>rule_id</code> to a <code>control_id</code>, engine, and automated, manual, or hybrid type.</p>
+        </li>
+        <li>
+          <span class="num">03</span>
+          <b>OSCAL results / POA&amp;M</b>
+          <p>Assessment-results JSON, POA&amp;M items for automated failures, plus HTML and Markdown reports.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="wrap demo" aria-labelledby="demo-title">
       <h2 id="demo-title">Bundled example, generated by Enact</h2>
       <p class="note">
-        These files are produced in GitHub Actions by running
-        <code>enact run</code> on <code>examples/access-control/</code>.
-        They are not hand-written. Open the HTML reports, or the raw OSCAL JSON.
+        GitHub Actions runs <code>enact run</code> on <code>examples/access-control/</code>.
+        The HTML reports and raw OSCAL JSON below are not hand-written.
       </p>
       <div class="runs">
         <article class="card">
-          <header>
+          <div class="card-top">
             <h3>Passing IAM config</h3>
-            <p>Review every 30 days, lockout after 3 tries, privileged review every 14 days — all inside the OSCAL thresholds.</p>
-          </header>
-          <div class="pills">
-            <span class="pill pass">2 passed</span>
-            <span class="pill wait">2 need evidence</span>
-            <span class="pill pass">0 POA&amp;M items</span>
+            <span class="pill pass">Passed</span>
           </div>
-          <p>Two automated checks pass. The manual access-agreement control stays <em>not automated</em>. The hybrid privileged-review check still <em>needs evidence</em> — that is not a failure.</p>
+          <p>Review every 30 days, lockout after 3 tries, privileged review every 14 days — inside the OSCAL thresholds.</p>
+          <p class="meta">2 passed · 2 need evidence · 0 POA&amp;M items</p>
           <ul class="links">
             <li><a href="examples/pass/summary.html">HTML report</a></li>
             <li><a href="examples/pass/assessment-results.json"><code>assessment-results.json</code></a></li>
@@ -72,16 +101,12 @@
           </ul>
         </article>
         <article class="card">
-          <header>
+          <div class="card-top">
             <h3>Failing IAM config</h3>
-            <p>Review every 180 days, lockout after 20 tries, privileged review every 365 days — all over the catalog limits.</p>
-          </header>
-          <div class="pills">
-            <span class="pill fail">3 failed</span>
-            <span class="pill wait">1 not automated</span>
-            <span class="pill fail">3 POA&amp;M items</span>
+            <span class="pill fail">Failed</span>
           </div>
-          <p>Automated and hybrid failures become findings and POA&amp;M items. The manual control still does not fail.</p>
+          <p>Review every 180 days, lockout after 20 tries, privileged review every 365 days — over the catalog limits.</p>
+          <p class="meta">3 failed · 1 not automated · 3 POA&amp;M items</p>
           <ul class="links">
             <li><a href="examples/fail/summary.html">HTML report</a></li>
             <li><a href="examples/fail/assessment-results.json"><code>assessment-results.json</code></a></li>
@@ -91,55 +116,9 @@
       </div>
     </section>
 
-    <section aria-labelledby="manifest-title">
-      <h2 id="manifest-title">What the example checks</h2>
-      <p class="note">Four access-control statements in the Codify catalog shape. Thresholds live in OSCAL params; Rego reads <code>input.oscal_params</code>.</p>
-      <table class="manifest">
-        <thead>
-          <tr>
-            <th>Control</th>
-            <th>Rule</th>
-            <th>Type</th>
-            <th>What it looks at</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>c-ac-2</code></td>
-            <td><code>ac-account-review</code></td>
-            <td><span class="pill type">automated</span></td>
-            <td>Account review cadence vs. 90 days</td>
-          </tr>
-          <tr>
-            <td><code>c-ac-7</code></td>
-            <td><code>ac-login-lockout</code></td>
-            <td><span class="pill type">automated</span></td>
-            <td>Lockout threshold vs. 5 failed attempts</td>
-          </tr>
-          <tr>
-            <td><code>c-ac-8</code></td>
-            <td><code>ac-access-agreements</code></td>
-            <td><span class="pill wait">manual</span></td>
-            <td>Signed agreements — recorded, never failed by the engine</td>
-          </tr>
-          <tr>
-            <td><code>c-ac-2p</code></td>
-            <td><code>ac-privileged-review</code></td>
-            <td><span class="pill wait">hybrid</span></td>
-            <td>Privileged review cadence, plus reviewer sign-off</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section aria-labelledby="install-title">
+    <section class="wrap install" aria-labelledby="install-title">
       <h2 id="install-title">Install and run</h2>
-      <p class="note">Python 3.10+ and the <a href="https://www.openpolicyagent.org/docs/latest/#running-opa">OPA</a> binary (1.8.x, Rego v1) on <code>PATH</code>. <code>ENACT_OPA</code> overrides the binary path.</p>
-      <ol class="steps">
-        <li>Clone the repo and install Enact.</li>
-        <li>Run the passing and failing example configs.</li>
-        <li>Validate the OSCAL JSON against the vendored NIST 1.1.2 schemas.</li>
-      </ol>
+      <p class="note">Python 3.10+ and the <a href="https://www.openpolicyagent.org/docs/latest/#running-opa">OPA</a> 1.8.x binary on <code>PATH</code>. <code>ENACT_OPA</code> overrides the binary path.</p>
 <pre><code>git clone https://github.com/code1sentinel/enact.git
 cd enact
 pip install -e ".[dev]"   # or: uv sync --extra dev
@@ -150,33 +129,20 @@ enact run \
   --input examples/access-control/inputs/passing.json \
   --workdir examples/access-control \
   --out out/pass \
-  --title "Access-control example (passing)"
-
-enact run \
-  --oscal examples/access-control/catalog.json \
-  --manifest examples/access-control/manifest.json \
-  --input examples/access-control/inputs/failing.json \
-  --workdir examples/access-control \
-  --out out/fail \
-  --title "Access-control example (failing)"
-
-enact validate \
-  --assessment-results out/pass/assessment-results.json \
-  --poam out/pass/poam.json \
-  --catalog examples/access-control/catalog.json
-
-enact serve out/pass</code></pre>
-      <p class="note">The failing run exits 1. That is expected: automated failures are the signal, not a broken CLI.</p>
+  --title "Access-control example (passing)"</code></pre>
+      <p class="note">The failing run exits 1. That is expected: automated failures are the signal.</p>
     </section>
   </main>
 
   <footer class="site-footer">
-    <p>
-      MIT licensed.
-      Sister tool: <a href="https://github.com/code1sentinel/policy-golden-path">Codify</a> writes the catalog;
-      Enact runs the checks.
-      Source: <a href="https://github.com/code1sentinel/enact">github.com/code1sentinel/enact</a>.
-    </p>
+    <div class="wrap">
+      <p>
+        MIT licensed.
+        <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a> writes the catalog;
+        Enact runs the checks.
+        <a href="https://github.com/code1sentinel/enact">github.com/code1sentinel/enact</a>
+      </p>
+    </div>
   </footer>
 </body>
 </html>
