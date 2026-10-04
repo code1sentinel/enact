@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
 from enact.engines import OpaEngine
-from enact.library import catalog_from_library, get_check, list_checks
+from enact.library import _load_check, catalog_from_library, get_check, list_checks, parse_check_type
 from enact.validate import validate_catalog
 
 
@@ -52,6 +56,26 @@ def test_each_library_check_against_pass_and_fail_samples() -> None:
             workdir=check.directory,
         )
         assert failing.status == "fail", f"{check.rule_id} failing sample: {failing.message}"
+
+
+def test_parse_check_type_narrows_and_rejects_unknown() -> None:
+    assert parse_check_type(None, source="demo") == "automated"
+    assert parse_check_type("", source="demo") == "automated"
+    assert parse_check_type("manual", source="demo") == "manual"
+    assert parse_check_type("hybrid", source="demo") == "hybrid"
+    with pytest.raises(ValueError, match="unknown check_type 'inspec'"):
+        parse_check_type("inspec", source="bad-check")
+
+
+def test_load_check_rejects_unknown_check_type(tmp_path: Path) -> None:
+    folder = tmp_path / "bad-check"
+    folder.mkdir()
+    (folder / "check.json").write_text(
+        '{"rule_id": "bad-check", "title": "Bad", "description": "nope", "check_type": "inspec"}',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="unknown check_type 'inspec'"):
+        _load_check(folder)
 
 
 def test_generated_library_catalog_is_oscal_112() -> None:
