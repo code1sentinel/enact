@@ -52,3 +52,43 @@ jobs:
             --assessment-results /tmp/enact-fail/assessment-results.json \
             --poam /tmp/enact-fail/poam.json \
             --catalog examples/access-control/catalog.json
+
+      - name: Schema validation
+        run: |
+          uv run enact validate \
+            --assessment-results /tmp/enact-pass/assessment-results.json \
+            --poam /tmp/enact-pass/poam.json \
+            --catalog examples/access-control/catalog.json
+          uv run enact validate \
+            --assessment-results /tmp/enact-fail/assessment-results.json \
+            --poam /tmp/enact-fail/poam.json
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install package
+        run: uv sync --extra dev
+      - name: Ruff
+        run: uv run ruff check src tests scripts
+      - name: Type check (lenient)
+        run: uv run mypy src/enact
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v5
+      - name: Install package
+        run: uv sync --extra dev
+      - name: pip-audit
+        run: uv run pip-audit --skip-editable
+      - name: Gitleaks
+        run: |
+          curl -sSL -o /tmp/gitleaks.tgz \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.24.3/gitleaks_8.24.3_linux_x64.tar.gz
+          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
+          /tmp/gitleaks detect --source . --verbose --redact

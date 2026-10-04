@@ -1,0 +1,53 @@
+name: Vertical slice
+description: Thin vertical slice from a PRD. One issue, one PR, Given/When/Then.
+title: "[slice] "
+labels: ["slice"]
+body:
+  - type: input
+    id: prd
+    attributes:
+      label: PRD
+      description: Path to the PRD this slice is cut from.
+      placeholder: docs/prd.md or docs/prds/<feature>.md
+    validations:
+      required: true
+  - type: input
+    id: adr
+    attributes:
+      label: ADR (if a decision is required)
+      placeholder: docs/adr/0008-title.md
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Slice outcome
+      description: One user-visible path through the stack. Keep it thin.
+      placeholder: A reviewer can pick lockout from the library and see it on a catalog control.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Given / When / Then. These become the failing tests.
+      value: |
+        Given
+        When
+        Then
+    validations:
+      required: true
+  - type: checkboxes
+    id: tdd
+    attributes:
+      label: TDD
+      options:
+        - label: I will write a failing test from the criteria before implementation
+          required: true
+        - label: OSCAL output will be checked against NIST 1.1.2 schemas (or this slice produces no OSCAL)
+          required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: This slice adds no new outbound network calls
+          required: true

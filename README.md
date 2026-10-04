@@ -180,12 +180,16 @@ FedRAMP 20x publishes 46 Key Security Indicators mapped to 800-53 controls. Clas
 
 ## Development
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) for the PRD → slice → TDD → PR loop.
+
 ```bash
 uv sync --extra dev
 uv run pytest
+uv run ruff check src tests scripts
+uv run mypy src/enact
 ```
 
-CI (`.github/workflows/ci.yml`) installs OPA, runs the tests, and executes both example configs. Output is validated against the vendored NIST 1.1.2 schemas.
+CI (`.github/workflows/ci.yml`) installs OPA, runs the tests, lints, type-checks, validates example output against the vendored NIST 1.1.2 schemas, and runs pip-audit plus gitleaks.
 
 Pushes to `main` also build the [live demo](https://code1sentinel.github.io/enact/) (`.github/workflows/pages.yml`) by running Enact on the example and deploying with `actions/deploy-pages`. Pages source should be **GitHub Actions**.
 
