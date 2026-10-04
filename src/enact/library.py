@@ -8,13 +8,27 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, TypeGuard
 
 from enact import NS, OSCAL_VERSION
 from enact.models import CheckSpec, CheckType, Manifest
 from enact.oscal_io import ControlRecord
 
-CHECK_TYPES = {"automated", "manual", "hybrid"}
+CHECK_TYPES: tuple[CheckType, ...] = ("automated", "manual", "hybrid")
+
+
+def _is_check_type(value: object) -> TypeGuard[CheckType]:
+    return value in CHECK_TYPES
+
+
+def parse_check_type(value: object, *, source: str) -> CheckType:
+    """Return a CheckType Literal, or raise if the library metadata is invalid."""
+    if value in (None, ""):
+        return "automated"
+    if _is_check_type(value):
+        return value
+    allowed = ", ".join(CHECK_TYPES)
+    raise ValueError(f"{source}: unknown check_type {value!r}. Expected one of: {allowed}.")
 
 
 @dataclass
@@ -101,9 +115,7 @@ def _load_check(directory: Path) -> LibraryCheck:
     if not meta_path.is_file():
         raise ValueError(f"{directory} has no check.json")
     data = json.loads(meta_path.read_text(encoding="utf-8"))
-    check_type = data.get("check_type") or "automated"
-    if check_type not in CHECK_TYPES:
-        raise ValueError(f"{directory.name}: unknown check_type {check_type!r}")
+    check_type = parse_check_type(data.get("check_type"), source=directory.name)
     policy_path = directory / "policy.rego"
     passing_path = directory / "passing.json"
     failing_path = directory / "failing.json"

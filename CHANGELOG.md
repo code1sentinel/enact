@@ -4,6 +4,10 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ## [Unreleased]
 
+### Fixed
+
+- Library `check_type` is validated to `automated` | `manual` | `hybrid` before constructing `LibraryCheck`, so mypy on `main` stays green.
+
 ### Added
 
 - Guided local web app (`enact ui`), starter check library, `enact checks` / `enact init`, command panel, and project zip — [PR #3](https://github.com/code1sentinel/enact/pull/3) (open; not on `main` yet).
