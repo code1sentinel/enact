@@ -30,6 +30,12 @@ Fixes #
 - [ ] ADR added or updated if this slice chose among alternatives
 - [ ] Pages demo rebuilt (`scripts/build_site.py`) if output or UI changed
 
+## Design (UI only)
+
+- [ ] UI changes cite the Mobbin references used, with before/after screenshots
+
+<!-- If this PR changes the report, landing page, enact ui, or other frontend: paste the mobbin.com links from the PRD/slice. If none were provided, do not invent a design — ask for the references first. CLI-only slices can leave this unchecked and write N/A. -->
+
 ## Screenshots
 
-<!-- Required when the report, landing page, or `enact ui` changes. -->
+<!-- Required when the report, landing page, or `enact ui` changes: before and after, plus the Mobbin stills you matched. -->

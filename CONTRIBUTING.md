@@ -7,7 +7,7 @@ Read [AGENTS.md](AGENTS.md) first. That file is the working agreement for humans
 1. Start from [docs/prd.md](docs/prd.md) or add `docs/prds/<feature>.md` from [docs/templates/prd-template.md](docs/templates/prd-template.md).
 2. If you are choosing among alternatives, write an [ADR](docs/adr/).
 3. Cut a **thin vertical slice**. Open a GitHub issue with [the slice template](.github/ISSUE_TEMPLATE/slice.yml). Acceptance criteria are Given / When / Then.
-4. One PR per slice, into `main`. Fill [.github/pull_request_template.md](.github/pull_request_template.md).
+4. One PR per slice, into `main`. Fill [.github/pull_request_template.md](.github/pull_request_template.md). UI slices must cite [Mobbin](https://mobbin.com) links from the PRD; if none were given, ask for them instead of inventing a design.
 5. **TDD:** failing test from those criteria, then implement, then refactor. Golden-file tests plus `enact validate` against NIST OSCAL 1.1.2 for writer output.
 6. Do not merge on red CI.
 7. Done means: merged, Pages demo updated if output or UI changed, README and CHANGELOG touched, issue closed.

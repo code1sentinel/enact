@@ -23,7 +23,7 @@ OPA 1.8.x must be on `PATH` (or set `ENACT_OPA`). Pin that version; policies are
 3. **Thin vertical slices.** Split the PRD into slices that each deliver a thin path through the stack (one user-visible outcome). One GitHub issue per slice, from `.github/ISSUE_TEMPLATE/slice.yml`. Acceptance criteria are **Given / When / Then**. One PR per slice. Link the issue.
 4. **TDD per slice.** Write a failing test from the acceptance criteria first. Then implement. Then refactor. Prefer golden-file tests for HTML/Markdown/JSON writers and always validate OSCAL output against the vendored NIST **1.1.2** schemas (`enact validate` / `enact.validate`).
 5. **Nothing merges on red CI.** Tests, ruff, mypy, schema validation, `pip-audit`, and gitleaks must be green. Do not skip, ignore, or weaken a gate to land a change.
-6. **PR checklist.** Every PR is reviewed against `.github/pull_request_template.md` (linked issue, tests, acceptance criteria, privacy, docs/CHANGELOG, screenshots when UI or reports change).
+6. **PR checklist.** Every PR is reviewed against `.github/pull_request_template.md` (linked issue, tests, acceptance criteria, privacy, docs/CHANGELOG, Mobbin citations and before/after screenshots when UI changes).
 7. **Definition of done.** The slice is done when the PR is merged, the Pages demo is updated if output or UI changed (`scripts/build_site.py` / `site/`), README and CHANGELOG are touched, and the issue is closed.
 8. **Retro.** After a feature (all of its slices) lands, add a short note in `docs/retros/` from `docs/templates/retro-template.md`. Fold lasting lessons into the templates and this file.
 
@@ -32,6 +32,7 @@ OPA 1.8.x must be on `PATH` (or set `ENACT_OPA`). Pin that version; policies are
 - **Local-first.** No new outbound network calls in product code. The CLI, the guided app, and generated reports talk only to the machine they run on. The hosted Pages site is a static showcase.
 - **OSCAL 1.1.2.** Vendored NIST schemas in `schemas/`. Do not take a runtime dependency on compliance-trestle or C2P (see ADRs).
 - **GitHub is the source of truth.** Origin is legacy history. Open PRs into `main` on this repo.
+- **Mobbin for UI.** Any frontend or UI change (report HTML, `enact ui`, Pages landing, or other user-facing layout) must cite [Mobbin](https://mobbin.com) design references on the PRD and the slice. Put the links in the **Design references** field. If no Mobbin links were provided, **ask for them and stop** — do not invent a visual design.
 
 ## Where to look
 

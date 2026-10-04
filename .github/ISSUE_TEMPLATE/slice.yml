@@ -25,6 +25,14 @@ body:
     validations:
       required: true
   - type: textarea
+    id: design
+    attributes:
+      label: Design references
+      description: Required if this slice changes frontend or UI. Paste Mobbin (mobbin.com) screen or flow links from the PRD. If none were provided, do not invent a design — ask for them first.
+      placeholder: |
+        https://mobbin.com/…
+        N/A — no UI in this slice
+  - type: textarea
     id: acceptance
     attributes:
       label: Acceptance criteria
