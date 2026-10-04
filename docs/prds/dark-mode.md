@@ -62,13 +62,13 @@ Antimetal’s dark hero (already the landing structure) guides the landing page 
 
 ## Acceptance (feature-level)
 
-- [ ] Happy path: System default, Light, Dark, and System-reset on landing, report, and `enact ui`
-- [ ] Empty / error states unchanged (theming only)
-- [ ] Tests (failing first) + no new OSCAL output (existing NIST 1.1.2 validation stays)
-- [ ] README + CHANGELOG
-- [ ] Pages demo rebuilt (`scripts/build_site.py`) so generated reports carry the toggle
-- [ ] Mobbin design references cited
-- [ ] Privacy review: no new third-party calls, remote fonts, or CDNs
+- [x] Happy path: System default, Light, Dark, and System-reset on landing, report, and `enact ui`
+- [x] Empty / error states unchanged (theming only)
+- [x] Tests (failing first) + no new OSCAL output (existing NIST 1.1.2 validation stays)
+- [x] README + CHANGELOG
+- [x] Pages demo rebuilt (`scripts/build_site.py`) so generated reports carry the toggle
+- [x] Mobbin design references cited
+- [x] Privacy review: no new third-party calls, remote fonts, or CDNs
 
 ## Open questions
 

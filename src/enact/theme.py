@@ -413,18 +413,21 @@ def theme_js() -> str:
     }} else {{
       attach();
     }}
+    function followSystem() {{
+      if (readMode(global.localStorage) === "system") {{
+        apply(global.document, "system", currentMedia().matches);
+        syncToggle(global.document, "system");
+      }}
+    }}
     if (media && media.addEventListener) {{
-      media.addEventListener("change", function () {{
-        if (readMode(global.localStorage) === "system") {{
-          apply(global.document, "system", currentMedia().matches);
-          syncToggle(global.document, "system");
-        }}
-      }});
+      media.addEventListener("change", followSystem);
     }} else if (media && media.addListener) {{
-      media.addListener(function () {{
-        if (readMode(global.localStorage) === "system") {{
-          apply(global.document, "system", currentMedia().matches);
-          syncToggle(global.document, "system");
+      media.addListener(followSystem);
+    }}
+    if (global.addEventListener) {{
+      global.addEventListener("storage", function (event) {{
+        if (!event.key || event.key === KEY) {{
+          boot(global.document, global.localStorage, currentMedia());
         }}
       }});
     }}
