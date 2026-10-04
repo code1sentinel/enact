@@ -7,7 +7,7 @@ All notable changes to Enact are documented here. Dates are UTC.
 ### Added
 
 - Guided local web app (`enact ui`), starter check library, `enact checks` / `enact init`, command panel, and project zip — [PR #3](https://github.com/code1sentinel/enact/pull/3) (open; not on `main` yet).
-- Contributor workflow: `AGENTS.md`, PRDs, ADRs, slice issue template, PR checklist, `CONTRIBUTING.md`, and CI gates for ruff, mypy, schema validation, pip-audit, and gitleaks.
+- Contributor workflow: `AGENTS.md`, PRDs, ADRs, slice issue template, PR checklist, `CONTRIBUTING.md`, and CI gates for ruff, mypy, schema validation, pip-audit, and gitleaks. UI slices must cite Mobbin design references (ask if none were provided; do not invent a look).
 
 ## [0.1.0] — 2026-10-04
 
