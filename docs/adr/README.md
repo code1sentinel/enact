@@ -1,0 +1,13 @@
+# Architecture decision records
+
+Numbered documents in this folder. Start from `docs/templates/adr-template.md`.
+
+| ADR | Title | Status |
+| --- | --- | --- |
+| [0001](0001-record-architecture-decisions.md) | Record architecture decisions | accepted |
+| [0002](0002-oscal-1-1-2-vendored-nist-schemas.md) | OSCAL 1.1.2 with vendored NIST schemas | accepted |
+| [0003](0003-no-c2p-runtime-dependency.md) | No C2P runtime dependency | accepted |
+| [0004](0004-opa-reference-engine.md) | OPA as the reference engine | accepted |
+| [0005](0005-pluggable-writers-fedramp-sdr-reserved.md) | Pluggable writers; FedRAMP SDR reserved | accepted |
+| [0006](0006-github-is-the-source-of-truth.md) | GitHub is the source of truth | accepted |
+| [0007](0007-local-only-privacy-model.md) | Local-only privacy model | accepted |
