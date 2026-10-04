@@ -11,13 +11,18 @@ import typer
 
 from enact import __version__
 from enact.engines import EngineRegistry
+from enact.library import get_check, list_checks
 from enact.manifest import derive_manifest, dump_manifest
 from enact.oscal_io import load_bundle
+from enact.project import default_control_id, write_project
 from enact.runner import run_assessment
 from enact.validate import SchemaValidationError, validate_assessment_results, validate_catalog, validate_poam
+from enact.webapp import serve as serve_ui
 from enact.writers import WriterError, WriterRegistry
 
 app = typer.Typer(help="Turn OSCAL controls into runnable checks and OSCAL assessment results.", no_args_is_help=True)
+checks_app = typer.Typer(help="Browse the bundled check library.")
+app.add_typer(checks_app, name="checks")
 
 
 def _paths(values: list[Path]) -> list[Path]:
@@ -157,6 +162,70 @@ def serve(
 ) -> None:
     """Serve a generated HTML summary locally."""
     _serve(directory.resolve(), port)
+
+
+@checks_app.command("list")
+def checks_list() -> None:
+    """List bundled library checks."""
+    for check in list_checks():
+        typer.echo(f"{check.rule_id}\t{check.check_type}\t{check.title}")
+
+
+@checks_app.command("show")
+def checks_show(rule_id: str = typer.Argument(..., help="Library check id, for example ac-login-lockout.")) -> None:
+    """Show one library check, including its Rego when present."""
+    try:
+        check = get_check(rule_id)
+    except KeyError as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from exc
+    typer.echo(f"{check.title} ({check.rule_id})")
+    typer.echo(f"type: {check.check_type}")
+    typer.echo(f"category: {check.category}")
+    typer.echo(check.description)
+    if check.suggested_controls:
+        typer.echo("suggested controls: " + ", ".join(check.suggested_controls))
+    for param in check.params:
+        typer.echo(f"param {param.id}: {param.label} = {param.default() or '—'}")
+    if check.policy:
+        typer.echo("")
+        typer.echo(check.policy.rstrip())
+
+
+@app.command()
+def init(
+    check: list[str] = typer.Option(..., "--check", "-c", help="Library check id to include. Repeat for each check."),
+    out: Path = typer.Option(Path("enact-project"), "--out", help="Folder to write the project into."),
+    oscal: Optional[Path] = typer.Option(None, "--oscal", "-o", help="Optional catalog used to suggest control mappings."),
+) -> None:
+    """Scaffold a manifest, policies, sample input, and a GitHub Actions workflow."""
+    catalog = None
+    if oscal:
+        oscal_path = oscal.resolve()
+        if not oscal_path.is_file():
+            raise typer.BadParameter(f"catalog not found: {oscal_path}")
+        catalog = json.loads(oscal_path.read_text(encoding="utf-8"))
+    selections = []
+    for rule_id in check:
+        try:
+            item = get_check(rule_id)
+        except KeyError as exc:
+            typer.secho(str(exc), fg=typer.colors.RED, err=True)
+            raise typer.Exit(code=2) from exc
+        selections.append((item, default_control_id(item, catalog)))
+    written = write_project(out, selections=selections, catalog=catalog)
+    typer.echo(f"wrote {out} ({len(selections)} checks)")
+    for path in written:
+        typer.echo(f"  {path}")
+
+
+@app.command()
+def ui(
+    port: int = typer.Option(43174, "--port", help="Local port. The app only listens on 127.0.0.1."),
+    open_browser: bool = typer.Option(True, "--open/--no-open", help="Open the page in your default browser."),
+) -> None:
+    """Open the guided local web app. Nothing is sent off this machine."""
+    serve_ui(host="127.0.0.1", port=port, open_browser=open_browser)
 
 
 @app.callback()

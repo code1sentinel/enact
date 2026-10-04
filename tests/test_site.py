@@ -24,3 +24,6 @@ def test_landing_page_uses_relative_demo_links() -> None:
     assert "OSCAL" in html
     assert "POA&amp;M" in html or "POA&M" in html
     assert "https://code1sentinel.github.io/policy-golden-path/" in html
+    assert "enact ui" in html
+    assert 'src="guided-app.png"' in html
+    assert "This Pages site stays a static showcase" in html or "does not host the app" in html

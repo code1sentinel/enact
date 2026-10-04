@@ -1,0 +1,5 @@
+{
+  "iam": {
+    "mfa_required": false
+  }
+}

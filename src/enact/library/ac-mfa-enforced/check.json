@@ -1,0 +1,21 @@
+{
+  "rule_id": "ac-mfa-enforced",
+  "title": "Multi-factor authentication is required",
+  "description": "Interactive logins should ask for a second factor, not just a password. This is the usual IA-2(1) check.",
+  "check_type": "automated",
+  "category": "access-control",
+  "suggested_controls": [
+    "IA-2(1)",
+    "IA-2"
+  ],
+  "params": [
+    {
+      "id": "ac-mfa-enforced_prm_1",
+      "label": "Who must use MFA",
+      "values": [
+        "all"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-IAM-MFA"
+}

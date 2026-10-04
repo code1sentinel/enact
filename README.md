@@ -6,7 +6,34 @@
 
 [Codify](https://github.com/code1sentinel/policy-golden-path) is for policy authors: it turns legacy clauses into OSCAL 1.1.2 control statements and exports a catalog. Enact is for engineers running those controls in CI. The two stay separate. Codify defines the input contract — an OSCAL catalog (or any catalog, profile, or component-definition). Enact maps rule IDs and parameters onto check engines, runs the checks locally, and writes OSCAL assessment results with every pass or fail traced to a control ID.
 
-Nothing leaves the machine. There are no third-party calls. The demo site is the bundled access-control example: CI runs Enact on a passing and a failing IAM config and publishes the HTML reports plus the raw OSCAL `assessment-results` and POA&M JSON.
+Nothing leaves the machine. There are no third-party calls. The demo site is the bundled access-control example: CI runs Enact on a passing and a failing IAM config and publishes the HTML reports plus the raw OSCAL `assessment-results` and POA&M JSON. The hosted Pages site stays a static showcase — it does not run the guided app.
+
+## No terminal? Start here
+
+If you are more comfortable in a browser than a shell, install Enact once (Python 3.10+ and the OPA binary, same as below) and then:
+
+```bash
+enact ui
+```
+
+That opens a local page at `http://127.0.0.1:43174/`. It only listens on localhost. Nothing is sent off this machine.
+
+1. **Catalog** — upload an OSCAL catalog, profile, or component-definition (a Codify export works as-is), or pick the bundled access-control example.
+2. **Checks** — choose from the bundled library (MFA, lockout, password length, inactive accounts, access reviews, signed agreements, logging, encryption). Each check has a plain-English title. Map it to a control; Enact suggests matches. Edit parameter values such as the lockout threshold in a form. Manual and hybrid checks are labeled. Advanced users can open the Rego.
+3. **Evidence** — upload a config JSON. Download a sample template first if you are unsure of the shape.
+4. **Run** — see the same HTML report the CLI writes, and download `assessment-results.json`, `poam.json`, `summary.md`, and the manifest.
+
+Every step shows the equivalent CLI command in a collapsible **command panel**, with a copy button and a one-line note for each flag. After a run, **Download as project** gives you a zip with the catalog, manifest, policies, sample input, and a GitHub Actions workflow that runs `enact run` — the same work, ready for a terminal or CI later.
+
+You can also browse the library from the CLI:
+
+```bash
+enact checks list
+enact checks show ac-login-lockout
+enact init --check ac-login-lockout --check au-logging-enabled --out my-project
+```
+
+`enact init` writes a runnable folder (catalog, manifest, Rego, sample input, workflow). Pass `--oscal` if you already have a catalog and want Enact to map checks onto its control IDs.
 
 ## What it does
 
@@ -80,6 +107,8 @@ Or derive the manifest from the `rule-id` props already on the catalog:
 enact derive-manifest --oscal examples/access-control/catalog.json -O /tmp/derived.json
 enact run --oscal examples/access-control/catalog.json --input examples/access-control/inputs/passing.json --workdir examples/access-control --out out/derived
 ```
+
+The bundled **check library** is the same set the guided app uses. Each entry has Rego (when automated or hybrid), OSCAL parameter defaults, pass/fail samples, and a suggested NIST 800-53 mapping. `enact checks show` prints the description and the policy.
 
 ## How it relates to Codify
 

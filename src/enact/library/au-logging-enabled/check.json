@@ -1,0 +1,21 @@
+{
+  "rule_id": "au-logging-enabled",
+  "title": "Audit logging is turned on",
+  "description": "Security-relevant events should be written to an audit log so you can reconstruct who did what.",
+  "check_type": "automated",
+  "category": "logging",
+  "suggested_controls": [
+    "AU-2",
+    "AU-3"
+  ],
+  "params": [
+    {
+      "id": "au-logging-enabled_prm_1",
+      "label": "Audit logging required",
+      "values": [
+        "true"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-CNA-LOG"
+}

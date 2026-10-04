@@ -1,0 +1,13 @@
+{
+  "rule_id": "ac-access-agreements",
+  "title": "Collect signed access agreements (manual)",
+  "description": "Before someone gets an account, they should sign the rules of use. A person has to confirm the paperwork exists \u2014 this check never fails automatically.",
+  "check_type": "manual",
+  "category": "access-control",
+  "suggested_controls": [
+    "PS-6",
+    "AC-8"
+  ],
+  "params": [],
+  "evidence_needed": "Signed access agreements for every user with a system account."
+}

@@ -41,6 +41,7 @@ packages = ["src/enact"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "schemas" = "enact/schemas"
+"examples/access-control/catalog.json" = "enact/examples/access-control/catalog.json"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

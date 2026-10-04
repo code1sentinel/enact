@@ -1,0 +1,5 @@
+{
+  "iam": {
+    "inactive_disable_days": 90
+  }
+}

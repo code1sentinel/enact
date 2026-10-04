@@ -1,0 +1,20 @@
+{
+  "rule_id": "ac-login-lockout",
+  "title": "Lock an account after too many failed logins",
+  "description": "Set a lockout threshold so password guessing cannot continue forever. The number of allowed attempts comes from the OSCAL parameter.",
+  "check_type": "automated",
+  "category": "access-control",
+  "suggested_controls": [
+    "AC-7"
+  ],
+  "params": [
+    {
+      "id": "ac-login-lockout_prm_1",
+      "label": "Maximum failed attempts",
+      "values": [
+        "5"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-IAM-AAM"
+}

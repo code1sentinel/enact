@@ -1,0 +1,20 @@
+{
+  "rule_id": "sc-encryption-at-rest",
+  "title": "Encrypt stored data",
+  "description": "Data sitting on disk or in a database should be encrypted so a stolen volume is not readable in the clear.",
+  "check_type": "automated",
+  "category": "encryption",
+  "suggested_controls": [
+    "SC-28"
+  ],
+  "params": [
+    {
+      "id": "sc-encryption-at-rest_prm_1",
+      "label": "Encryption at rest required",
+      "values": [
+        "true"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-CNA-ENC"
+}

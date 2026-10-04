@@ -1,0 +1,20 @@
+{
+  "rule_id": "au-log-retention",
+  "title": "Keep audit logs long enough",
+  "description": "Logs that disappear after a week cannot support an investigation. Compare retention days to the OSCAL parameter.",
+  "check_type": "automated",
+  "category": "logging",
+  "suggested_controls": [
+    "AU-11"
+  ],
+  "params": [
+    {
+      "id": "au-log-retention_prm_1",
+      "label": "Keep logs at least (days)",
+      "values": [
+        "365"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-CNA-LOG"
+}

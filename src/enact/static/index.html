@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enact — guided assessment</title>
+  <meta name="description" content="Walk through an OSCAL catalog, pick checks, add evidence, and run Enact on this machine.">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <div class="wrap top__row">
+      <div>
+        <p class="brand">Enact</p>
+        <p class="tag">Guided assessment — local only</p>
+      </div>
+      <p class="privacy">Nothing is uploaded. This page talks only to 127.0.0.1.</p>
+    </div>
+    <nav class="stepper wrap" aria-label="Steps">
+      <button type="button" data-go="catalog" aria-current="step">1 Catalog</button>
+      <button type="button" data-go="checks">2 Checks</button>
+      <button type="button" data-go="evidence">3 Evidence</button>
+      <button type="button" data-go="run">4 Run</button>
+    </nav>
+  </header>
+
+  <main id="main" class="wrap">
+    <p id="banner" class="banner" hidden role="alert"></p>
+
+    <section id="step-catalog" class="step">
+      <h1>Start with a catalog</h1>
+      <p class="lede">A catalog is the list of controls you want to assess. If you used Codify, export the OSCAL JSON and drop it here. Or try the bundled example.</p>
+      <div class="actions">
+        <button type="button" class="btn" id="use-example">Use the bundled example</button>
+        <label class="btn btn--ghost">
+          Upload an OSCAL file
+          <input id="catalog-file" type="file" accept="application/json,.json" hidden>
+        </label>
+      </div>
+      <div id="catalog-empty" class="empty">
+        <h2>No catalog yet</h2>
+        <p>You do not need to write JSON by hand. Codify can turn a policy into a catalog, or use the example to see the rest of the walk-through.</p>
+      </div>
+      <div id="catalog-summary" class="card" hidden>
+        <h2 id="catalog-title"></h2>
+        <p id="catalog-meta" class="note"></p>
+        <ul id="catalog-controls" class="plain"></ul>
+        <div class="actions">
+          <button type="button" class="btn" data-go="checks">Continue to checks</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="step-checks" class="step" hidden>
+      <h1>Choose checks</h1>
+      <p class="lede">Each check is a plain-English question Enact can ask. We suggest a control from your catalog when we can. You can change the mapping and the parameter values. Advanced users may edit the Rego.</p>
+      <div id="checks-empty" class="empty" hidden>
+        <h2>Load a catalog first</h2>
+        <p>Go back to step 1 so we know which controls these checks should map to.</p>
+      </div>
+      <div id="check-list" class="stack"></div>
+      <div class="actions">
+        <button type="button" class="btn" data-go="evidence">Continue to evidence</button>
+      </div>
+    </section>
+
+    <section id="step-evidence" class="step" hidden>
+      <h1>Add evidence</h1>
+      <p class="lede">Automated checks read a JSON file that describes how the system is configured. Download a template for the checks you picked, fill it from your IAM or logging export, then upload it here.</p>
+      <div class="actions">
+        <button type="button" class="btn btn--ghost" id="download-template">Download a sample template</button>
+        <label class="btn">
+          Upload config JSON
+          <input id="evidence-file" type="file" accept="application/json,.json" hidden>
+        </label>
+      </div>
+      <pre id="evidence-preview" class="code" hidden></pre>
+      <div id="evidence-empty" class="empty">
+        <h2>No config file yet</h2>
+        <p>If you are exploring, skip this and Enact will use the passing sample for each selected check. For a real assessment, export the fields shown in the template.</p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" data-go="run">Continue to run</button>
+      </div>
+    </section>
+
+    <section id="step-run" class="step" hidden>
+      <h1>Run the assessment</h1>
+      <p class="lede">Enact will evaluate the checks on this machine and show the same HTML report you would get from the command line.</p>
+      <div class="actions">
+        <button type="button" class="btn" id="run-btn">Run Enact</button>
+        <button type="button" class="btn btn--ghost" id="download-project" hidden>Download as project</button>
+      </div>
+      <div id="run-empty" class="empty">
+        <h2>Nothing has been run yet</h2>
+        <p>When you click Run, the report appears here. You can then download the OSCAL files or a zip you can take to CI.</p>
+      </div>
+      <div id="run-results" hidden>
+        <div class="downloads" id="run-downloads"></div>
+        <iframe id="report-frame" title="Assessment report"></iframe>
+      </div>
+    </section>
+  </main>
+
+  <aside class="cli-panel" id="cli-panel">
+    <button type="button" class="cli-toggle" id="cli-toggle" aria-expanded="false">
+      Command panel — see the equivalent CLI
+    </button>
+    <div id="cli-body" hidden>
+      <p id="cli-summary" class="note">Work through a step and the matching command will appear here.</p>
+      <pre id="cli-command" class="code">enact ui</pre>
+      <button type="button" class="btn btn--ghost" id="cli-copy">Copy command</button>
+      <ul id="cli-flags" class="flags"></ul>
+    </div>
+  </aside>
+
+  <script src="/app.js"></script>
+</body>
+</html>

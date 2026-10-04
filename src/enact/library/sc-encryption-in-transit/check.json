@@ -1,0 +1,20 @@
+{
+  "rule_id": "sc-encryption-in-transit",
+  "title": "Encrypt data in transit",
+  "description": "Traffic between clients and services should use TLS (or equivalent) so credentials and records are not sent in the clear.",
+  "check_type": "automated",
+  "category": "encryption",
+  "suggested_controls": [
+    "SC-8"
+  ],
+  "params": [
+    {
+      "id": "sc-encryption-in-transit_prm_1",
+      "label": "TLS required",
+      "values": [
+        "true"
+      ]
+    }
+  ],
+  "ksi_id": "KSI-CNA-ENC"
+}
