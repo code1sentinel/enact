@@ -180,7 +180,8 @@ def _require_fields(spec: CheckSpec, payload: dict[str, Any]) -> None:
 
 
 def _provenance(envelope: dict[str, Any], payload: dict[str, Any]) -> dict[str, str]:
-    collector = envelope.get("collector") if isinstance(envelope.get("collector"), dict) else {}
+    raw_collector = envelope.get("collector")
+    collector: dict[str, Any] = raw_collector if isinstance(raw_collector, dict) else {}
     return {
         "evidence-id": str(envelope.get("id") or ""),
         "payload-type": str(envelope.get("payload_type") or ""),
