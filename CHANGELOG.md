@@ -4,6 +4,10 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ## [Unreleased]
 
+### Added
+
+- Draft Rego checks for unmatched OSCAL controls. `enact checks draft` writes a deterministic stub plus metadata (`status=draft`); `enact checks list --status draft` lists them; `enact checks review <id> --reviewer NAME` promotes into a project library. `enact run --drafts` includes unreviewed stubs as **draft** (HTML card + filter, Markdown section, OSCAL observation `status=draft`). Drafts never count as passed, never open a POA&M item, and never claim `satisfied`. Template-only; no network and no Ollama. See [docs/prds/draft-checks.md](docs/prds/draft-checks.md) and [ADR 0009](docs/adr/0009-draft-rego-checks.md).
+
 ### Fixed
 
 - Library `check_type` is validated to `automated` | `manual` | `hybrid` before constructing `LibraryCheck`, so mypy on `main` stays green.

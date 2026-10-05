@@ -21,6 +21,7 @@ HTML_STATUS: dict[OutcomeStatus, str] = {
     "not_automated": "Manual",
     "needs_evidence": "Not checked",
     "error": "Failed",
+    "draft": "Draft",
 }
 
 REPORT_CSS = """
@@ -54,7 +55,7 @@ h1 { margin: 0 0 .45rem; font-size: 1.7rem; letter-spacing: -.02em; }
 .report-head h1 { margin: 0 0 .45rem; }
 .cards {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: .85rem;
   margin: 0 0 1.35rem;
 }
@@ -82,6 +83,7 @@ h1 { margin: 0 0 .45rem; font-size: 1.7rem; letter-spacing: -.02em; }
 .pill.pass { background: var(--pass-bg); color: var(--pass); }
 .pill.fail, .pill.error { background: var(--fail-bg); color: var(--fail); }
 .pill.not_automated, .pill.needs_evidence, .pill.wait { background: var(--wait-bg); color: var(--wait); }
+.pill.draft { background: var(--draft-bg); color: var(--draft); }
 .bar {
   margin-top: .7rem; height: 8px; border-radius: 999px;
   background: var(--track); overflow: hidden;
@@ -148,8 +150,11 @@ code { font-family: var(--mono); font-size: .86em; }
 .empty { padding: 1.1rem .85rem; color: var(--muted); }
 footer.note { margin-top: 1.2rem; color: var(--muted); font-size: .88rem; }
 @media (max-width: 800px) {
-  .cards { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .toolbar { align-items: stretch; }
+}
+@media (max-width: 560px) {
+  .cards { grid-template-columns: 1fr; }
 }
 """
 
@@ -166,6 +171,7 @@ REPORT_JS = """
     if (filter === "pass") return status === "pass";
     if (filter === "fail") return status === "fail" || status === "error";
     if (filter === "manual") return status === "not_automated" || status === "needs_evidence";
+    if (filter === "draft") return status === "draft";
     return status === filter;
   }
 
@@ -323,6 +329,7 @@ def render_html(run: AssessmentRun, bundle: OscalBundle | None = None) -> str:
     passed = counts["pass"]
     failed = counts["fail"] + counts["error"]
     manual = counts["not_automated"] + counts["needs_evidence"]
+    draft = counts["draft"]
     automated = passed + failed
     rate = round(100 * passed / automated) if automated else 0
     rate_hint = (
@@ -352,7 +359,7 @@ def render_html(run: AssessmentRun, bundle: OscalBundle | None = None) -> str:
       </div>
       {theme_toggle_html()}
     </div>
-    <p class="lede">Each row is a check. Pass and fail come from automation. Manual and not-checked controls still need a person — that is not a failure.</p>
+    <p class="lede">Each row is a check. Pass and fail come from automation. Manual and not-checked controls still need a person — that is not a failure. Draft stubs are unreviewed and never count as passed.</p>
     <div class="cards" aria-label="Result counts">
       <article class="card">
         <div class="card-top">
@@ -381,6 +388,14 @@ def render_html(run: AssessmentRun, bundle: OscalBundle | None = None) -> str:
         <p class="count">{manual}</p>
         <p class="hint">Recorded as observations, not as failures.</p>
       </article>
+      <article class="card">
+        <div class="card-top">
+          <span class="label">Draft</span>
+          <span class="pill draft">Draft</span>
+        </div>
+        <p class="count">{draft}</p>
+        <p class="hint">Generated stubs. Untrusted until <code>enact checks review</code>.</p>
+      </article>
     </div>
     <div class="toolbar">
       <label class="visually-hidden" for="q" style="position:absolute;left:-9999px">Search controls</label>
@@ -390,6 +405,7 @@ def render_html(run: AssessmentRun, bundle: OscalBundle | None = None) -> str:
         <button type="button" data-filter="pass">Passed</button>
         <button type="button" data-filter="fail">Failed</button>
         <button type="button" data-filter="manual">Manual</button>
+        <button type="button" data-filter="draft">Draft</button>
       </div>
     </div>
     <div class="table-wrap">

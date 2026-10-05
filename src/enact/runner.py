@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
+from enact.drafts import attach_drafts
 from enact.engines import EngineError, EngineRegistry
 from enact.library import normalize_control_id
 from enact.manifest import Manifest, merge_or_load
@@ -29,14 +30,23 @@ def run_assessment(
     engines: EngineRegistry | None = None,
     clock: Clock = utcnow,
     param_overrides: dict[str, str] | None = None,
+    drafts_dir: Path | None = None,
 ) -> tuple[AssessmentRun, OscalBundle]:
     if not oscal_paths:
         raise ValueError("at least one OSCAL document is required")
     bundle = load_bundle(oscal_paths)
     if param_overrides:
         bundle.params.update(param_overrides)
-    manifest = merge_or_load(bundle, manifest_path)
     workdir = workdir or (manifest_path.parent if manifest_path else oscal_paths[0].parent)
+    try:
+        manifest = merge_or_load(bundle, manifest_path)
+    except ValueError:
+        if drafts_dir and Path(drafts_dir).is_dir():
+            manifest = Manifest(title=bundle.title() or "Draft checks", checks=[], source="drafts")
+        else:
+            raise
+    if drafts_dir:
+        manifest = attach_drafts(manifest, Path(drafts_dir), workdir)
     default_input = _load_input(input_path) if input_path else {}
     registry = engines or EngineRegistry()
     started = clock()
@@ -96,6 +106,17 @@ def _run_one(
         outcome = engine.run(spec, input_data=input_data, params=params, workdir=workdir)
     except EngineError as exc:
         outcome = CheckOutcome(spec=spec, status="error", message=str(exc), engine=spec.engine, params_used=params)
+
+    if spec.review_status == "draft":
+        return CheckOutcome(
+            spec=spec,
+            status="draft",
+            message=f"Draft (unreviewed): {outcome.message}",
+            engine=outcome.engine,
+            params_used=params,
+            evidence=list(outcome.evidence),
+            raw={**outcome.raw, "engine_status": outcome.status},
+        )
 
     if spec.check_type == "hybrid" and outcome.status == "pass":
         needed = spec.evidence_needed or "Automated portion passed; a person still needs to attach evidence."

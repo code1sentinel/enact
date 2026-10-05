@@ -6,6 +6,8 @@
     library: [],
     suggestions: {},
     selected: {},
+    drafts: [],
+    includeDrafts: false,
     input: null,
     result: null,
   };
@@ -27,7 +29,10 @@
     document.querySelectorAll(".stepper button").forEach((btn) => {
       btn.setAttribute("aria-current", btn.dataset.go === step ? "step" : "false");
     });
-    if (step === "checks") renderChecks();
+    if (step === "checks") {
+      renderUnmatched();
+      renderChecks();
+    }
     if (step === "evidence") renderEvidence();
   }
 
@@ -111,8 +116,49 @@
       body: JSON.stringify({ catalog }),
     });
     state.suggestions = suggest.suggestions || {};
+    state.drafts = [];
+    state.includeDrafts = false;
     preselectMatches();
     setCli(data.cli || suggest.cli);
+    renderUnmatched();
+  }
+
+  function renderUnmatched() {
+    const box = $("unmatched-box");
+    const list = $("unmatched-list");
+    const summary = $("drafts-summary");
+    if (!box || !list) return;
+    const unmatched = state.inspect?.unmatched || [];
+    if (!state.catalog || !unmatched.length) {
+      box.hidden = true;
+      return;
+    }
+    box.hidden = false;
+    list.innerHTML = "";
+    unmatched.forEach((control) => {
+      const li = document.createElement("li");
+      li.innerHTML = `<code>${escapeHtml(control.id)}</code> — ${escapeHtml(control.title)} <span class="pill draft">unmatched</span>`;
+      list.appendChild(li);
+    });
+    if (state.drafts.length) {
+      summary.hidden = false;
+      summary.textContent = `${state.drafts.length} draft check(s) ready. They stay draft until you run enact checks review.`;
+    } else {
+      summary.hidden = true;
+    }
+  }
+
+  async function generateDrafts() {
+    if (!state.catalog) throw new Error("Load a catalog first.");
+    const data = await api("/api/drafts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ catalog: state.catalog }),
+    });
+    state.drafts = data.drafts || [];
+    state.includeDrafts = state.drafts.length > 0;
+    renderUnmatched();
+    setCli(data.cli);
   }
 
   function preselectMatches() {
@@ -307,7 +353,9 @@
   async function runAssessment() {
     if (!state.catalog) throw new Error("Load a catalog first.");
     const selections = selectedPayload();
-    if (!selections.length) throw new Error("Choose at least one check and map it to a control.");
+    if (!selections.length && !state.includeDrafts) {
+      throw new Error("Choose at least one library check, or generate drafts for unmatched controls.");
+    }
     const data = await api("/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -316,6 +364,7 @@
         selections,
         input: state.input,
         title: "Guided Enact run",
+        include_drafts: state.includeDrafts,
       }),
     });
     state.result = data;
@@ -376,6 +425,9 @@
     } catch {
       showBanner("That evidence file must be a JSON object. Download the template if you need a starting point.");
     }
+  });
+  $("generate-drafts").addEventListener("click", () => {
+    generateDrafts().catch((err) => showBanner(err.message));
   });
   $("run-btn").addEventListener("click", () => {
     runAssessment().catch((err) => showBanner(err.message));

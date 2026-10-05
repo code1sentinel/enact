@@ -33,9 +33,14 @@ You can also browse the library from the CLI:
 enact checks list
 enact checks show ac-login-lockout
 enact init --check ac-login-lockout --check au-logging-enabled --out my-project
+enact checks draft --oscal catalog.json --out drafts
+enact checks list --status draft --drafts drafts
+enact checks review draft-c-cm-2 --reviewer "Your Name" --note "accepted stub" --drafts drafts --library library
 ```
 
 `enact init` writes a runnable folder (catalog, manifest, Rego, sample input, workflow). Pass `--oscal` if you already have a catalog and want Enact to map checks onto its control IDs.
+
+Controls with no library check get a **draft** Rego stub (`enact checks draft`). Drafts live under `drafts/<id>/`, stay `status=draft` until a person runs `enact checks review`, and never count as passed. Include them in a run with `--drafts`. See [docs/prds/draft-checks.md](docs/prds/draft-checks.md).
 
 ## What it does
 
@@ -43,7 +48,7 @@ enact init --check ac-login-lockout --check au-logging-enabled --out my-project
 2. Load a [check manifest](docs/manifest.md), or derive one from OSCAL props.
 3. Resolve parameter values from OSCAL (not from the check).
 4. Run OPA/Rego policies against a local JSON config.
-5. Record manual and hybrid controls as **not automated** / **needs evidence**, not as failures.
+5. Record manual and hybrid controls as **not automated** / **needs evidence**, not as failures. Unreviewed draft stubs are **draft** — not passed, not a POA&M item.
 6. Write:
    - OSCAL 1.1.2 `assessment-results` JSON
    - OSCAL 1.1.2 POA&M items for automated failures
@@ -154,6 +159,7 @@ See [docs/manifest.md](docs/manifest.md) for the full convention. The short vers
 - **`rule_id`** names the check implementation. **`control_id`** is the OSCAL control. Every observation and finding carries both.
 - **`params`** lists OSCAL param ids. Values come from the catalog, a profile `set-parameters` overlay, or a component-definition. Change the lockout in OSCAL; do not edit the Rego.
 - **`check_type`**: `automated` | `manual` | `hybrid`. Manual never fails. Hybrid fails only if the automated half fails; a pass still reports `needs_evidence`.
+- **`review_status`**: optional `draft` for generated stubs. `enact run --drafts` includes them; they render as Draft and never increment the pass count.
 - **`ksi_id`** is optional. It is stored on results for a later FedRAMP 20x writer.
 
 The same fields can live as OSCAL props on a control or on a component-definition `implemented-requirement`. C2P-style `Rule_Id` / `Check_Id` names are accepted.

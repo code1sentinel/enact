@@ -81,6 +81,48 @@ def test_library_and_example_endpoints(ui_server: str) -> None:
     assert status == 200
     assert data["kind"] == "catalog"
     assert data["catalog"]["catalog"]["metadata"]["title"]
+    assert data.get("unmatched") == []
+
+
+def test_drafts_endpoint_generates_stub_for_unmatched_control(ui_server: str) -> None:
+    catalog = {
+        "catalog": {
+            "uuid": "5a2c1d90-4b11-4e2a-9f08-6c3d1e5a9b22",
+            "metadata": {
+                "title": "One unmatched control",
+                "last-modified": "2026-10-05T00:00:00Z",
+                "version": "1.0",
+                "oscal-version": "1.1.2",
+            },
+            "controls": [
+                {
+                    "id": "c-cm-2",
+                    "title": "Software inventory",
+                    "parts": [{"id": "c-cm-2_smt", "name": "statement", "prose": "Keep an inventory."}],
+                }
+            ],
+        }
+    }
+    status, inspected, _ = _request(ui_server, "POST", "/api/inspect", {"catalog": catalog})
+    assert status == 200
+    assert [item["id"] for item in inspected["unmatched"]] == ["c-cm-2"]
+    status, data, _ = _request(ui_server, "POST", "/api/drafts", {"catalog": catalog})
+    assert status == 200, data
+    assert data["count"] == 1
+    assert data["drafts"][0]["rule_id"] == "draft-c-cm-2"
+    assert data["drafts"][0]["status"] == "draft"
+    assert "import rego.v1" in data["drafts"][0]["policy"]
+    status, run, _ = _request(
+        ui_server,
+        "POST",
+        "/api/run",
+        {"catalog": catalog, "include_drafts": True, "title": "Drafts only", "input": {}},
+    )
+    assert status == 200, run
+    assert run["counts"]["draft"] == 1
+    assert run["counts"]["pass"] == 0
+    assert "draft-c-cm-2" in run["html"]
+    assert 'data-status="draft"' in run["html"]
 
 
 def test_run_endpoint_returns_html_report(ui_server: str) -> None:

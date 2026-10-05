@@ -30,6 +30,8 @@
   --wait-bg: #fef3c7;
   --hybrid: #3730a3;
   --hybrid-bg: #e0e7ff;
+  --draft: #1e3a8a;
+  --draft-bg: #dbeafe;
   --ghost: #fafafa;
   --ghost-hover: #f4f4f5;
   --table-head: #f4f4f5;
@@ -66,6 +68,8 @@
   --wait-bg: #422006;
   --hybrid: #c7d2fe;
   --hybrid-bg: #1e1b4b;
+  --draft: #bfdbfe;
+  --draft-bg: #1e3a8a;
   --ghost: #1c1c1f;
   --ghost-hover: #27272a;
   --table-head: #111113;
@@ -103,6 +107,8 @@
   --wait-bg: #422006;
   --hybrid: #c7d2fe;
   --hybrid-bg: #1e1b4b;
+  --draft: #bfdbfe;
+  --draft-bg: #1e3a8a;
   --ghost: #1c1c1f;
   --ghost-hover: #27272a;
   --table-head: #111113;
