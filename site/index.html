@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Enact — OSCAL controls to runnable checks</title>
-  <meta name="description" content="Enact turns OSCAL controls into runnable checks. Start with enact ui on your machine; CI writes NIST OSCAL 1.1.2 assessment results and POA&amp;M items.">
+  <meta name="description" content="Enact turns OSCAL controls into local checks and back into OSCAL assessment results. Codify writes the catalog; Enact runs the checks. Start with enact ui on your machine.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-EsFVG4LqCF4Icn/J3ZeeTKA3tLbNxDeUgzCMl8eWYDk='; connect-src 'none'; font-src 'none'; base-uri 'none'; form-action 'none'">
   <script>(function(){var k="enact-theme",m="system";try{var s=localStorage.getItem(k);if(s==="light"||s==="dark"||s==="system")m=s;}catch(e){}var d=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;var t=m==="dark"||(m!=="light"&&d)?"dark":"light";var r=document.documentElement;r.setAttribute("data-theme",t);r.setAttribute("data-theme-mode",m);r.style.colorScheme=t;})();</script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f766e'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' fill='%23ffffff' font-family='ui-sans-serif, system-ui, sans-serif'%3EE%3C/text%3E%3C/svg%3E">
@@ -37,14 +37,12 @@
         <p class="kicker">Local-first guided assessment</p>
         <h1>OSCAL controls become runnable checks, then assessment results.</h1>
         <p class="lede">
-          Install once, then <code>enact ui</code>. Walk Catalog → Checks → Evidence → Run
-          in a local browser. Write NIST OSCAL 1.1.2 assessment results and POA&amp;M items.
-          Nothing leaves the machine. This Pages site is a static showcase; the guided
-          app runs on your machine.
+          <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
+          writes the catalog; Enact runs the checks. Nothing leaves the machine.
         </p>
         <div class="hero__actions">
-          <a class="btn" href="examples/pass/summary.html">View a passing report</a>
-          <a class="btn btn--ghost" href="https://code1sentinel.github.io/policy-golden-path/">Open Codify</a>
+          <a class="btn" href="#how-to-use">How to use it</a>
+          <a class="btn btn--ghost" href="examples/pass/summary.html">View a passing report</a>
         </div>
       </div>
       <figure class="terminal" aria-label="Example enact ui">
@@ -63,15 +61,35 @@ Command panel shows the equivalent CLI for CI later</code></pre>
       </figure>
     </section>
 
+    <section class="wrap explainer" aria-labelledby="what-title">
+      <h2 id="what-title">What is Enact?</h2>
+      <p class="note">
+        Enact turns OSCAL controls into local checks and writes the results back as
+        OSCAL assessment results.
+        <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
+        writes the catalog; Enact runs the checks. Nothing leaves the machine.
+      </p>
+      <h2 id="how-to-use">How to use it</h2>
+      <ol class="path">
+        <li><b>Install</b> Enact on your machine (Python 3.10+ and OPA 1.8.x).</li>
+        <li>Run <code>enact ui</code> — a guided app on localhost only.</li>
+        <li>Walk <b>Catalog</b> → <b>Checks</b> → <b>Evidence</b> → <b>Run</b>.</li>
+        <li>Download the report, or a <b>project zip</b> for CI later.</li>
+      </ol>
+      <p class="note">
+        This hosted Pages site is a <strong>static demo</strong>. The guided app runs on
+        your machine; this site does not host the app. A browser-only path (no install)
+        is in progress — try the
+        <a href="browser-spike/index.html">OPA spike</a> (vendored sample only; no uploads).
+      </p>
+    </section>
+
     <section class="wrap guided" aria-labelledby="guided-title">
       <h2 id="guided-title">Start here: a guided app on your machine</h2>
       <p class="note">
-        <code>enact ui</code> opens a local stepper — Catalog, Checks, Evidence, Run —
-        with the same HTML report the CLI writes. It binds to localhost only and makes
-        no third-party network calls. This Pages site stays a static showcase; it does
-        not host the app. A separate
-        <a href="browser-spike/index.html">browser OPA spike</a> evaluates a vendored
-        lockout sample in WebAssembly in this tab — still no uploads.
+        After you install, <code>enact ui</code> opens Catalog, Checks, Evidence, and Run
+        in a local browser, with the same HTML report the CLI writes. It binds to
+        localhost only. This Pages site stays a static showcase; it does not host the app.
       </p>
       <figure class="guided__shot">
         <img src="guided-app.png" alt="The Enact guided app: catalog step, four-step stepper, and the command panel showing the equivalent CLI.">

@@ -1,14 +1,12 @@
 # Enact
 
-**Turn OSCAL controls into runnable checks, and checks back into OSCAL assessment results.**
+**Turn OSCAL controls into local checks, and those checks back into OSCAL assessment results.**
 
-[Codify](https://github.com/code1sentinel/policy-golden-path) is for policy authors: it turns legacy clauses into OSCAL 1.1.2 control statements and exports a catalog. Enact is for GRC reviewers who prefer a local browser app, and for engineers who run the same checks in CI later. The two stay separate. Codify defines the input contract — an OSCAL catalog (or any catalog, profile, or component-definition). Enact maps rule IDs and parameters onto check engines, runs the checks locally, and writes OSCAL assessment results with every pass or fail traced to a control ID.
-
-Nothing leaves the machine. There are no third-party calls.
+[Codify](https://github.com/code1sentinel/policy-golden-path) writes the catalog. Enact runs the checks. GRC reviewers start in a local browser; engineers use the same work in CI later. Nothing leaves the machine.
 
 **Live demo:** https://code1sentinel.github.io/enact/
 
-The demo is the bundled access-control example: CI runs Enact on a passing and a failing IAM config and publishes the HTML reports plus the raw OSCAL `assessment-results` and POA&M JSON. The hosted Pages site stays a static showcase — it does not run the guided app. On your machine, start with `enact ui`. See [docs/prds/ui-first.md](docs/prds/ui-first.md). A [browser OPA spike](site/browser-spike/) (see [ADR 0013](docs/adr/0013-browser-only-guided-app.md)) evaluates a vendored lockout policy in WebAssembly in the tab; it is not a replacement for `enact ui` and does not accept catalog uploads.
+The hosted Pages site is a **static demo** — sample reports from the bundled example, not the guided app. On your machine: install once, then `enact ui` (Catalog → Checks → Evidence → Run), then download the report or a project zip for CI. A [browser-only path](site/browser-spike/) is in progress (vendored lockout sample in the tab; no uploads). See [docs/prds/ui-first.md](docs/prds/ui-first.md) and [ADR 0013](docs/adr/0013-browser-only-guided-app.md).
 
 ## Install
 
