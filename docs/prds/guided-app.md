@@ -44,6 +44,7 @@ Stepper: **1 Catalog** → **2 Checks** → **3 Evidence** → **4 Run**. Light 
 | 4 | Catalog + mapping | Given an uploaded catalog or the bundled example, when the user opens Checks, then Enact suggests control matches and shows editable OSCAL param values (and optional Rego). |
 | 5 | Evidence + run | Given selected checks and optional config JSON, when the user clicks Run, then the existing HTML report renders inline and assessment-results, POA&M, summary.md, and checks.json are downloadable. |
 | 6 | Command panel + project zip | Given any step, when the command panel is open, then it shows the equivalent CLI with flag notes and a copy button; after a run, Download as project yields a zip that can `enact run` in CI. |
+| 6b | Run step CLI before execute | Given a catalog and selected checks (or drafts), when the user opens Run, then the command panel shows `enact run …` without waiting for a successful run. Given missing catalog/checks, it shows “Select catalog and checks first” instead of a blank panel. |
 | 7 | Docs + landing still | Given the feature, when a newcomer reads the README or the Pages landing page, then they see `enact ui` as the default path and a screenshot; the hosted demo remains static. Later framing: [ui-first.md](ui-first.md). |
 
 ## Acceptance (feature-level)

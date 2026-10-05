@@ -10,7 +10,7 @@ from pathlib import Path
 import pytest
 
 from enact.library import example_catalog_path, get_check
-from enact.webapp import UiError, UiHandler, run_from_payload, serve
+from enact.webapp import RUN_CLI_PLACEHOLDER, UiError, UiHandler, cli_for_run, run_from_payload, serve
 
 
 def _start_server() -> tuple[ThreadingHTTPServer, str]:
@@ -221,3 +221,69 @@ def test_ui_static_downloads_checks_json() -> None:
     js = (Path(__file__).resolve().parents[1] / "src" / "enact" / "static" / "app.js").read_text(encoding="utf-8")
     assert '["checks.json"' in js or '"checks.json"' in js
     assert "manifest.json" not in js
+
+
+def test_cli_for_run_placeholder_when_catalog_or_checks_missing() -> None:
+    empty = cli_for_run(has_catalog=False, has_checks=False)
+    assert empty["command"] == RUN_CLI_PLACEHOLDER
+    assert "catalog" in empty["summary"].lower()
+    no_checks = cli_for_run(has_catalog=True, has_checks=False, include_drafts=False)
+    assert no_checks["command"] == RUN_CLI_PLACEHOLDER
+    drafts_only = cli_for_run(has_catalog=True, has_checks=False, include_drafts=True)
+    assert drafts_only["command"].startswith("enact run")
+    assert "--drafts drafts" in drafts_only["command"]
+    assert "--checks" not in drafts_only["command"]
+
+
+def test_cli_for_run_ready_command_includes_paths() -> None:
+    cli = cli_for_run(has_catalog=True, has_checks=True)
+    assert cli["command"].startswith("enact run")
+    assert "--oscal catalog.json" in cli["command"]
+    assert "--checks checks.json" in cli["command"]
+    assert "--input inputs/sample.json" in cli["command"]
+    assert "--out out" in cli["command"]
+    both = cli_for_run(has_catalog=True, has_checks=True, include_drafts=True)
+    assert "--checks checks.json" in both["command"]
+    assert "--drafts drafts" in both["command"]
+
+
+def test_run_endpoint_cli_includes_drafts_when_used(ui_server: str) -> None:
+    catalog = {
+        "catalog": {
+            "uuid": "5a2c1d90-4b11-4e2a-9f08-6c3d1e5a9b22",
+            "metadata": {
+                "title": "One unmatched control",
+                "last-modified": "2026-10-05T00:00:00Z",
+                "version": "1.0",
+                "oscal-version": "1.1.2",
+            },
+            "controls": [
+                {
+                    "id": "c-cm-2",
+                    "title": "Software inventory",
+                    "parts": [{"id": "c-cm-2_smt", "name": "statement", "prose": "Keep an inventory."}],
+                }
+            ],
+        }
+    }
+    status, run, _ = _request(
+        ui_server,
+        "POST",
+        "/api/run",
+        {"catalog": catalog, "include_drafts": True, "title": "Drafts CLI", "input": {}},
+    )
+    assert status == 200, run
+    command = run["cli"]["command"]
+    assert command.startswith("enact run")
+    assert "--drafts drafts" in command
+    assert "--oscal catalog.json" in command
+    assert "--checks" not in command
+
+
+def test_run_step_fills_command_panel_before_assessment() -> None:
+    js = (Path(__file__).resolve().parents[1] / "src" / "enact" / "static" / "app.js").read_text(encoding="utf-8")
+    assert "function renderRun(" in js
+    assert "function cliForRun(" in js
+    assert "if (step === " in js and "renderRun()" in js
+    assert RUN_CLI_PLACEHOLDER in js
+    assert "enact run" in js
