@@ -8,11 +8,11 @@
 
 ## Problem
 
-Enact only runs checks that already exist in the starter library or a hand-written manifest. A catalog control with no matching Rego shows as **manual** (or is omitted entirely when the manifest is derived from `rule-id` props). That does not scale: a Codify catalog can have dozens of statements and only a handful of ready-made checks. Assessors need a starter policy they can edit, without Enact pretending the stub is a trusted automated result.
+Enact only runs checks that already exist in the starter library or a hand-written checks.json. A catalog control with no matching Rego shows as **manual** (or is omitted entirely when checks.json is derived from `rule-id` props). That does not scale: a Codify catalog can have dozens of statements and only a handful of ready-made checks. Assessors need a starter policy they can edit, without Enact pretending the stub is a trusted automated result.
 
 ## Goals
 
-- Detect OSCAL controls that have no library check (and are not already in the current manifest).
+- Detect OSCAL controls that have no library check (and are not already in the current checks.json).
 - Generate a deterministic Rego stub + metadata for each unmatched control, stored under a project-local `drafts/` tree, with `status=draft`.
 - Show draft as a first-class result in the CLI, HTML report, Markdown summary, and `enact ui` (via the same report). Drafts never count as passed and never become POA&M items.
 - Require an explicit local review step (`enact checks review`) with a reviewer name before a draft is promoted into a trusted project library. Generation alone never promotes.
@@ -59,7 +59,7 @@ CLI (fits the existing `enact checks` group, not a new singular `check` app):
 enact checks draft --oscal catalog.json --out drafts
 enact checks list --status draft --drafts drafts
 enact checks review draft-c-ac-9 --reviewer "Ada Lovelace" --note "filled TODOs" --drafts drafts --library library
-enact run --oscal catalog.json --manifest manifest.json --drafts drafts --input input.json --workdir . --out out
+enact run --oscal catalog.json --checks checks.json --drafts drafts --input input.json --workdir . --out out
 ```
 
 Draft metadata (`check.json`):
@@ -85,8 +85,8 @@ OSCAL: a draft produces an **observation** with Enact props `result=draft` and `
 
 ### Acceptance criteria (slice 1 — Given / When / Then)
 
-- Given a catalog with one control that has no library check and is not in the manifest, when `enact checks draft` is run, then `drafts/draft-<control-id>/policy.rego` and `check.json` exist, `status` is `draft`, review fields are empty, and the package name plus `statement_hash` are stable across two runs.
-- Given a catalog whose every control is already mapped (library `rule-id` or manifest row), when `enact checks draft` is run, then no new draft directories are created.
+- Given a catalog with one control that has no library check and is not in checks.json, when `enact checks draft` is run, then `drafts/draft-<control-id>/policy.rego` and `check.json` exist, `status` is `draft`, review fields are empty, and the package name plus `statement_hash` are stable across two runs.
+- Given a catalog whose every control is already mapped (library `rule-id` or checks.json row), when `enact checks draft` is run, then no new draft directories are created.
 - Given a generated draft included via `enact run --drafts`, when writers render, then the HTML report shows a Draft count card, a Draft filter, and a Draft pill; `counts.pass` does not include that row; Markdown says Draft; OSCAL assessment-results validate against NIST 1.1.2 and the observation has `status=draft` with no `satisfied` finding; POA&M is not opened for the draft; the process exit code is not 1 solely because of the draft.
 - Given a draft, when `enact checks review <id> --reviewer NAME` is run, then the check moves into the project library with `status=reviewed` and is no longer listed by `enact checks list --status draft`. Generation alone never sets `reviewed`.
 - Given `enact checks review` without `--reviewer`, when the command runs, then it exits non-zero and the draft stays draft.

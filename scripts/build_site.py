@@ -106,8 +106,8 @@ def build(out: Path) -> None:
     common = [
         "--oscal",
         str(EXAMPLE / "catalog.json"),
-        "--manifest",
-        str(EXAMPLE / "manifest.json"),
+        "--checks",
+        str(EXAMPLE / "checks.json"),
         "--workdir",
         str(EXAMPLE),
     ]

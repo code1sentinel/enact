@@ -3,10 +3,11 @@
 - Status: accepted
 - Date: 2026-10-03
 - PRD: [docs/prd.md](../prd.md)
+- Note: the user-facing mapping file is now `checks.json` / `--checks` ([ADR 0012](0012-checks-json-user-facing-name.md)). This ADR originally said “manifest.”
 
 ## Context
 
-v1 needs one engine that can read OSCAL parameters and a local JSON config, that assessors can read next to the manifest, and that CI can install as a single binary. InSpec, Checkov, and cloud-config are likely later, but they are not required to prove the loop.
+v1 needs one engine that can read OSCAL parameters and a local JSON config, that assessors can read next to checks.json, and that CI can install as a single binary. InSpec, Checkov, and cloud-config are likely later, but they are not required to prove the loop.
 
 ## Decision
 
@@ -16,4 +17,4 @@ The check library (PR #3) follows the same contract: each automated or hybrid ch
 
 ## Consequences
 
-Contributors write Rego, not a second DSL. Assessors can review the policy file named in the manifest. Other engines cannot silently pass: stubs return `error`. Adding a real InSpec adapter is a later ADR plus a slice, not a surprise import.
+Contributors write Rego, not a second DSL. Assessors can review the policy file named in checks.json. Other engines cannot silently pass: stubs return `error`. Adding a real InSpec adapter is a later ADR plus a slice, not a surprise import.

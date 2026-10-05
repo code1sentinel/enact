@@ -13,7 +13,7 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 ## Goals
 
 - Load a catalog, profile, and/or component-definition.
-- Map controls to checks via a [manifest](manifest.md) or OSCAL props.
+- Map controls to checks via [checks.json](checks.md) or OSCAL props.
 - Run OPA/Rego (Rego v1, `input.oscal_params`) against a local JSON config.
 - Treat manual and hybrid checks as **not automated** / **needs evidence**, not as failures.
 - Write NIST OSCAL 1.1.2 `assessment-results` and POA&M, plus Markdown and HTML summaries.
@@ -35,7 +35,7 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 ```
 OSCAL catalog (Codify or anyone) ──┐
                                    ├── Enact ──► assessment-results.json
-check manifest or OSCAL props   ──┤            poam.json
+checks.json or OSCAL props       ──┤            poam.json
                                    │            summary.md / summary.html
 local config + Rego policies    ──┘
 ```
@@ -43,7 +43,7 @@ local config + Rego policies    ──┘
 ```bash
 enact run \
   --oscal examples/access-control/catalog.json \
-  --manifest examples/access-control/manifest.json \
+  --checks examples/access-control/checks.json \
   --input examples/access-control/inputs/passing.json \
   --workdir examples/access-control \
   --out out/pass
@@ -60,6 +60,7 @@ enact run \
 ## In flight
 
 - Dark mode (Light / Dark / System) on the Pages landing, HTML report, and `enact ui`: [docs/prds/dark-mode.md](prds/dark-mode.md).
+- User-facing `checks.json` / `--checks` (`--manifest` remains a deprecated alias): [docs/prds/checks-json.md](prds/checks-json.md), [ADR 0012](adr/0012-checks-json-user-facing-name.md).
 - Draft Rego checks for unmatched catalog controls: [docs/prds/draft-checks.md](prds/draft-checks.md), [ADR 0009](adr/0009-draft-rego-checks.md).
 - Evidence envelope (thin v1): [docs/prds/evidence-schema.md](prds/evidence-schema.md), [ADR 0010](adr/0010-evidence-envelope.md) (proposed). P1 adapters: [ADR 0011](adr/0011-adapter-pack-in-contrib.md).
 

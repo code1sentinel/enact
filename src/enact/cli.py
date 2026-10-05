@@ -28,6 +28,9 @@ evidence_app = typer.Typer(help="Validate Enact evidence envelopes (no OPA).")
 app.add_typer(checks_app, name="checks")
 app.add_typer(evidence_app, name="evidence")
 
+MANIFEST_ALIAS_NOTICE = "--manifest is deprecated; use --checks. The alias still works."
+DERIVE_MANIFEST_NOTICE = "derive-manifest is deprecated; use derive-checks."
+
 
 def _paths(values: list[Path]) -> list[Path]:
     resolved = [path.resolve() for path in values]
@@ -37,15 +40,40 @@ def _paths(values: list[Path]) -> list[Path]:
     return resolved
 
 
+def resolve_checks_path(checks: Optional[Path], manifest: Optional[Path]) -> Optional[Path]:
+    """Prefer --checks; --manifest / -m is a deprecated alias."""
+    if checks is not None and manifest is not None:
+        raise typer.BadParameter("pass --checks or --manifest, not both")
+    chosen = checks if checks is not None else manifest
+    if chosen is None:
+        return None
+    if manifest is not None:
+        typer.secho(MANIFEST_ALIAS_NOTICE, fg=typer.colors.YELLOW, err=True)
+    path = chosen.resolve()
+    if not path.is_file():
+        raise typer.BadParameter(f"checks file not found: {path}")
+    return path
+
+
 @app.command()
 def run(
     oscal: list[Path] = typer.Option(..., "--oscal", "-o", help="OSCAL catalog, profile, and/or component-definition."),
-    manifest: Optional[Path] = typer.Option(None, "--manifest", "-m", help="Check manifest JSON. Derived from OSCAL props if omitted."),
+    checks: Optional[Path] = typer.Option(
+        None,
+        "--checks",
+        help="checks.json mapping of rule_id to control_id. Derived from OSCAL props if omitted.",
+    ),
+    manifest: Optional[Path] = typer.Option(
+        None,
+        "--manifest",
+        "-m",
+        help="Deprecated alias for --checks.",
+    ),
     input_file: Optional[Path] = typer.Option(None, "--input", "-i", help="Sample system config JSON for automated engines."),
     out: Path = typer.Option(Path("out"), "--out", help="Directory for assessment results and summaries."),
     format: str = typer.Option("oscal,poam,markdown,html", "--format", "-f", help="Comma-separated writers."),
     title: Optional[str] = typer.Option(None, "--title", help="Title for the assessment results."),
-    workdir: Optional[Path] = typer.Option(None, "--workdir", help="Root for policy and evidence paths. Defaults to the manifest directory."),
+    workdir: Optional[Path] = typer.Option(None, "--workdir", help="Root for policy and evidence paths. Defaults to the checks.json directory."),
     drafts: Optional[Path] = typer.Option(
         None,
         "--drafts",
@@ -55,11 +83,9 @@ def run(
     serve: bool = typer.Option(False, "--serve", help="Serve the HTML summary after the run."),
     port: int = typer.Option(43173, "--port", help="Port for --serve."),
 ) -> None:
-    """Load OSCAL + manifest, run checks, write assessment results."""
+    """Load OSCAL + checks.json, run checks, write assessment results."""
     oscal_paths = _paths(oscal)
-    manifest_path = manifest.resolve() if manifest else None
-    if manifest_path and not manifest_path.is_file():
-        raise typer.BadParameter(f"manifest not found: {manifest_path}")
+    manifest_path = resolve_checks_path(checks, manifest)
     input_path = input_file.resolve() if input_file else None
     if input_path and not input_path.is_file():
         raise typer.BadParameter(f"input not found: {input_path}")
@@ -130,20 +156,34 @@ def evidence_validate(
     typer.echo(f"ok {path} (evidence envelope)")
 
 
+@app.command("derive-checks")
+def derive_checks_cmd(
+    oscal: list[Path] = typer.Option(..., "--oscal", "-o"),
+    output: Path = typer.Option(Path("checks.json"), "--output", "-O"),
+) -> None:
+    """Write checks.json from rule-id props on an OSCAL catalog or component-definition."""
+    _write_derived_checks(oscal, output)
+
+
 @app.command("derive-manifest")
 def derive_manifest_cmd(
     oscal: list[Path] = typer.Option(..., "--oscal", "-o"),
-    output: Path = typer.Option(Path("manifest.json"), "--output", "-O"),
+    output: Path = typer.Option(Path("checks.json"), "--output", "-O"),
 ) -> None:
-    """Write a check manifest from rule-id props on an OSCAL catalog or component-definition."""
+    """Deprecated alias for derive-checks."""
+    typer.secho(DERIVE_MANIFEST_NOTICE, fg=typer.colors.YELLOW, err=True)
+    _write_derived_checks(oscal, output)
+
+
+def _write_derived_checks(oscal: list[Path], output: Path) -> None:
     bundle = load_bundle(_paths(oscal))
     try:
-        manifest = derive_manifest(bundle)
+        parsed = derive_manifest(bundle)
     except ValueError as exc:
         typer.secho(str(exc), fg=typer.colors.RED, err=True)
         raise typer.Exit(code=2) from exc
-    output.write_text(json.dumps(dump_manifest(manifest), indent=2) + "\n", encoding="utf-8")
-    typer.echo(f"wrote {output} ({len(manifest.checks)} checks)")
+    output.write_text(json.dumps(dump_manifest(parsed), indent=2) + "\n", encoding="utf-8")
+    typer.echo(f"wrote {output} ({len(parsed.checks)} checks)")
 
 
 @app.command()
@@ -235,16 +275,24 @@ def checks_list(
 def checks_draft(
     oscal: list[Path] = typer.Option(..., "--oscal", "-o", help="OSCAL catalog, profile, and/or component-definition."),
     output: Path = typer.Option(Path("drafts"), "--out", help="Directory for generated draft checks."),
-    manifest: Optional[Path] = typer.Option(None, "--manifest", "-m", help="Existing manifest; those controls are skipped."),
+    checks: Optional[Path] = typer.Option(
+        None,
+        "--checks",
+        help="Existing checks.json; those controls are skipped.",
+    ),
+    manifest: Optional[Path] = typer.Option(
+        None,
+        "--manifest",
+        "-m",
+        help="Deprecated alias for --checks.",
+    ),
 ) -> None:
     """Generate draft Rego stubs for catalog controls that have no library check."""
     bundle = load_bundle(_paths(oscal))
     loaded = None
-    if manifest:
-        manifest_path = manifest.resolve()
-        if not manifest_path.is_file():
-            raise typer.BadParameter(f"manifest not found: {manifest_path}")
-        loaded = load_manifest(manifest_path)
+    checks_path = resolve_checks_path(checks, manifest)
+    if checks_path:
+        loaded = load_manifest(checks_path)
     try:
         created = generate_drafts(bundle, output.resolve(), library=list_checks(), manifest=loaded)
     except DraftError as exc:
@@ -310,7 +358,7 @@ def init(
     out: Path = typer.Option(Path("enact-project"), "--out", help="Folder to write the project into."),
     oscal: Optional[Path] = typer.Option(None, "--oscal", "-o", help="Optional catalog used to suggest control mappings."),
 ) -> None:
-    """Scaffold a manifest, policies, sample input, and a GitHub Actions workflow."""
+    """Scaffold checks.json, policies, sample input, and a GitHub Actions workflow."""
     catalog = None
     if oscal:
         oscal_path = oscal.resolve()

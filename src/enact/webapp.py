@@ -134,7 +134,7 @@ def run_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
         manifest = None
         if selections:
             manifest = manifest_from_library(selections, title=str(payload.get("title") or "Guided Enact run"))
-            manifest_path = work / "manifest.json"
+            manifest_path = work / "checks.json"
             manifest_path.write_text(json.dumps(dump_manifest(manifest), indent=2) + "\n", encoding="utf-8")
         input_path = work / "input.json"
         input_path.write_text(json.dumps(input_data, indent=2) + "\n", encoding="utf-8")
@@ -221,7 +221,7 @@ def cli_for_checks(rule_ids: list[str]) -> dict[str, Any]:
         "command": f"enact init {shown} --out my-project",
         "flags": [
             {"flag": "--check", "text": "A library check to include. Repeat the flag for each one."},
-            {"flag": "--out", "text": "Folder to write the manifest, Rego policies, and sample input."},
+            {"flag": "--out", "text": "Folder to write checks.json, Rego policies, and sample input."},
         ],
         "summary": "These are the same checks `enact checks list` and `enact init` use.",
     }
@@ -232,7 +232,7 @@ def cli_for_evidence() -> dict[str, Any]:
         "command": "enact run --input inputs/sample.json --workdir .",
         "flags": [
             {"flag": "--input", "text": "The JSON config you exported from the system you are assessing."},
-            {"flag": "--workdir", "text": "Folder that contains the policy files named in the manifest."},
+            {"flag": "--workdir", "text": "Folder that contains the policy files named in checks.json."},
         ],
         "summary": "The evidence file is just JSON. Download a template if you are unsure of the shape.",
     }
@@ -243,14 +243,14 @@ def cli_for_run() -> dict[str, Any]:
         "command": (
             "enact run \\\n"
             "  --oscal catalog.json \\\n"
-            "  --manifest manifest.json \\\n"
+            "  --checks checks.json \\\n"
             "  --input inputs/sample.json \\\n"
             "  --workdir . \\\n"
             "  --out out"
         ),
         "flags": [
             {"flag": "--oscal", "text": "Catalog (and optional profile) whose control IDs and parameters you used."},
-            {"flag": "--manifest", "text": "The mapping of library checks to those control IDs."},
+            {"flag": "--checks", "text": "The mapping of library checks to those control IDs."},
             {"flag": "--input", "text": "The config JSON from the Evidence step."},
             {"flag": "--workdir", "text": "Where the .rego policy files live."},
             {"flag": "--out", "text": "Folder for assessment-results.json, poam.json, and the HTML report."},
@@ -384,7 +384,7 @@ class UiHandler(BaseHTTPRequestHandler):
                     catalog=catalog if isinstance(catalog, dict) else None,
                     input_data=input_data,
                     policies=policies,
-                    title=str(payload.get("title") or "Library check manifest"),
+                    title=str(payload.get("title") or "Library checks"),
                 )
                 return _bytes_response(self, blob, "application/zip", "enact-project.zip")
         except (UiError, KeyError, ValueError) as exc:

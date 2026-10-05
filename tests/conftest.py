@@ -20,8 +20,13 @@ def catalog_path() -> Path:
 
 
 @pytest.fixture
-def manifest_path() -> Path:
-    return EXAMPLE / "manifest.json"
+def checks_path() -> Path:
+    return EXAMPLE / "checks.json"
+
+
+@pytest.fixture
+def manifest_path(checks_path: Path) -> Path:
+    return checks_path
 
 
 @pytest.fixture

@@ -3,10 +3,11 @@
 - Status: accepted
 - Date: 2026-10-05
 - PRD: [docs/prds/draft-checks.md](../prds/draft-checks.md)
+- Note: the user-facing mapping file is now `checks.json` / `--checks` ([ADR 0012](0012-checks-json-user-facing-name.md)). This ADR originally said “manifest.”
 
 ## Context
 
-A Codify (or any) OSCAL catalog can contain controls that Enact’s starter library does not cover. Today those controls are omitted from a derived manifest, or recorded as manual “needs a person.” Neither gives the assessor a starting Rego file. We need a generated stub, a place to keep it, a way to show it on a report without claiming automation, and a promotion step that is not implicit.
+A Codify (or any) OSCAL catalog can contain controls that Enact’s starter library does not cover. Today those controls are omitted from a derived checks.json, or recorded as manual “needs a person.” Neither gives the assessor a starting Rego file. We need a generated stub, a place to keep it, a way to show it on a report without claiming automation, and a promotion step that is not implicit.
 
 Forces:
 
@@ -21,7 +22,7 @@ Forces:
 
 2. **Project-local `drafts/` tree, not the bundled library.** Each draft is `drafts/<rule_id>/{check.json,policy.rego}` with `rule_id = draft-<oscal-control-id>`. Metadata records `source_control_id`, `statement_hash` (SHA-256 of whitespace-normalized statement), `generated_at`, `status=draft`, and empty review fields. The packaged `src/enact/library/` set stays human-authored.
 
-3. **Match conservatively.** A control is *matched* (no draft) when it already appears in the current manifest, or its `rule-id` prop names a bundled library check, or its normalized id is in a library check’s `suggested_controls`. Fuzzy title-keyword suggestion (used by `enact ui`) does **not** suppress draft generation.
+3. **Match conservatively.** A control is *matched* (no draft) when it already appears in the current checks.json, or its `rule-id` prop names a bundled library check, or its normalized id is in a library check’s `suggested_controls`. Fuzzy title-keyword suggestion (used by `enact ui`) does **not** suppress draft generation.
 
 4. **Draft is an outcome status, not a fourth check type.** The stub is still `check_type=automated` / `engine=opa` so it can evaluate. `review_status=draft` on the spec forces the runner to emit `status=draft` even if OPA returns pass or fail. Drafts are excluded from pass counts, from `failures()`, from POA&M items, and from process exit code 1.
 

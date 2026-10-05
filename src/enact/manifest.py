@@ -1,4 +1,4 @@
-"""Check manifest: load JSON or derive it from OSCAL props."""
+"""checks.json: load JSON or derive it from OSCAL props."""
 
 from __future__ import annotations
 
@@ -22,11 +22,11 @@ def load_manifest(path: Path) -> Manifest:
 def parse_manifest(data: dict[str, Any], source: str | None = None) -> Manifest:
     checks_raw = data.get("checks")
     if not isinstance(checks_raw, list) or not checks_raw:
-        raise ValueError("manifest must contain a non-empty 'checks' array")
+        raise ValueError("checks.json must contain a non-empty 'checks' array")
     checks = [_parse_check(item, index) for index, item in enumerate(checks_raw)]
     return Manifest(
         schema_version=str(data.get("schema_version") or "1.0"),
-        title=str(data.get("title") or "Check manifest"),
+        title=str(data.get("title") or "Checks"),
         checks=checks,
         source=source,
     )
@@ -61,10 +61,10 @@ def derive_manifest(bundle: OscalBundle) -> Manifest:
         )
     if not checks:
         raise ValueError(
-            "no check mappings found on the OSCAL document. Add a JSON manifest, "
+            "no check mappings found on the OSCAL document. Add a checks.json, "
             "or put rule-id and check-type props on controls / implemented-requirements."
         )
-    return Manifest(title=bundle.title() or "Derived check manifest", checks=checks, source="oscal-props")
+    return Manifest(title=bundle.title() or "Derived checks", checks=checks, source="oscal-props")
 
 
 def merge_or_load(bundle: OscalBundle, manifest_path: Path | None) -> Manifest:

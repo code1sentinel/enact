@@ -1,4 +1,4 @@
-"""In-memory types for manifests, check outcomes, and a finished assessment run."""
+"""In-memory types for checks.json, check outcomes, and a finished assessment run."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ ENGINE_STUBS = ("inspec", "checkov", "cloud-config")
 
 @dataclass
 class CheckSpec:
-    """One row of the check manifest."""
+    """One row of checks.json."""
 
     rule_id: str
     control_id: str
@@ -43,7 +43,7 @@ class CheckSpec:
 @dataclass
 class Manifest:
     schema_version: str = "1.0"
-    title: str = "Check manifest"
+    title: str = "Checks"
     checks: list[CheckSpec] = field(default_factory=list)
     source: str | None = None
 

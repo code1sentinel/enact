@@ -37,7 +37,7 @@
         <p class="kicker">Local-first compliance CLI</p>
         <h1>OSCAL controls become runnable checks, then assessment results.</h1>
         <p class="lede">
-          Load a catalog and a check manifest. Run OPA/Rego locally.
+          Load a catalog and <code>checks.json</code>. Run OPA/Rego locally.
           Write NIST OSCAL 1.1.2 assessment results and POA&amp;M items.
           Nothing leaves the machine.
         </p>
@@ -56,7 +56,7 @@
         <pre><code><span class="cmt"># Passing IAM config from the bundled example</span>
 <span class="cmd">$</span> enact run \
     --oscal examples/access-control/catalog.json \
-    --manifest examples/access-control/manifest.json \
+    --checks examples/access-control/checks.json \
     --input examples/access-control/inputs/passing.json \
     --workdir examples/access-control \
     --out out/pass \
@@ -81,7 +81,7 @@ wrote out/pass/summary.html</code></pre>
         <li>
           <span class="num">02</span>
           <b>OPA checks</b>
-          <p>A manifest maps each <code>rule_id</code> to a <code>control_id</code>, engine, and automated, manual, or hybrid type.</p>
+          <p><code>checks.json</code> maps each <code>rule_id</code> to a <code>control_id</code>, engine, and automated, manual, or hybrid type.</p>
         </li>
         <li>
           <span class="num">03</span>
@@ -154,7 +154,7 @@ pip install -e ".[dev]"   # or: uv sync --extra dev
 
 enact run \
   --oscal examples/access-control/catalog.json \
-  --manifest examples/access-control/manifest.json \
+  --checks examples/access-control/checks.json \
   --input examples/access-control/inputs/passing.json \
   --workdir examples/access-control \
   --out out/pass \

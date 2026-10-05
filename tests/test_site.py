@@ -34,3 +34,7 @@ def test_landing_page_uses_relative_demo_links() -> None:
     assert "Appearance" in html
     assert 'data-theme-choice="system"' in html
     assert "fonts.googleapis" not in html
+    assert "--checks" in html
+    assert "examples/access-control/checks.json" in html
+    assert "--manifest" not in html
+    assert "manifest.json" not in html

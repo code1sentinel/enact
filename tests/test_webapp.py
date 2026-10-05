@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import threading
+import zipfile
 from http.client import HTTPConnection
 from http.server import ThreadingHTTPServer
 from pathlib import Path
@@ -189,3 +190,34 @@ def test_project_zip_endpoint(ui_server: str, tmp_path: Path) -> None:
     zip_path = tmp_path / "project.zip"
     zip_path.write_bytes(body)
     assert zip_path.stat().st_size > 100
+    with zipfile.ZipFile(zip_path) as archive:
+        names = archive.namelist()
+        assert "checks.json" in names
+        assert "manifest.json" not in names
+        workflow = archive.read(".github/workflows/enact.yml").decode("utf-8")
+        assert "--checks checks.json" in workflow
+
+
+def test_run_cli_snippet_uses_checks_flag(ui_server: str) -> None:
+    catalog = json.loads(example_catalog_path().read_text(encoding="utf-8"))
+    lockout = get_check("ac-login-lockout")
+    status, data, _ = _request(
+        ui_server,
+        "POST",
+        "/api/run",
+        {
+            "catalog": catalog,
+            "title": "CLI snippet",
+            "selections": [{"rule_id": lockout.rule_id, "control_id": "c-ac-7", "params": lockout.default_params()}],
+            "input": lockout.passing,
+        },
+    )
+    assert status == 200, data
+    assert "--checks checks.json" in data["cli"]["command"]
+    assert "--manifest" not in data["cli"]["command"]
+
+
+def test_ui_static_downloads_checks_json() -> None:
+    js = (Path(__file__).resolve().parents[1] / "src" / "enact" / "static" / "app.js").read_text(encoding="utf-8")
+    assert '["checks.json"' in js or '"checks.json"' in js
+    assert "manifest.json" not in js

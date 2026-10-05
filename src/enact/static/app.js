@@ -270,12 +270,12 @@
         ? `enact init ${ids.map((id) => `--check ${id}`).join(" ")} --out my-project`
         : "enact checks list",
       summary: ids.length
-        ? "These flags write a manifest and copy the Rego files into a folder."
+        ? "These flags write checks.json and copy the Rego files into a folder."
         : "Tick a check to see the init command.",
       flags: [
         { flag: "enact checks list", text: "Shows every library check with a one-line description." },
         { flag: "--check", text: "Include this library check in the project." },
-        { flag: "--out", text: "Folder for manifest.json, policies/, and a sample input." },
+        { flag: "--out", text: "Folder for checks.json, policies/, and a sample input." },
       ],
     });
   }
@@ -318,7 +318,7 @@
         : "If you skip the upload, Enact uses the passing samples from the library.",
       flags: [
         { flag: "--input", text: "JSON config exported from the system under assessment." },
-        { flag: "--workdir", text: "Folder that holds the policy files named in the manifest." },
+        { flag: "--workdir", text: "Folder that holds the policy files named in checks.json." },
       ],
     });
   }
@@ -378,7 +378,7 @@
       ["assessment-results.json", JSON.stringify(data.assessment_results, null, 2), "application/json"],
       ["poam.json", JSON.stringify(data.poam, null, 2), "application/json"],
       ["summary.md", data.markdown, "text/markdown"],
-      ["manifest.json", JSON.stringify(data.manifest, null, 2), "application/json"],
+      ["checks.json", JSON.stringify(data.manifest, null, 2), "application/json"],
     ].forEach(([name, body, type]) => {
       const btn = document.createElement("button");
       btn.type = "button";

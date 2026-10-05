@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://grcengineering.club/ns/enact/check-manifest.schema.json",
-  "title": "Enact check manifest",
+  "title": "Enact checks.json",
   "type": "object",
   "required": ["checks"],
   "additionalProperties": false,

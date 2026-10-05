@@ -252,8 +252,8 @@ def test_legacy_bare_json_still_runs_with_one_deprecation_notice(
             "run",
             "--oscal",
             str(example_dir / "catalog.json"),
-            "--manifest",
-            str(example_dir / "manifest.json"),
+            "--checks",
+            str(example_dir / "checks.json"),
             "--input",
             str(example_dir / "inputs" / "passing.json"),
             "--workdir",
@@ -270,7 +270,7 @@ def test_legacy_bare_json_still_runs_with_one_deprecation_notice(
     assert "legacy" in combined.lower()
     run, _bundle = run_assessment(
         [example_dir / "catalog.json"],
-        manifest_path=example_dir / "manifest.json",
+        manifest_path=example_dir / "checks.json",
         input_path=example_dir / "inputs" / "passing.json",
         workdir=example_dir,
     )

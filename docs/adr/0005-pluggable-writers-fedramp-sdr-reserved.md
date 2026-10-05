@@ -3,6 +3,7 @@
 - Status: accepted
 - Date: 2026-10-03
 - PRD: [docs/prd.md](../prd.md)
+- Note: the user-facing mapping file is now `checks.json` / `--checks` ([ADR 0012](0012-checks-json-user-facing-name.md)). This ADR originally said “manifest.”
 
 ## Context
 
@@ -10,7 +11,7 @@ v1 consumers need OSCAL assessment results, a POA&M for automated failures, and 
 
 ## Decision
 
-Writers are a registry, same shape as engines. Ship `oscal`, `poam`, `markdown`, and `html` now. Reserve `fedramp-sdr` as a named stub. Optional `ksi_id` on each manifest row is the hook for later KSI coverage counts. HTML reports stay a single self-contained file (inline CSS/JS, no network fetches).
+Writers are a registry, same shape as engines. Ship `oscal`, `poam`, `markdown`, and `html` now. Reserve `fedramp-sdr` as a named stub. Optional `ksi_id` on each checks.json row is the hook for later KSI coverage counts. HTML reports stay a single self-contained file (inline CSS/JS, no network fetches).
 
 ## Consequences
 

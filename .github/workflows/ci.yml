@@ -29,7 +29,7 @@ jobs:
         run: |
           uv run enact run \
             --oscal examples/access-control/catalog.json \
-            --manifest examples/access-control/manifest.json \
+            --checks examples/access-control/checks.json \
             --input examples/access-control/inputs/passing.json \
             --workdir examples/access-control \
             --out /tmp/enact-pass \
@@ -40,7 +40,7 @@ jobs:
           set +e
           uv run enact run \
             --oscal examples/access-control/catalog.json \
-            --manifest examples/access-control/manifest.json \
+            --checks examples/access-control/checks.json \
             --input examples/access-control/inputs/failing.json \
             --workdir examples/access-control \
             --out /tmp/enact-fail \
