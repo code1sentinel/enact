@@ -112,6 +112,17 @@ def test_drafts_endpoint_generates_stub_for_unmatched_control(ui_server: str) ->
     assert data["drafts"][0]["rule_id"] == "draft-c-cm-2"
     assert data["drafts"][0]["status"] == "draft"
     assert "import rego.v1" in data["drafts"][0]["policy"]
+    status, run, _ = _request(
+        ui_server,
+        "POST",
+        "/api/run",
+        {"catalog": catalog, "include_drafts": True, "title": "Drafts only", "input": {}},
+    )
+    assert status == 200, run
+    assert run["counts"]["draft"] == 1
+    assert run["counts"]["pass"] == 0
+    assert "draft-c-cm-2" in run["html"]
+    assert 'data-status="draft"' in run["html"]
 
 
 def test_run_endpoint_returns_html_report(ui_server: str) -> None:

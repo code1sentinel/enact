@@ -110,10 +110,18 @@ def run_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(catalog, dict):
         raise UiError("Upload a catalog, or pick the bundled example, before you run.")
     inspect_catalog(catalog)
-    selections, overrides, policies = _selections(payload)
+    include_drafts = bool(payload.get("include_drafts") or payload.get("drafts"))
+    raw_selections = payload.get("selections")
+    selections: list[tuple[Any, str]]
+    overrides: dict[str, str]
+    policies: dict[str, str]
+    if include_drafts and (not isinstance(raw_selections, list) or not raw_selections):
+        selections, overrides, policies = [], {}, {}
+    else:
+        selections, overrides, policies = _selections(payload)
     input_data = payload.get("input")
     if input_data is None:
-        input_data = merge_inputs(check.passing for check, _ in selections if check.passing)
+        input_data = merge_inputs(check.passing for check, _ in selections if check.passing) or {}
     if not isinstance(input_data, dict):
         raise UiError("The evidence file must be a JSON object.")
 
@@ -122,9 +130,12 @@ def run_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
         (work / "policies").mkdir()
         catalog_path = work / "catalog.json"
         catalog_path.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
-        manifest = manifest_from_library(selections, title=str(payload.get("title") or "Guided Enact run"))
-        manifest_path = work / "manifest.json"
-        manifest_path.write_text(json.dumps(dump_manifest(manifest), indent=2) + "\n", encoding="utf-8")
+        manifest_path = None
+        manifest = None
+        if selections:
+            manifest = manifest_from_library(selections, title=str(payload.get("title") or "Guided Enact run"))
+            manifest_path = work / "manifest.json"
+            manifest_path.write_text(json.dumps(dump_manifest(manifest), indent=2) + "\n", encoding="utf-8")
         input_path = work / "input.json"
         input_path.write_text(json.dumps(input_data, indent=2) + "\n", encoding="utf-8")
         for check, _control in selections:

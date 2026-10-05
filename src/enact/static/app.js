@@ -353,7 +353,9 @@
   async function runAssessment() {
     if (!state.catalog) throw new Error("Load a catalog first.");
     const selections = selectedPayload();
-    if (!selections.length) throw new Error("Choose at least one check and map it to a control.");
+    if (!selections.length && !state.includeDrafts) {
+      throw new Error("Choose at least one library check, or generate drafts for unmatched controls.");
+    }
     const data = await api("/api/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
