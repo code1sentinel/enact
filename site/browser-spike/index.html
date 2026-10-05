@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Enact — browser OPA spike</title>
+  <meta name="description" content="Static proof that Enact can evaluate a vendored Rego policy in the browser with OPA WASM. Not the guided app. No uploads.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-EsFVG4LqCF4Icn/J3ZeeTKA3tLbNxDeUgzCMl8eWYDk=' 'wasm-unsafe-eval'; connect-src 'self'; font-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <script>(function(){var k="enact-theme",m="system";try{var s=localStorage.getItem(k);if(s==="light"||s==="dark"||s==="system")m=s;}catch(e){}var d=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;var t=m==="dark"||(m!=="light"&&d)?"dark":"light";var r=document.documentElement;r.setAttribute("data-theme",t);r.setAttribute("data-theme-mode",m);r.style.colorScheme=t;})();</script>
+  <link rel="stylesheet" href="../theme.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="spike.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <div class="wrap top__row">
+      <p class="brand">Enact</p>
+      <nav class="top__links" aria-label="Project">
+        <a href="../index.html">Demo home</a>
+        <a href="https://github.com/code1sentinel/enact">GitHub</a>
+        <div class="theme-toggle">
+          <p class="theme-toggle__label" id="theme-toggle-label">Appearance</p>
+          <div class="theme-toggle__group" role="radiogroup" aria-labelledby="theme-toggle-label">
+            <button type="button" role="radio" aria-checked="false" data-theme-choice="light">Light</button>
+            <button type="button" role="radio" aria-checked="false" data-theme-choice="dark">Dark</button>
+            <button type="button" role="radio" aria-checked="true" data-theme-choice="system">System</button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="spike">
+    <p class="kicker">Spike — not the guided app</p>
+    <h1>OPA/Rego evaluation in this tab</h1>
+    <p class="lede">
+      The lockout library check is compiled with <code>opa build -t wasm</code> in CI
+      and shipped as <code>policy.wasm</code>. Samples are evaluated here with the same
+      <code>result.passed</code> contract as <code>enact run</code>. Catalogs and evidence
+      are not uploaded; this page only fetches same-origin wasm and JSON.
+    </p>
+    <p class="banner">
+      This is a proof-of-concept for <a href="https://github.com/code1sentinel/enact/blob/main/docs/adr/0013-browser-only-guided-app.md">ADR 0013</a>.
+      <code>enact ui</code> is still the guided app. GitHub Pages does not host user secrets.
+      See <a href="https://github.com/code1sentinel/enact/blob/main/docs/spikes/browser-opa.md">spike notes</a>.
+    </p>
+    <div class="actions">
+      <button type="button" class="btn" id="run-pass">Evaluate passing sample</button>
+      <button type="button" class="btn btn--ghost" id="run-fail">Evaluate failing sample</button>
+      <button type="button" class="btn btn--ghost" id="run-custom">Evaluate JSON below</button>
+    </div>
+    <p class="status" id="status" role="status">Loading…</p>
+    <p class="verdict" id="verdict" hidden></p>
+    <p id="message"></p>
+    <label for="input-json">OPA input document (local JSON)</label>
+    <textarea id="input-json" spellcheck="false">{
+  "payload": {
+    "lockout_threshold": 3
+  },
+  "oscal_params": {
+    "ac-login-lockout_prm_1": "5"
+  },
+  "check": {
+    "rule_id": "ac-login-lockout"
+  }
+}</textarea>
+    <h2>Engine output</h2>
+    <pre id="raw">(run a sample)</pre>
+    <h2>Policy (Rego v1)</h2>
+    <pre id="policy-src">package enact.login_lockout
+
+import rego.v1
+
+threshold := to_number(input.oscal_params["ac-login-lockout_prm_1"])
+configured := input.payload.lockout_threshold
+
+default passed := false
+
+passed if {
+	is_number(configured)
+	configured &gt; 0
+	configured &lt;= threshold
+}
+
+result := {
+	"passed": passed,
+	"message": sprintf("lockout_threshold is %v; policy allows at most %v failed attempts", [configured, threshold]),
+}</pre>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Static wasm spike. No third-party scripts. MIT licensed.</p>
+    </div>
+  </footer>
+  <script src="../theme.js"></script>
+  <script src="opa-eval.js"></script>
+  <script src="spike.js"></script>
+</body>
+</html>

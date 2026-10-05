@@ -2,8 +2,10 @@
 
     python scripts/build_site.py --out _site
 
-Copies the committed landing page, runs Enact on the passing and failing
-example inputs, and publishes the generated HTML reports plus raw OSCAL JSON.
+Copies the committed landing page (including the browser OPA spike), runs
+Enact on the passing and failing example inputs, and publishes the generated
+HTML reports plus raw OSCAL JSON. Rebuilds site/browser-spike/policy.wasm
+with opa build -t wasm so Pages stays in lockstep with the lockout library check.
 """
 
 from __future__ import annotations
@@ -64,7 +66,13 @@ def _run(cmd: list[str], *, expect_fail: bool = False) -> None:
         raise SystemExit(result.returncode)
 
 
+def _rebuild_browser_spike() -> None:
+    script = ROOT / "scripts" / "build_browser_spike.py"
+    _run([sys.executable, str(script)])
+
+
 def _copy_static(out: Path) -> None:
+    _rebuild_browser_spike()
     write_theme_assets(STATIC)
     if out.exists():
         shutil.rmtree(out)

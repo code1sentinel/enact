@@ -42,3 +42,5 @@ def test_landing_page_uses_relative_demo_links() -> None:
     assert "Local-first guided assessment" in html
     assert html.find("enact ui") < html.find("enact run")
     assert "Start here: a guided app" in html
+    assert 'href="browser-spike/index.html"' in html
+    assert (ROOT / "site" / "browser-spike" / "index.html").is_file()
