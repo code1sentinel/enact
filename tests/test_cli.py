@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -8,6 +9,12 @@ from typer.testing import CliRunner
 from enact.cli import MANIFEST_ALIAS_NOTICE, app
 
 runner = CliRunner()
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _plain(text: str) -> str:
+    """Strip ANSI and collapse whitespace so CI's Rich 80-col output still matches."""
+    return re.sub(r"\s+", " ", _ANSI.sub("", text))
 
 
 def test_engines_and_writers_list() -> None:
@@ -35,9 +42,10 @@ def test_checks_list_and_show() -> None:
 
 def test_run_help_lists_checks_flag() -> None:
     result = runner.invoke(app, ["run", "--help"])
-    assert result.exit_code == 0, result.stdout + result.stderr
-    assert "--checks" in result.stdout
-    assert "--manifest" in result.stdout
+    text = _plain(result.stdout + result.stderr)
+    assert result.exit_code == 0, text
+    assert "--checks" in text
+    assert "--manifest" in text
 
 
 def test_init_scaffolds_runnable_project(tmp_path: Path) -> None:
@@ -184,7 +192,7 @@ def test_run_rejects_checks_and_manifest_together(example_dir: Path, tmp_path: P
         ],
     )
     assert result.exit_code != 0
-    combined = result.stdout + result.stderr
+    combined = _plain(result.stdout + result.stderr)
     assert "--checks or --manifest" in combined
 
 
