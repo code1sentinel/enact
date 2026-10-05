@@ -34,12 +34,18 @@
       renderChecks();
     }
     if (step === "evidence") renderEvidence();
+    if (step === "run") renderRun();
   }
 
   function setCli(payload) {
-    if (!payload) return;
+    if (!payload) {
+      $("cli-summary").textContent = "Load a catalog and pick at least one check (or generate drafts) to see the equivalent enact run command.";
+      $("cli-command").textContent = "Select catalog and checks first";
+      $("cli-flags").innerHTML = "";
+      return;
+    }
     $("cli-summary").textContent = payload.summary || "";
-    $("cli-command").textContent = payload.command || "";
+    $("cli-command").textContent = payload.command || "Select catalog and checks first";
     const flags = $("cli-flags");
     flags.innerHTML = "";
     (payload.flags || []).forEach((item) => {
@@ -306,6 +312,53 @@
     return Object.values(state.selected).filter((item) => item.control_id);
   }
 
+  function cliForRun({ hasCatalog, hasChecks, includeDrafts }) {
+    if (!hasCatalog || !(hasChecks || includeDrafts)) {
+      return {
+        command: "Select catalog and checks first",
+        summary: "Load a catalog and pick at least one check (or generate drafts) to see the equivalent enact run command.",
+        flags: [],
+      };
+    }
+    const lines = ["enact run \\", "  --oscal catalog.json \\"];
+    const flags = [
+      { flag: "--oscal", text: "Catalog (and optional profile) whose control IDs and parameters you used." },
+    ];
+    if (hasChecks) {
+      lines.push("  --checks checks.json \\");
+      flags.push({ flag: "--checks", text: "The mapping of library checks to those control IDs." });
+    }
+    if (includeDrafts) {
+      lines.push("  --drafts drafts \\");
+      flags.push({
+        flag: "--drafts",
+        text: "Unreviewed draft stubs from unmatched controls. They never count as passed.",
+      });
+    }
+    lines.push("  --input inputs/sample.json \\", "  --workdir . \\", "  --out out");
+    flags.push(
+      { flag: "--input", text: "The config JSON from the Evidence step." },
+      { flag: "--workdir", text: "Where the .rego policy files live." },
+      { flag: "--out", text: "Folder for assessment-results.json, poam.json, and the HTML report." }
+    );
+    return {
+      command: lines.join("\n"),
+      summary: "This is the command CI will run once you download the project zip.",
+      flags,
+    };
+  }
+
+  function renderRun() {
+    const hasCatalog = Boolean(state.catalog);
+    const hasChecks = selectedPayload().length > 0;
+    const includeDrafts = Boolean(state.includeDrafts);
+    if (state.result && state.result.cli && hasCatalog && (hasChecks || includeDrafts)) {
+      setCli(state.result.cli);
+      return;
+    }
+    setCli(cliForRun({ hasCatalog, hasChecks, includeDrafts }));
+  }
+
   function renderEvidence() {
     const has = Boolean(state.input);
     $("evidence-empty").hidden = has;
@@ -387,7 +440,7 @@
       btn.addEventListener("click", () => downloadBlob(name, body, type));
       box.appendChild(btn);
     });
-    setCli(data.cli);
+    renderRun();
   }
 
   async function downloadProject() {

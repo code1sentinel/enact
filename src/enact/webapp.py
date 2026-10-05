@@ -171,7 +171,11 @@ def run_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "poam": poam,
         "manifest": dump_manifest(run.manifest),
         "counts": counts,
-        "cli": cli_for_run(),
+        "cli": cli_for_run(
+            has_catalog=True,
+            has_checks=bool(selections),
+            include_drafts=bool(drafts_dir),
+        ),
         "drafts": [spec.rule_id for spec in run.manifest.checks if spec.review_status == "draft"],
     }
 
@@ -238,23 +242,56 @@ def cli_for_evidence() -> dict[str, Any]:
     }
 
 
-def cli_for_run() -> dict[str, Any]:
-    return {
-        "command": (
-            "enact run \\\n"
-            "  --oscal catalog.json \\\n"
-            "  --checks checks.json \\\n"
-            "  --input inputs/sample.json \\\n"
-            "  --workdir . \\\n"
-            "  --out out"
-        ),
-        "flags": [
-            {"flag": "--oscal", "text": "Catalog (and optional profile) whose control IDs and parameters you used."},
-            {"flag": "--checks", "text": "The mapping of library checks to those control IDs."},
+RUN_CLI_PLACEHOLDER = "Select catalog and checks first"
+
+
+def cli_for_run(
+    *,
+    has_catalog: bool = True,
+    has_checks: bool = True,
+    include_drafts: bool = False,
+) -> dict[str, Any]:
+    if not has_catalog or not (has_checks or include_drafts):
+        return {
+            "command": RUN_CLI_PLACEHOLDER,
+            "flags": [],
+            "summary": (
+                "Load a catalog and pick at least one check (or generate drafts) "
+                "to see the equivalent enact run command."
+            ),
+        }
+    lines = ["enact run \\", "  --oscal catalog.json \\"]
+    flags = [
+        {"flag": "--oscal", "text": "Catalog (and optional profile) whose control IDs and parameters you used."},
+    ]
+    if has_checks:
+        lines.append("  --checks checks.json \\")
+        flags.append({"flag": "--checks", "text": "The mapping of library checks to those control IDs."})
+    if include_drafts:
+        lines.append("  --drafts drafts \\")
+        flags.append(
+            {
+                "flag": "--drafts",
+                "text": "Unreviewed draft stubs from unmatched controls. They never count as passed.",
+            }
+        )
+    lines.extend(
+        [
+            "  --input inputs/sample.json \\",
+            "  --workdir . \\",
+            "  --out out",
+        ]
+    )
+    flags.extend(
+        [
             {"flag": "--input", "text": "The config JSON from the Evidence step."},
             {"flag": "--workdir", "text": "Where the .rego policy files live."},
             {"flag": "--out", "text": "Folder for assessment-results.json, poam.json, and the HTML report."},
-        ],
+        ]
+    )
+    return {
+        "command": "\n".join(lines),
+        "flags": flags,
         "summary": "This is the command CI will run once you download the project zip.",
     }
 
