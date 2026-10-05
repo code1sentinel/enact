@@ -2,17 +2,29 @@
 
 **Turn OSCAL controls into runnable checks, and checks back into OSCAL assessment results.**
 
+[Codify](https://github.com/code1sentinel/policy-golden-path) is for policy authors: it turns legacy clauses into OSCAL 1.1.2 control statements and exports a catalog. Enact is for GRC reviewers who prefer a local browser app, and for engineers who run the same checks in CI later. The two stay separate. Codify defines the input contract — an OSCAL catalog (or any catalog, profile, or component-definition). Enact maps rule IDs and parameters onto check engines, runs the checks locally, and writes OSCAL assessment results with every pass or fail traced to a control ID.
+
+Nothing leaves the machine. There are no third-party calls.
+
 **Live demo:** https://code1sentinel.github.io/enact/
 
-[Codify](https://github.com/code1sentinel/policy-golden-path) is for policy authors: it turns legacy clauses into OSCAL 1.1.2 control statements and exports a catalog. Enact is for engineers running those controls in CI. The two stay separate. Codify defines the input contract — an OSCAL catalog (or any catalog, profile, or component-definition). Enact maps rule IDs and parameters onto check engines, runs the checks locally, and writes OSCAL assessment results with every pass or fail traced to a control ID.
+The demo is the bundled access-control example: CI runs Enact on a passing and a failing IAM config and publishes the HTML reports plus the raw OSCAL `assessment-results` and POA&M JSON. The hosted Pages site stays a static showcase — it does not run the guided app. On your machine, start with `enact ui`. See [docs/prds/ui-first.md](docs/prds/ui-first.md).
 
-Nothing leaves the machine. There are no third-party calls. The demo site is the bundled access-control example: CI runs Enact on a passing and a failing IAM config and publishes the HTML reports plus the raw OSCAL `assessment-results` and POA&M JSON. The hosted Pages site stays a static showcase — it does not run the guided app.
+## Install
 
-Appearance defaults to the operating system (`prefers-color-scheme`) on the landing page, the HTML report, and `enact ui`. A Light / Dark / System control is in each header; the choice stays in `localStorage` and never leaves the browser. Generated `summary.html` files are still a single offline document — open them from disk with no network.
+Python 3.10+ and the [OPA](https://www.openpolicyagent.org/docs/latest/#running-opa) binary on `PATH`.
 
-## No terminal? Start here
+```bash
+git clone https://github.com/code1sentinel/enact.git
+cd enact
+pip install -e ".[dev]"   # or: uv sync --extra dev
+```
 
-If you are more comfortable in a browser than a shell, install Enact once (Python 3.10+ and the OPA binary, same as below) and then:
+Pin OPA 1.8.x (Rego v1). `ENACT_OPA` overrides the binary path.
+
+## Quickstart: `enact ui`
+
+After install, open the guided app:
 
 ```bash
 enact ui
@@ -27,20 +39,7 @@ That opens a local page at `http://127.0.0.1:43174/`. It only listens on localho
 
 Every step shows the equivalent CLI command in a collapsible **command panel**, with a copy button and a one-line note for each flag. After a run, **Download as project** gives you a zip with the catalog, `checks.json`, policies, sample input, and a GitHub Actions workflow that runs `enact run` — the same work, ready for a terminal or CI later.
 
-You can also browse the library from the CLI:
-
-```bash
-enact checks list
-enact checks show ac-login-lockout
-enact init --check ac-login-lockout --check au-logging-enabled --out my-project
-enact checks draft --oscal catalog.json --out drafts
-enact checks list --status draft --drafts drafts
-enact checks review draft-c-cm-2 --reviewer "Your Name" --note "accepted stub" --drafts drafts --library library
-```
-
-`enact init` writes a runnable folder (catalog, `checks.json`, Rego, sample input, workflow). Pass `--oscal` if you already have a catalog and want Enact to map checks onto its control IDs.
-
-Controls with no library check get a **draft** Rego stub (`enact checks draft`). Drafts live under `drafts/<id>/`, stay `status=draft` until a person runs `enact checks review`, and never count as passed. Include them in a run with `--drafts`. See [docs/prds/draft-checks.md](docs/prds/draft-checks.md).
+Appearance defaults to the operating system (`prefers-color-scheme`) on the landing page, the HTML report, and `enact ui`. A Light / Dark / System control is in each header; the choice stays in `localStorage` and never leaves the browser. Generated `summary.html` files are still a single offline document — open them from disk with no network.
 
 ## What it does
 
@@ -63,19 +62,9 @@ checks.json or OSCAL props       ──┤            poam.json
 local config + Rego policies    ──┘
 ```
 
-## Install
+## CLI and CI
 
-Python 3.10+ and the [OPA](https://www.openpolicyagent.org/docs/latest/#running-opa) binary on `PATH`.
-
-```bash
-git clone https://github.com/code1sentinel/enact.git
-cd enact
-pip install -e ".[dev]"   # or: uv sync --extra dev
-```
-
-Pin OPA 1.8.x (Rego v1). `ENACT_OPA` overrides the binary path.
-
-## Quickstart
+Optional for day-to-day use. The guided app's **command panel** and **Download as project** zip emit these same commands. Use them in a terminal, a script, or GitHub Actions.
 
 The bundled example is four access-control statements in the Codify catalog shape: account review cadence, login lockout, signed access agreements (manual), and privileged-account review (hybrid). Thresholds live in OSCAL params. The Rego policies read `input.oscal_params` and, for migrated IAM checks, `input.payload`.
 
@@ -125,11 +114,24 @@ enact run --oscal examples/access-control/catalog.json --input examples/access-c
 
 The bundled **check library** is the same set the guided app uses. Each entry has Rego (when automated or hybrid), OSCAL parameter defaults, pass/fail samples, and a suggested NIST 800-53 mapping. `enact checks show` prints the description and the policy.
 
+```bash
+enact checks list
+enact checks show ac-login-lockout
+enact init --check ac-login-lockout --check au-logging-enabled --out my-project
+enact checks draft --oscal catalog.json --out drafts
+enact checks list --status draft --drafts drafts
+enact checks review draft-c-cm-2 --reviewer "Your Name" --note "accepted stub" --drafts drafts --library library
+```
+
+`enact init` writes a runnable folder (catalog, `checks.json`, Rego, sample input, workflow). Pass `--oscal` if you already have a catalog and want Enact to map checks onto its control IDs.
+
+Controls with no library check get a **draft** Rego stub (`enact checks draft`). Drafts live under `drafts/<id>/`, stay `status=draft` until a person runs `enact checks review`, and never count as passed. Include them in a run with `--drafts`. See [docs/prds/draft-checks.md](docs/prds/draft-checks.md).
+
 ## How it relates to Codify
 
 | | Codify | Enact |
 | --- | --- | --- |
-| Who | Policy authors | Engineers in CI |
+| Who | Policy authors | GRC reviewers (local browser) and engineers (CI) |
 | In | Legacy policy text | OSCAL catalog / profile / component-definition |
 | Out | OSCAL 1.1.2 catalog | OSCAL 1.1.2 assessment results (+ POA&M, Markdown, HTML) |
 | Parameters | `[90]` in a statement becomes `params` with `values` | The check reads those same `values` |

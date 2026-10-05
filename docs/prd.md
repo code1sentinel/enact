@@ -18,6 +18,7 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 - Treat manual and hybrid checks as **not automated** / **needs evidence**, not as failures.
 - Write NIST OSCAL 1.1.2 `assessment-results` and POA&M, plus Markdown and HTML summaries.
 - Stay on the machine: no third-party calls. Hosted Pages is a static demo of the bundled example.
+- Default onboarding is `enact ui`; CLI/`enact run` is the power-user and CI path ([docs/prds/ui-first.md](prds/ui-first.md)).
 
 ## Non-goals
 
@@ -28,7 +29,7 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 
 ## Users and privacy
 
-**Engineers in CI** run `enact run` on a catalog they already trust. Inputs are local files. Reports are local files. The [live demo](https://code1sentinel.github.io/enact/) is generated in Actions from `examples/access-control/` and contains no customer data.
+**GRC reviewers** start with `enact ui` on localhost (Catalog → Checks → Evidence → Run). **Engineers in CI** run the same work later with `enact run`. Inputs are local files. Reports are local files. The [live demo](https://code1sentinel.github.io/enact/) is generated in Actions from `examples/access-control/` and contains no customer data. Product stance: [docs/prds/ui-first.md](prds/ui-first.md).
 
 ## Shape
 
@@ -39,6 +40,14 @@ checks.json or OSCAL props       ──┤            poam.json
                                    │            summary.md / summary.html
 local config + Rego policies    ──┘
 ```
+
+Default path:
+
+```bash
+enact ui
+```
+
+CI / power-user path:
 
 ```bash
 enact run \
@@ -59,6 +68,7 @@ enact run \
 
 ## In flight
 
+- UI-first onboarding (README, `--help`, Pages copy): [docs/prds/ui-first.md](prds/ui-first.md).
 - Dark mode (Light / Dark / System) on the Pages landing, HTML report, and `enact ui`: [docs/prds/dark-mode.md](prds/dark-mode.md).
 - User-facing `checks.json` / `--checks` (`--manifest` remains a deprecated alias): [docs/prds/checks-json.md](prds/checks-json.md), [ADR 0012](adr/0012-checks-json-user-facing-name.md).
 - Draft Rego checks for unmatched catalog controls: [docs/prds/draft-checks.md](prds/draft-checks.md), [ADR 0009](adr/0009-draft-rego-checks.md).
@@ -68,5 +78,5 @@ enact run \
 
 - [x] `uv run pytest` and example schema validation are green on `main`
 - [x] Pages demo at https://code1sentinel.github.io/enact/
-- [x] README describes install, quickstart, Codify contract, engines/writers
+- [x] README describes install, `enact ui` as the primary quickstart, then CLI/CI, Codify contract, engines/writers
 - [x] Local-only: no product network calls

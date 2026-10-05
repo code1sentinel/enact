@@ -38,3 +38,7 @@ def test_landing_page_uses_relative_demo_links() -> None:
     assert "examples/access-control/checks.json" in html
     assert "--manifest" not in html
     assert "manifest.json" not in html
+    assert "Local-first compliance CLI" not in html
+    assert "Local-first guided assessment" in html
+    assert html.find("enact ui") < html.find("enact run")
+    assert "Start here: a guided app" in html
