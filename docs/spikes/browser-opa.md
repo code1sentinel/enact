@@ -73,4 +73,4 @@ The current library policies all use `sprintf` in `result.message`. A loader wit
 uv run python scripts/build_browser_spike.py
 ```
 
-OPA 1.8.x must be on `PATH` (or `ENACT_OPA`). The script copies `src/enact/library/ac-login-lockout/policy.rego`, compiles wasm, and writes samples. `scripts/build_site.py` calls it so Pages stays in lockstep.
+`opa build -t wasm` is **not bit-identical across machines** (name-section layout / clang producer strings differ). Tests check that a rebuild evaluates the samples, not that bytes match the committed `policy.wasm`. Pages rebuilds wasm in `scripts/build_site.py`.

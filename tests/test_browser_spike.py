@@ -60,16 +60,35 @@ def _load_builder():
     return module
 
 
-def test_committed_wasm_matches_opa_build(tmp_path: Path) -> None:
+def test_opa_build_produces_evaluable_wasm(tmp_path: Path) -> None:
     if not (os.environ.get("ENACT_OPA") or shutil.which("opa")):
         pytest.skip("OPA 1.8.x is required to rebuild the spike wasm")
-    wasm = SPIKE / "policy.wasm"
-    assert wasm.is_file()
-    assert wasm.read_bytes()[:4] == b"\x00asm"
+    committed = SPIKE / "policy.wasm"
+    assert committed.is_file()
+    assert committed.read_bytes()[:4] == b"\x00asm"
     rebuilt = _load_builder().build(tmp_path)
-    assert rebuilt.read_bytes() == wasm.read_bytes()
+    data = rebuilt.read_bytes()
+    assert data[:4] == b"\x00asm"
+    assert len(data) > 50_000
     source = (ROOT / "src" / "enact" / "library" / "ac-login-lockout" / "policy.rego").read_text(encoding="utf-8")
     assert (tmp_path / "policy.rego").read_text(encoding="utf-8") == source
+    node = shutil.which("node")
+    if node is None:
+        return
+    proc = subprocess.run(
+        [
+            node,
+            str(ROOT / "tests" / "eval_opa_wasm.js"),
+            str(rebuilt),
+            str(tmp_path / "samples" / "passing.json"),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        cwd=ROOT,
+    )
+    assert proc.returncode == 0, proc.stderr or proc.stdout
+    assert json.loads(proc.stdout)["passed"] is True
 
 
 def test_wasm_loader_matches_lockout_pass_and_fail_samples() -> None:
