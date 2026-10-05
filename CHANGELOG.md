@@ -19,7 +19,7 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ### Fixed
 
-- `enact ui` Run step command panel now shows `enact run …` as soon as a catalog and checks (or drafts) are in session. If those are missing, it shows “Select catalog and checks first” instead of a blank panel. Previously the equivalent CLI only appeared after a successful run.
+- `enact ui` Run step command panel now shows `enact run …` as soon as a catalog and checks (or drafts) are in session. If those are missing, it shows “Select catalog and checks first” instead of a blank panel. Previously the equivalent CLI only appeared after a successful run. Buttons with the HTML `hidden` attribute stay hidden (Download as project until after a run).
 - Library `check_type` is validated to `automated` | `manual` | `hybrid` before constructing `LibraryCheck`, so mypy on `main` stays green.
 
 ### Added
