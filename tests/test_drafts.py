@@ -60,7 +60,7 @@ def _catalog(
     controls.extend(extra_controls or [])
     document = {
         "catalog": {
-            "uuid": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "uuid": "5a2c1d90-4b11-4e2a-9f08-6c3d1e5a9b21",
             "metadata": {
                 "title": "Draft-check fixture catalog",
                 "last-modified": "2026-10-05T00:00:00Z",

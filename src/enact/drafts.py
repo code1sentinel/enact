@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Callable, Iterable
 
 from enact.library import LibraryCheck, normalize_control_id, oscal_control_id
-from enact.models import CheckSpec, Manifest
+from enact.models import CheckSpec, Manifest, ReviewStatus
 from enact.oscal_io import ControlRecord, OscalBundle
 
 Clock = Callable[[], datetime]
@@ -41,6 +41,7 @@ class DraftCheck:
     directory: Path | None = None
 
     def to_spec(self, *, policy: str) -> CheckSpec:
+        review: ReviewStatus | None = "draft" if self.status == DRAFT_STATUS else None
         return CheckSpec(
             rule_id=self.rule_id,
             control_id=self.control_id,
@@ -49,7 +50,7 @@ class DraftCheck:
             policy=policy,
             title=self.title,
             description=self.statement or self.title,
-            review_status=self.status if self.status == DRAFT_STATUS else None,
+            review_status=review,
         )
 
     def to_meta(self) -> dict[str, object]:

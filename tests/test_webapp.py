@@ -87,7 +87,7 @@ def test_library_and_example_endpoints(ui_server: str) -> None:
 def test_drafts_endpoint_generates_stub_for_unmatched_control(ui_server: str) -> None:
     catalog = {
         "catalog": {
-            "uuid": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
+            "uuid": "5a2c1d90-4b11-4e2a-9f08-6c3d1e5a9b22",
             "metadata": {
                 "title": "One unmatched control",
                 "last-modified": "2026-10-05T00:00:00Z",
