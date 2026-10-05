@@ -4,6 +4,10 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ## [Unreleased]
 
+### Changed
+
+- User-facing check mapping is `checks.json` / `--checks`, not `manifest.json` / `--manifest`. `--manifest` and `-m` still work as a deprecated alias and print a notice. `enact derive-checks` replaces `derive-manifest` (alias kept). `enact init`, the guided-app zip, and UI downloads write `checks.json`. See [docs/checks.md](docs/checks.md) and [ADR 0012](docs/adr/0012-checks-json-user-facing-name.md).
+
 ### Added
 
 - P1 evidence adapters (`enact-adapt aws-iam|terraform|aws-scp`) under `contrib/adapters/`: file-in dumps become `enact.iam.account-policy` envelopes that pass `enact evidence validate`. Mapping report on stderr (filled / empty / ignored / skipped). Fail closed on unparseable or unmappable input — no empty payload. Logging/crypto terraform resources are reported as skipped (those payload types are not on main yet). See [contrib/adapters/README.md](contrib/adapters/README.md) and [ADR 0011](docs/adr/0011-adapter-pack-in-contrib.md).

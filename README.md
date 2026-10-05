@@ -23,9 +23,9 @@ That opens a local page at `http://127.0.0.1:43174/`. It only listens on localho
 1. **Catalog** — upload an OSCAL catalog, profile, or component-definition (a Codify export works as-is), or pick the bundled access-control example.
 2. **Checks** — choose from the bundled library (MFA, lockout, password length, inactive accounts, access reviews, signed agreements, logging, encryption). Each check has a plain-English title. Map it to a control; Enact suggests matches. Edit parameter values such as the lockout threshold in a form. Manual and hybrid checks are labeled. Advanced users can open the Rego.
 3. **Evidence** — upload a config JSON. Download a sample template first if you are unsure of the shape.
-4. **Run** — see the same HTML report the CLI writes, and download `assessment-results.json`, `poam.json`, `summary.md`, and the manifest.
+4. **Run** — see the same HTML report the CLI writes, and download `assessment-results.json`, `poam.json`, `summary.md`, and `checks.json`.
 
-Every step shows the equivalent CLI command in a collapsible **command panel**, with a copy button and a one-line note for each flag. After a run, **Download as project** gives you a zip with the catalog, manifest, policies, sample input, and a GitHub Actions workflow that runs `enact run` — the same work, ready for a terminal or CI later.
+Every step shows the equivalent CLI command in a collapsible **command panel**, with a copy button and a one-line note for each flag. After a run, **Download as project** gives you a zip with the catalog, `checks.json`, policies, sample input, and a GitHub Actions workflow that runs `enact run` — the same work, ready for a terminal or CI later.
 
 You can also browse the library from the CLI:
 
@@ -38,14 +38,14 @@ enact checks list --status draft --drafts drafts
 enact checks review draft-c-cm-2 --reviewer "Your Name" --note "accepted stub" --drafts drafts --library library
 ```
 
-`enact init` writes a runnable folder (catalog, manifest, Rego, sample input, workflow). Pass `--oscal` if you already have a catalog and want Enact to map checks onto its control IDs.
+`enact init` writes a runnable folder (catalog, `checks.json`, Rego, sample input, workflow). Pass `--oscal` if you already have a catalog and want Enact to map checks onto its control IDs.
 
 Controls with no library check get a **draft** Rego stub (`enact checks draft`). Drafts live under `drafts/<id>/`, stay `status=draft` until a person runs `enact checks review`, and never count as passed. Include them in a run with `--drafts`. See [docs/prds/draft-checks.md](docs/prds/draft-checks.md).
 
 ## What it does
 
 1. Load an OSCAL catalog, profile, and/or component-definition.
-2. Load a [check manifest](docs/manifest.md), or derive one from OSCAL props.
+2. Load [checks.json](docs/checks.md), or derive one from OSCAL props.
 3. Resolve parameter values from OSCAL (not from the check).
 4. Run OPA/Rego policies against a local evidence envelope (or legacy JSON).
 5. Record manual and hybrid controls as **not automated** / **needs evidence**, not as failures. Unreviewed draft stubs are **draft** — not passed, not a POA&M item.
@@ -58,7 +58,7 @@ Controls with no library check get a **draft** Rego stub (`enact checks draft`).
 ```
 OSCAL catalog (Codify or anyone) ──┐
                                    ├── Enact ──► assessment-results.json
-check manifest or OSCAL props   ──┤            poam.json
+checks.json or OSCAL props       ──┤            poam.json
                                    │            summary.md / summary.html
 local config + Rego policies    ──┘
 ```
@@ -83,7 +83,7 @@ The bundled example is four access-control statements in the Codify catalog shap
 # Passing IAM config (legacy bare JSON — still accepted in v1 with a deprecation notice)
 enact run \
   --oscal examples/access-control/catalog.json \
-  --manifest examples/access-control/manifest.json \
+  --checks examples/access-control/checks.json \
   --input examples/access-control/inputs/passing.json \
   --workdir examples/access-control \
   --out out/pass \
@@ -100,7 +100,7 @@ enact evidence validate --input evidence.json
 # Failing IAM config (exit code 1)
 enact run \
   --oscal examples/access-control/catalog.json \
-  --manifest examples/access-control/manifest.json \
+  --checks examples/access-control/checks.json \
   --input examples/access-control/inputs/failing.json \
   --workdir examples/access-control \
   --out out/fail \
@@ -116,10 +116,10 @@ enact serve out/pass
 
 Passing config: two automated passes, one manual `not_automated`, one hybrid `needs_evidence`. Failing config: three automated/hybrid failures and POA&M items for each; the manual control still does not fail.
 
-Or derive the manifest from the `rule-id` props already on the catalog:
+Or derive checks.json from the `rule-id` props already on the catalog:
 
 ```bash
-enact derive-manifest --oscal examples/access-control/catalog.json -O /tmp/derived.json
+enact derive-checks --oscal examples/access-control/catalog.json -O /tmp/derived.json
 enact run --oscal examples/access-control/catalog.json --input examples/access-control/inputs/passing.json --workdir examples/access-control --out out/derived
 ```
 
@@ -141,11 +141,11 @@ Codify's catalog contract, which Enact reads:
 - placeholders as `params` (`c-ac-7_prm_1`) and `{{ insert: param, <id> }}` in prose
 - namespaced props under `https://grcengineering.club/ns/codify`
 
-Enact adds its own props under `https://grcengineering.club/ns/enact` (`rule-id`, `check-type`, `engine`, `policy-path`, `ksi-id`). A catalog that Codify exported works as-is once you add a manifest or those props.
+Enact adds its own props under `https://grcengineering.club/ns/enact` (`rule-id`, `check-type`, `engine`, `policy-path`, `ksi-id`). A catalog that Codify exported works as-is once you add `checks.json` or those props.
 
-## Check manifest
+## checks.json
 
-See [docs/manifest.md](docs/manifest.md) for the full convention. The short version:
+See [docs/checks.md](docs/checks.md) for the full convention. The short version:
 
 ```json
 {
@@ -233,9 +233,9 @@ Checked against [fedramp.gov](https://fedramp.gov/2026/timeline/) and [fedramp.g
 
 The GRC engineer's notes hold, with one date nuance: 4 July 2026 is official **optional early adoption** (and the 20x *obtain* date). **Mandatory** adoption is 1 January 2027, with a longer ramp for Rev5. Providers now submit JSON validated against FedRAMP's own schemas. Those schemas include a Security Decision Record (the SSP replacement) and Accepted Vulnerability Info (the POA&M replacement). Some provider artifacts may use FedRAMP JSON instead of OSCAL; agency GRC tools still need to read and produce OSCAL, which is why Enact's v1 writer stays on assessment results.
 
-FedRAMP 20x publishes 46 Key Security Indicators mapped to 800-53 controls. Class C requires at least two automated methods per KSI; Class D requires at least four. Assessors are expected to review the check code — keep the Rego next to the manifest.
+FedRAMP 20x publishes 46 Key Security Indicators mapped to 800-53 controls. Class C requires at least two automated methods per KSI; Class D requires at least four. Assessors are expected to review the check code — keep the Rego next to `checks.json`.
 
-**v1 does not emit FedRAMP JSON.** The output layer is already a writer registry. A later `fedramp-sdr` writer can turn the same `AssessmentRun` into an SDR / Accepted Vulnerabilities document. Optional `ksi_id` on each manifest row is the hook for KSI coverage counts.
+**v1 does not emit FedRAMP JSON.** The output layer is already a writer registry. A later `fedramp-sdr` writer can turn the same `AssessmentRun` into an SDR / Accepted Vulnerabilities document. Optional `ksi_id` on each checks.json row is the hook for KSI coverage counts.
 
 ## Development
 

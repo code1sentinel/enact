@@ -1,4 +1,4 @@
-"""Load OSCAL + manifest, run engines, collect outcomes."""
+"""Load OSCAL + checks.json, run engines, collect outcomes."""
 
 from __future__ import annotations
 

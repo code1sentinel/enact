@@ -240,7 +240,7 @@ def _deep_merge(dest: dict[str, Any], source: dict[str, Any]) -> None:
 def manifest_from_library(
     selections: list[tuple[LibraryCheck, str]],
     *,
-    title: str = "Library check manifest",
+    title: str = "Library checks",
 ) -> Manifest:
     checks = [
         check.to_spec(control_id, policy=f"policies/{check.rule_id}.rego" if check.policy else None)

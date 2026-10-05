@@ -42,7 +42,7 @@ jobs:
         run: |
           enact run \\
             --oscal catalog.json \\
-            --manifest manifest.json \\
+            --checks checks.json \\
             --input inputs/sample.json \\
             --workdir . \\
             --out out \\
@@ -56,13 +56,13 @@ This folder was created by `enact init` (or Download as project from `enact ui`)
 ```bash
 enact run \\
   --oscal catalog.json \\
-  --manifest manifest.json \\
+  --checks checks.json \\
   --input inputs/sample.json \\
   --workdir . \\
   --out out
 ```
 
-`--oscal` is the catalog you assessed. `--manifest` maps each library check to a control.
+`--oscal` is the catalog you assessed. `--checks` maps each library check to a control.
 `--input` is the JSON config you exported. `--workdir` is where the Rego files live.
 """
 
@@ -74,7 +74,7 @@ def write_project(
     catalog: dict[str, Any] | None = None,
     input_data: dict[str, Any] | None = None,
     policies: dict[str, str] | None = None,
-    title: str = "Library check manifest",
+    title: str = "Library checks",
 ) -> list[Path]:
     dest.mkdir(parents=True, exist_ok=True)
     (dest / "policies").mkdir(exist_ok=True)
@@ -86,7 +86,7 @@ def write_project(
     catalog_doc = catalog if catalog is not None else catalog_from_library(selections)
     written: list[Path] = []
 
-    path = dest / "manifest.json"
+    path = dest / "checks.json"
     path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     written.append(path)
 
@@ -122,14 +122,14 @@ def project_zip(
     catalog: dict[str, Any] | None = None,
     input_data: dict[str, Any] | None = None,
     policies: dict[str, str] | None = None,
-    title: str = "Library check manifest",
+    title: str = "Library checks",
 ) -> bytes:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
         manifest = dump_manifest(manifest_from_library(selections, title=title))
         sample = input_data if input_data is not None else merge_inputs(check.passing for check, _ in selections if check.passing)
         catalog_doc = catalog if catalog is not None else catalog_from_library(selections)
-        zf.writestr("manifest.json", json.dumps(manifest, indent=2) + "\n")
+        zf.writestr("checks.json", json.dumps(manifest, indent=2) + "\n")
         zf.writestr("catalog.json", json.dumps(catalog_doc, indent=2) + "\n")
         zf.writestr("inputs/sample.json", json.dumps(sample, indent=2) + "\n")
         for check, _control_id in selections:
