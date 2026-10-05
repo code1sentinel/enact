@@ -84,6 +84,12 @@ def _parse_check(item: Any, index: int) -> CheckSpec:
     params = item.get("params") or []
     if not isinstance(params, list) or any(not isinstance(p, str) for p in params):
         raise ValueError(f"checks[{index}].params must be an array of strings")
+    payload_versions = item.get("payload_versions") or []
+    if not isinstance(payload_versions, list) or any(not isinstance(p, str) for p in payload_versions):
+        raise ValueError(f"checks[{index}].payload_versions must be an array of strings")
+    payload_requires = item.get("payload_requires") or []
+    if not isinstance(payload_requires, list) or any(not isinstance(p, str) for p in payload_requires):
+        raise ValueError(f"checks[{index}].payload_requires must be an array of strings")
     raw_review = item.get("review_status")
     if raw_review not in (None, "", "draft", "reviewed"):
         raise ValueError(f"checks[{index}].review_status must be draft or reviewed")
@@ -103,6 +109,9 @@ def _parse_check(item: Any, index: int) -> CheckSpec:
         evidence=item.get("evidence"),
         evidence_needed=item.get("evidence_needed"),
         review_status=review_status,
+        payload_type=str(item["payload_type"]) if item.get("payload_type") else None,
+        payload_versions=list(payload_versions),
+        payload_requires=list(payload_requires),
     )
 
 
@@ -133,6 +142,9 @@ def dump_manifest(manifest: Manifest) -> dict[str, Any]:
                 **({"evidence": check.evidence} if check.evidence else {}),
                 **({"evidence_needed": check.evidence_needed} if check.evidence_needed else {}),
                 **({"review_status": check.review_status} if check.review_status else {}),
+                **({"payload_type": check.payload_type} if check.payload_type else {}),
+                **({"payload_versions": check.payload_versions} if check.payload_versions else {}),
+                **({"payload_requires": check.payload_requires} if check.payload_requires else {}),
             }
             for check in manifest.checks
         ],

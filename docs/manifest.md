@@ -38,11 +38,15 @@ component-definition `set-parameters`.
 | `query` | no | OPA query. Default: `data.<package>.result`. |
 | `params` | no | OSCAL param ids whose values are injected as `input.oscal_params`. |
 | `ksi_id` | no | FedRAMP 20x Key Security Indicator id. Stored on observations; unused in v1 writers. |
+| `payload_type` | automated (migrating) | Enact-owned evidence type, e.g. `enact.iam.account-policy`. |
+| `payload_versions` | with `payload_type` | Accepted payload schema versions. Unknown versions fail closed. |
+| `payload_requires` | with `payload_type` | Payload fields that must be present. Missing → `error`, not `fail`. |
 | `evidence` | no | Path to supporting evidence linked from the report. |
 | `evidence_needed` | manual/hybrid | What a person must still provide. |
 | `review_status` | draft checks | `draft` until `enact checks review`. Draft results never count as passed. |
 
 The JSON Schema is [`schemas/check-manifest.schema.json`](../schemas/check-manifest.schema.json).
+Evidence envelopes use [`schemas/evidence/`](../schemas/evidence/).
 
 ## Rule ID
 

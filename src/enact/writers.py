@@ -192,6 +192,7 @@ def _observation(run: AssessmentRun, outcome: CheckOutcome) -> dict[str, Any]:
             _prop("engine", outcome.engine),
             _prop("ksi-id", outcome.ksi_id),
             *[_prop(f"param-{key}", value) for key, value in outcome.params_used.items()],
+            *[_prop(name, value) for name, value in (outcome.evidence_provenance or {}).items()],
         ),
         "methods": methods,
         "types": ["finding"] if outcome.status in {"pass", "fail"} else ["control-objective"],

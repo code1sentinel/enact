@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable
 
 from enact.drafts import attach_drafts
 from enact.engines import EngineError, EngineRegistry
+from enact.evidence import EvidenceError, bind_check, parse_evidence
 from enact.library import normalize_control_id
 from enact.manifest import Manifest, merge_or_load
 from enact.models import AssessmentRun, CheckOutcome, CheckSpec, Evidence
@@ -50,10 +52,20 @@ def run_assessment(
     default_input = _load_input(input_path) if input_path else {}
     registry = engines or EngineRegistry()
     started = clock()
-    outcomes = [
-        _run_one(spec, bundle=bundle, default_input=default_input, workdir=workdir, input_path=input_path, registry=registry)
-        for spec in manifest.checks
-    ]
+    legacy_evidence = False
+    outcomes: list[CheckOutcome] = []
+    for spec in manifest.checks:
+        outcome, used_legacy = _run_one(
+            spec,
+            bundle=bundle,
+            default_input=default_input,
+            workdir=workdir,
+            input_path=input_path,
+            registry=registry,
+        )
+        outcomes.append(outcome)
+        if used_legacy:
+            legacy_evidence = True
     ended = clock()
     run = AssessmentRun(
         title=title or bundle.title() or manifest.title,
@@ -64,6 +76,7 @@ def run_assessment(
         outcomes=outcomes,
         catalog_title=bundle.title(),
         input_label=str(input_path) if input_path else None,
+        legacy_evidence=legacy_evidence,
     )
     return run, bundle
 
@@ -76,20 +89,23 @@ def _run_one(
     workdir: Path,
     input_path: Path | None,
     registry: EngineRegistry,
-) -> CheckOutcome:
+) -> tuple[CheckOutcome, bool]:
     params = _resolve_params(spec, bundle)
     if spec.check_type == "manual":
         needed = spec.evidence_needed or "This control is not automated. Attach reviewer evidence."
         evidence = []
         if spec.evidence:
             evidence.append(Evidence(description=needed, href=spec.evidence))
-        return CheckOutcome(
-            spec=spec,
-            status="not_automated",
-            message=needed,
-            engine="none",
-            params_used=params,
-            evidence=evidence,
+        return (
+            CheckOutcome(
+                spec=spec,
+                status="not_automated",
+                message=needed,
+                engine="none",
+                params_used=params,
+                evidence=evidence,
+            ),
+            False,
         )
 
     input_data = default_input
@@ -99,7 +115,25 @@ def _run_one(
         input_data = {}
 
     if spec.check_type == "hybrid" and spec.engine in {"none", "", None}:
-        return _hybrid_pending(spec, params, "Hybrid control has no automated engine configured.")
+        return _hybrid_pending(spec, params, "Hybrid control has no automated engine configured."), False
+
+    used_legacy = False
+    bound = None
+    try:
+        parsed = parse_evidence(input_data)
+        used_legacy = parsed.kind == "legacy" and bool(input_data)
+        bound = bind_check(spec, parsed)
+    except EvidenceError as exc:
+        return (
+            CheckOutcome(
+                spec=spec,
+                status="error",
+                message=str(exc),
+                engine=spec.engine,
+                params_used=params,
+            ),
+            used_legacy,
+        )
 
     try:
         engine = registry.get(spec.engine)
@@ -107,15 +141,22 @@ def _run_one(
     except EngineError as exc:
         outcome = CheckOutcome(spec=spec, status="error", message=str(exc), engine=spec.engine, params_used=params)
 
+    if bound and bound.provenance and not outcome.evidence_provenance:
+        outcome = replace(outcome, evidence_provenance=bound.provenance)
+
     if spec.review_status == "draft":
-        return CheckOutcome(
-            spec=spec,
-            status="draft",
-            message=f"Draft (unreviewed): {outcome.message}",
-            engine=outcome.engine,
-            params_used=params,
-            evidence=list(outcome.evidence),
-            raw={**outcome.raw, "engine_status": outcome.status},
+        return (
+            CheckOutcome(
+                spec=spec,
+                status="draft",
+                message=f"Draft (unreviewed): {outcome.message}",
+                engine=outcome.engine,
+                params_used=params,
+                evidence=list(outcome.evidence),
+                raw={**outcome.raw, "engine_status": outcome.status},
+                evidence_provenance=outcome.evidence_provenance,
+            ),
+            used_legacy,
         )
 
     if spec.check_type == "hybrid" and outcome.status == "pass":
@@ -123,16 +164,20 @@ def _run_one(
         evidence = list(outcome.evidence)
         if spec.evidence:
             evidence.append(Evidence(description=needed, href=spec.evidence))
-        return CheckOutcome(
-            spec=spec,
-            status="needs_evidence",
-            message=needed,
-            engine=outcome.engine,
-            params_used=params,
-            evidence=evidence,
-            raw=outcome.raw,
+        return (
+            CheckOutcome(
+                spec=spec,
+                status="needs_evidence",
+                message=needed,
+                engine=outcome.engine,
+                params_used=params,
+                evidence=evidence,
+                raw=outcome.raw,
+                evidence_provenance=outcome.evidence_provenance,
+            ),
+            used_legacy,
         )
-    return outcome
+    return outcome, used_legacy
 
 
 def _find_control(bundle: OscalBundle, control_id: str) -> ControlRecord | None:

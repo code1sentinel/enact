@@ -12,6 +12,7 @@ import typer
 from enact import __version__
 from enact.drafts import DraftError, generate_drafts, list_drafts, review_draft
 from enact.engines import EngineRegistry
+from enact.evidence import LEGACY_NOTICE, EvidenceError, validate_evidence_document
 from enact.library import get_check, list_checks
 from enact.manifest import derive_manifest, dump_manifest, load_manifest
 from enact.oscal_io import load_bundle
@@ -23,7 +24,9 @@ from enact.writers import WriterError, WriterRegistry
 
 app = typer.Typer(help="Turn OSCAL controls into runnable checks and OSCAL assessment results.", no_args_is_help=True)
 checks_app = typer.Typer(help="Browse the bundled check library.")
+evidence_app = typer.Typer(help="Validate Enact evidence envelopes (no OPA).")
 app.add_typer(checks_app, name="checks")
+app.add_typer(evidence_app, name="evidence")
 
 
 def _paths(values: list[Path]) -> list[Path]:
@@ -91,6 +94,8 @@ def run(
             validate_poam(json.loads(path.read_text(encoding="utf-8")))
 
     counts = assessment.counts()
+    if assessment.legacy_evidence:
+        typer.secho(LEGACY_NOTICE, fg=typer.colors.YELLOW, err=True)
     typer.echo(
         f"{len(assessment.outcomes)} checks: {counts['pass']} passed, {counts['fail']} failed, "
         f"{counts['needs_evidence'] + counts['not_automated']} need evidence, "
@@ -104,6 +109,25 @@ def run(
 
     if counts["fail"] or counts["error"]:
         raise typer.Exit(code=1)
+
+
+@evidence_app.command("validate")
+def evidence_validate(
+    input_file: Path = typer.Option(..., "--input", "-i", help="Evidence envelope or bundle JSON."),
+) -> None:
+    """Validate an evidence envelope or bundle against vendored schemas. Does not run OPA."""
+    path = input_file.resolve()
+    if not path.is_file():
+        raise typer.BadParameter(f"input not found: {path}")
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            raise EvidenceError("document must be a JSON object")
+        validate_evidence_document(data)
+    except (EvidenceError, json.JSONDecodeError) as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1) from exc
+    typer.echo(f"ok {path} (evidence envelope)")
 
 
 @app.command("derive-manifest")

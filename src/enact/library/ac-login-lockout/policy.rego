@@ -4,7 +4,7 @@ import rego.v1
 
 threshold := to_number(input.oscal_params["ac-login-lockout_prm_1"])
 
-configured := input.iam.lockout_threshold
+configured := input.payload.lockout_threshold
 
 default passed := false
 

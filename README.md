@@ -47,7 +47,7 @@ Controls with no library check get a **draft** Rego stub (`enact checks draft`).
 1. Load an OSCAL catalog, profile, and/or component-definition.
 2. Load a [check manifest](docs/manifest.md), or derive one from OSCAL props.
 3. Resolve parameter values from OSCAL (not from the check).
-4. Run OPA/Rego policies against a local JSON config.
+4. Run OPA/Rego policies against a local evidence envelope (or legacy JSON).
 5. Record manual and hybrid controls as **not automated** / **needs evidence**, not as failures. Unreviewed draft stubs are **draft** — not passed, not a POA&M item.
 6. Write:
    - OSCAL 1.1.2 `assessment-results` JSON
@@ -77,10 +77,10 @@ Pin OPA 1.8.x (Rego v1). `ENACT_OPA` overrides the binary path.
 
 ## Quickstart
 
-The bundled example is four access-control statements in the Codify catalog shape: account review cadence, login lockout, signed access agreements (manual), and privileged-account review (hybrid). Thresholds live in OSCAL params. The Rego policies read `input.oscal_params`.
+The bundled example is four access-control statements in the Codify catalog shape: account review cadence, login lockout, signed access agreements (manual), and privileged-account review (hybrid). Thresholds live in OSCAL params. The Rego policies read `input.oscal_params` and, for migrated IAM checks, `input.payload`.
 
 ```bash
-# Passing IAM config
+# Passing IAM config (legacy bare JSON — still accepted in v1 with a deprecation notice)
 enact run \
   --oscal examples/access-control/catalog.json \
   --manifest examples/access-control/manifest.json \
@@ -88,6 +88,10 @@ enact run \
   --workdir examples/access-control \
   --out out/pass \
   --title "Access-control example (passing)"
+
+# Evidence envelope (preferred). The four-check example still uses legacy
+# passing.json until later slices migrate privileged-review. Validate here:
+enact evidence validate --input examples/access-control/inputs/account-policy.envelope.json
 
 # Failing IAM config (exit code 1)
 enact run \
@@ -161,6 +165,7 @@ See [docs/manifest.md](docs/manifest.md) for the full convention. The short vers
 - **`check_type`**: `automated` | `manual` | `hybrid`. Manual never fails. Hybrid fails only if the automated half fails; a pass still reports `needs_evidence`.
 - **`review_status`**: optional `draft` for generated stubs. `enact run --drafts` includes them; they render as Draft and never increment the pass count.
 - **`ksi_id`** is optional. It is stored on results for a later FedRAMP 20x writer.
+- **`payload_type` / `payload_versions` / `payload_requires`**: evidence contract for automated checks. Invalid or missing evidence is `status=error` (message starts with `evidence:`), never `pass`. See [docs/prds/evidence-schema.md](docs/prds/evidence-schema.md).
 
 The same fields can live as OSCAL props on a control or on a component-definition `implemented-requirement`. C2P-style `Rule_Id` / `Check_Id` names are accepted.
 
@@ -174,8 +179,8 @@ import rego.v1
 threshold := to_number(input.oscal_params["c-ac-7_prm_1"])
 
 result := {
-  "passed": input.iam.lockout_threshold <= threshold,
-  "message": sprintf("lockout is %v; max is %v", [input.iam.lockout_threshold, threshold]),
+  "passed": input.payload.lockout_threshold <= threshold,
+  "message": sprintf("lockout is %v; max is %v", [input.payload.lockout_threshold, threshold]),
 }
 ```
 

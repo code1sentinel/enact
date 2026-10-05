@@ -11,6 +11,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, Protocol
 
+from enact.evidence import EvidenceError, bind_check, parse_evidence
 from enact.models import ENGINE_STUBS, CheckOutcome, CheckSpec, Evidence
 
 PACKAGE_RE = re.compile(r"^\s*package\s+([A-Za-z_][\w.]*)", re.MULTILINE)
@@ -46,21 +47,42 @@ class OpaEngine:
                 "OPA is not installed. Install the opa binary and put it on PATH, "
                 "or set ENACT_OPA. See https://www.openpolicyagent.org/docs/latest/#running-opa"
             )
-        payload = {
-            "config": input_data.get("config", input_data),
-            "oscal_params": params,
-            "check": {
-                "rule_id": spec.rule_id,
-                "control_id": spec.control_id,
-                "ksi_id": spec.ksi_id,
-            },
+        try:
+            evidence_doc = parse_evidence(input_data)
+            bound = bind_check(spec, evidence_doc)
+        except EvidenceError as exc:
+            return CheckOutcome(
+                spec=spec,
+                status="error",
+                message=str(exc),
+                engine=self.name,
+                params_used=params,
+            )
+        check_meta = {
+            "rule_id": spec.rule_id,
+            "control_id": spec.control_id,
+            "ksi_id": spec.ksi_id,
         }
-        if "iam" in input_data and "iam" not in payload:
-            payload["iam"] = input_data["iam"]
-        # Keep the original document at the top level so simple policies can read input.iam.*
-        for key, value in input_data.items():
-            if key not in payload:
-                payload[key] = value
+        if bound.mode == "envelope":
+            payload = {
+                "payload": bound.payload,
+                "oscal_params": params,
+                "check": check_meta,
+            }
+        else:
+            payload = {
+                "config": input_data.get("config", input_data),
+                "oscal_params": params,
+                "check": check_meta,
+            }
+            if "iam" in input_data and "iam" not in payload:
+                payload["iam"] = input_data["iam"]
+            # Keep the original document at the top level so unmigrated policies can read input.iam.*
+            for key, value in input_data.items():
+                if key not in payload:
+                    payload[key] = value
+            if "payload" not in payload:
+                payload["payload"] = bound.payload
 
         query = spec.query or _default_query(policy_path)
         with tempfile.TemporaryDirectory(prefix="enact-opa-") as tmp:
@@ -119,6 +141,7 @@ class OpaEngine:
             params_used=params,
             evidence=evidence,
             raw={"opa": parsed, "query": query, "input": payload},
+            evidence_provenance=bound.provenance or None,
         )
 
 

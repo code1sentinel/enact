@@ -5,7 +5,7 @@ import rego.v1
 # Threshold comes from the OSCAL parameter, not from this file.
 threshold := to_number(input.oscal_params["c-ac-2_prm_1"])
 
-configured := input.iam.account_review_days
+configured := input.payload.account_review_days
 
 default passed := false
 

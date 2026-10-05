@@ -1,0 +1,26 @@
+{
+  "enact_evidence_bundle": "1.0",
+  "items": [
+    {
+      "enact_evidence": "1.0",
+      "id": "8f0c6a7e-2f5c-4b1e-9a3d-0c1f6c2b9e11",
+      "collected_at": "2026-10-05T08:30:00Z",
+      "collector": {
+        "name": "enact-sample",
+        "version": "1.0",
+        "kind": "sample"
+      },
+      "subject": {
+        "type": "cloud-account",
+        "id": "prod-aws",
+        "environment": "prod"
+      },
+      "payload_type": "enact.iam.account-policy",
+      "payload_version": "1.0",
+      "payload": {
+        "account_review_days": 30,
+        "lockout_threshold": 3
+      }
+    }
+  ]
+}
