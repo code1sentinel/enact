@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Enact — OSCAL controls to runnable checks</title>
-  <meta name="description" content="Enact turns OSCAL controls into OPA/Rego checks and writes OSCAL 1.1.2 assessment results and POA&amp;M items.">
+  <meta name="description" content="Enact turns OSCAL controls into runnable checks. Start with enact ui on your machine; CI writes NIST OSCAL 1.1.2 assessment results and POA&amp;M items.">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-EsFVG4LqCF4Icn/J3ZeeTKA3tLbNxDeUgzCMl8eWYDk='; connect-src 'none'; font-src 'none'; base-uri 'none'; form-action 'none'">
   <script>(function(){var k="enact-theme",m="system";try{var s=localStorage.getItem(k);if(s==="light"||s==="dark"||s==="system")m=s;}catch(e){}var d=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;var t=m==="dark"||(m!=="light"&&d)?"dark":"light";var r=document.documentElement;r.setAttribute("data-theme",t);r.setAttribute("data-theme-mode",m);r.style.colorScheme=t;})();</script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f766e'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' fill='%23ffffff' font-family='ui-sans-serif, system-ui, sans-serif'%3EE%3C/text%3E%3C/svg%3E">
@@ -34,39 +34,50 @@
   <main id="main">
     <section class="hero wrap">
       <div class="hero__copy">
-        <p class="kicker">Local-first compliance CLI</p>
+        <p class="kicker">Local-first guided assessment</p>
         <h1>OSCAL controls become runnable checks, then assessment results.</h1>
         <p class="lede">
-          Load a catalog and <code>checks.json</code>. Run OPA/Rego locally.
-          Write NIST OSCAL 1.1.2 assessment results and POA&amp;M items.
-          Nothing leaves the machine.
+          Install once, then <code>enact ui</code>. Walk Catalog → Checks → Evidence → Run
+          in a local browser. Write NIST OSCAL 1.1.2 assessment results and POA&amp;M items.
+          Nothing leaves the machine. This Pages site is a static showcase; the guided
+          app runs on your machine.
         </p>
         <div class="hero__actions">
           <a class="btn" href="examples/pass/summary.html">View a passing report</a>
           <a class="btn btn--ghost" href="https://code1sentinel.github.io/policy-golden-path/">Open Codify</a>
         </div>
       </div>
-      <figure class="terminal" aria-label="Example enact run">
+      <figure class="terminal" aria-label="Example enact ui">
         <figcaption class="terminal__bar">
           <span class="dot" aria-hidden="true"></span>
           <span class="dot" aria-hidden="true"></span>
           <span class="dot" aria-hidden="true"></span>
-          <span class="terminal__title">enact run</span>
+          <span class="terminal__title">enact ui</span>
         </figcaption>
-        <pre><code><span class="cmt"># Passing IAM config from the bundled example</span>
-<span class="cmd">$</span> enact run \
-    --oscal examples/access-control/catalog.json \
-    --checks examples/access-control/checks.json \
-    --input examples/access-control/inputs/passing.json \
-    --workdir examples/access-control \
-    --out out/pass \
-    --title "Access-control example (passing)"
+        <pre><code><span class="cmt"># After install — localhost only</span>
+<span class="cmd">$</span> enact ui
 
-<span class="ok">4 checks: 2 passed, 0 failed, 2 need evidence, 0 errors.</span>
-wrote out/pass/assessment-results.json
-wrote out/pass/poam.json
-wrote out/pass/summary.md
-wrote out/pass/summary.html</code></pre>
+<span class="ok">Enact UI (localhost only) at http://127.0.0.1:43174/</span>
+Catalog → Checks → Evidence → Run
+Command panel shows the equivalent CLI for CI later</code></pre>
+      </figure>
+    </section>
+
+    <section class="wrap guided" aria-labelledby="guided-title">
+      <h2 id="guided-title">Start here: a guided app on your machine</h2>
+      <p class="note">
+        <code>enact ui</code> opens a local stepper — Catalog, Checks, Evidence, Run —
+        with the same HTML report the CLI writes. It binds to localhost only and makes
+        no third-party network calls. This Pages site stays a static showcase; it does
+        not host the app.
+      </p>
+      <figure class="guided__shot">
+        <img src="guided-app.png" alt="The Enact guided app: catalog step, four-step stepper, and the command panel showing the equivalent CLI.">
+        <figcaption>
+          After you install Enact locally, <code>enact ui</code> walks through a catalog,
+          the check library, evidence JSON, and a run. The command panel shows the CLI
+          for each step so you can move to a terminal or GitHub Actions later.
+        </figcaption>
       </figure>
     </section>
 
@@ -89,24 +100,6 @@ wrote out/pass/summary.html</code></pre>
           <p>Assessment-results JSON, POA&amp;M items for automated failures, plus HTML and Markdown reports.</p>
         </li>
       </ol>
-    </section>
-
-    <section class="wrap guided" aria-labelledby="guided-title">
-      <h2 id="guided-title">No terminal? A guided app on your machine</h2>
-      <p class="note">
-        <code>enact ui</code> opens a local stepper — Catalog, Checks, Evidence, Run —
-        with the same HTML report the CLI writes. It binds to localhost only and makes
-        no third-party network calls. This Pages site stays a static showcase; it does
-        not host the app.
-      </p>
-      <figure class="guided__shot">
-        <img src="guided-app.png" alt="The Enact guided app: catalog step, four-step stepper, and the command panel showing the equivalent CLI.">
-        <figcaption>
-          After you install Enact locally, <code>enact ui</code> walks through a catalog,
-          the check library, evidence JSON, and a run. The command panel shows the CLI
-          for each step so you can move to a terminal or GitHub Actions later.
-        </figcaption>
-      </figure>
     </section>
 
     <section class="wrap demo" aria-labelledby="demo-title">
@@ -146,13 +139,15 @@ wrote out/pass/summary.html</code></pre>
     </section>
 
     <section class="wrap install" aria-labelledby="install-title">
-      <h2 id="install-title">Install and run</h2>
+      <h2 id="install-title">Install, then enact ui</h2>
       <p class="note">Python 3.10+ and the <a href="https://www.openpolicyagent.org/docs/latest/#running-opa">OPA</a> 1.8.x binary on <code>PATH</code>. <code>ENACT_OPA</code> overrides the binary path.</p>
 <pre><code>git clone https://github.com/code1sentinel/enact.git
 cd enact
 pip install -e ".[dev]"   # or: uv sync --extra dev
 
-enact run \
+enact ui</code></pre>
+      <p class="note">That is the default path. For CI and scripts, the same runner is <code>enact run</code> (the command panel and Download as project zip emit it):</p>
+<pre><code>enact run \
   --oscal examples/access-control/catalog.json \
   --checks examples/access-control/checks.json \
   --input examples/access-control/inputs/passing.json \

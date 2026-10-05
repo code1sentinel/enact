@@ -22,7 +22,13 @@ from enact.validate import SchemaValidationError, validate_assessment_results, v
 from enact.webapp import serve as serve_ui
 from enact.writers import WriterError, WriterRegistry
 
-app = typer.Typer(help="Turn OSCAL controls into runnable checks and OSCAL assessment results.", no_args_is_help=True)
+UI_HELP_HINT = "Prefer a browser? Run: enact ui"
+
+app = typer.Typer(
+    help="Turn OSCAL controls into runnable checks and OSCAL assessment results.",
+    epilog=UI_HELP_HINT,
+    no_args_is_help=True,
+)
 checks_app = typer.Typer(help="Browse the bundled check library.")
 evidence_app = typer.Typer(help="Validate Enact evidence envelopes (no OPA).")
 app.add_typer(checks_app, name="checks")

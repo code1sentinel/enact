@@ -6,7 +6,7 @@ from pathlib import Path
 
 from typer.testing import CliRunner
 
-from enact.cli import MANIFEST_ALIAS_NOTICE, app
+from enact.cli import MANIFEST_ALIAS_NOTICE, UI_HELP_HINT, app
 
 runner = CliRunner()
 _ANSI = re.compile(r"\x1b\[[0-9;]*m")
@@ -38,6 +38,17 @@ def test_checks_list_and_show() -> None:
     assert "import rego.v1" in shown.stdout
     missing = runner.invoke(app, ["checks", "show", "not-a-check"])
     assert missing.exit_code == 2
+
+
+def test_top_help_points_to_guided_ui() -> None:
+    result = runner.invoke(app, ["--help"])
+    text = _plain(result.stdout + result.stderr)
+    assert result.exit_code == 0, text
+    assert UI_HELP_HINT in text
+    assert "enact ui" in text
+    empty = runner.invoke(app, [])
+    empty_text = _plain(empty.stdout + empty.stderr)
+    assert UI_HELP_HINT in empty_text
 
 
 def test_run_help_lists_checks_flag() -> None:
