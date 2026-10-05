@@ -61,6 +61,7 @@ enact run \
 
 - Dark mode (Light / Dark / System) on the Pages landing, HTML report, and `enact ui`: [docs/prds/dark-mode.md](prds/dark-mode.md).
 - Draft Rego checks for unmatched catalog controls: [docs/prds/draft-checks.md](prds/draft-checks.md), [ADR 0009](adr/0009-draft-rego-checks.md).
+- Evidence envelope (thin v1): [docs/prds/evidence-schema.md](prds/evidence-schema.md), [ADR 0010](adr/0010-evidence-envelope.md) (proposed).
 
 ## Acceptance (product-level)
 

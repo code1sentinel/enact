@@ -58,6 +58,9 @@ class LibraryCheck:
     failing: dict[str, Any] = field(default_factory=dict)
     input_template: dict[str, Any] = field(default_factory=dict)
     directory: Path | None = None
+    payload_type: str | None = None
+    payload_versions: list[str] = field(default_factory=list)
+    payload_requires: list[str] = field(default_factory=list)
 
     def param_ids(self) -> list[str]:
         return [param.id for param in self.params]
@@ -77,6 +80,9 @@ class LibraryCheck:
             title=self.title,
             description=self.description,
             evidence_needed=self.evidence_needed,
+            payload_type=self.payload_type,
+            payload_versions=list(self.payload_versions),
+            payload_requires=list(self.payload_requires),
         )
 
 
@@ -147,6 +153,9 @@ def _load_check(directory: Path) -> LibraryCheck:
         failing=failing if isinstance(failing, dict) else {},
         input_template=template if isinstance(template, dict) else {},
         directory=directory,
+        payload_type=str(data["payload_type"]) if data.get("payload_type") else None,
+        payload_versions=[str(item) for item in data.get("payload_versions") or []],
+        payload_requires=[str(item) for item in data.get("payload_requires") or []],
     )
 
 
@@ -164,6 +173,9 @@ def check_as_dict(check: LibraryCheck, *, include_samples: bool = False) -> dict
         "evidence_needed": check.evidence_needed,
         "policy": check.policy,
         "input_template": check.input_template,
+        "payload_type": check.payload_type,
+        "payload_versions": check.payload_versions,
+        "payload_requires": check.payload_requires,
     }
     if include_samples:
         payload["passing"] = check.passing

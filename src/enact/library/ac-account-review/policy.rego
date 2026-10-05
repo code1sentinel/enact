@@ -4,7 +4,7 @@ import rego.v1
 
 threshold := to_number(input.oscal_params["ac-account-review_prm_1"])
 
-configured := input.iam.account_review_days
+configured := input.payload.account_review_days
 
 default passed := false
 

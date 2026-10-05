@@ -40,6 +40,20 @@
         "review_status": {
           "enum": ["draft", "reviewed"],
           "description": "draft means the Rego stub is untrusted. Generation never writes reviewed."
+        },
+        "payload_type": {
+          "type": "string",
+          "description": "Enact-owned evidence payload type, for example enact.iam.account-policy."
+        },
+        "payload_versions": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Payload schema versions this check accepts. Unknown versions fail closed."
+        },
+        "payload_requires": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Payload fields that must be present. Missing fields are status=error, not fail."
         }
       }
     }

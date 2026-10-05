@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grcengineering.club/ns/enact/evidence/bundle-1.0.schema.json",
+  "title": "Enact evidence bundle 1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["enact_evidence_bundle", "items"],
+  "properties": {
+    "enact_evidence_bundle": {
+      "const": "1.0",
+      "description": "Bundle version. Unknown versions fail closed."
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "description": "Each item is an enact evidence envelope 1.0 (validated in code, no remote $ref)."
+      }
+    }
+  }
+}

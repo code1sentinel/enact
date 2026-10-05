@@ -32,6 +32,9 @@ class CheckSpec:
     evidence: str | None = None
     evidence_needed: str | None = None
     review_status: ReviewStatus | None = None
+    payload_type: str | None = None
+    payload_versions: list[str] = field(default_factory=list)
+    payload_requires: list[str] = field(default_factory=list)
 
     def display_title(self) -> str:
         return self.title or self.rule_id
@@ -60,6 +63,7 @@ class CheckOutcome:
     params_used: dict[str, str] = field(default_factory=dict)
     evidence: list[Evidence] = field(default_factory=list)
     raw: dict[str, Any] = field(default_factory=dict)
+    evidence_provenance: dict[str, str] | None = None
 
     @property
     def control_id(self) -> str:
@@ -84,6 +88,7 @@ class AssessmentRun:
     outcomes: list[CheckOutcome]
     catalog_title: str | None = None
     input_label: str | None = None
+    legacy_evidence: bool = False
 
     def counts(self) -> dict[str, int]:
         tallies = {

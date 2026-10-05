@@ -13,3 +13,4 @@ Numbered documents in this folder. Start from `docs/templates/adr-template.md`.
 | [0007](0007-local-only-privacy-model.md) | Local-only privacy model | accepted |
 | [0008](0008-css-theme-tokens.md) | Shared CSS theme tokens and a System-first toggle | accepted |
 | [0009](0009-draft-rego-checks.md) | Draft Rego checks for unmatched controls | accepted |
+| [0010](0010-evidence-envelope.md) | Shared evidence envelope, validated before OPA | proposed |

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grcengineering.club/ns/enact/evidence/payloads/enact.iam.account-policy-1.0.schema.json",
+  "title": "enact.iam.account-policy 1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "lockout_threshold": { "type": "number" },
+    "account_review_days": { "type": "number" },
+    "privileged_review_days": { "type": "number" },
+    "inactive_disable_days": { "type": "number" },
+    "mfa_required": { "type": "boolean" },
+    "password_min_length": { "type": "number" }
+  }
+}
