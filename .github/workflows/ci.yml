@@ -71,7 +71,7 @@ jobs:
       - name: Install package
         run: uv sync --extra dev
       - name: Ruff
-        run: uv run ruff check src tests scripts
+        run: uv run ruff check src tests scripts contrib
       - name: Type check (lenient)
         run: uv run mypy src/enact
 

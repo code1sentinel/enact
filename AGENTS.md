@@ -7,11 +7,12 @@ This is how work happens in Enact. Humans and coding agents follow the same loop
 ```bash
 uv sync --extra dev
 uv run pytest                          # unit + e2e + schema checks
-uv run ruff check src tests scripts    # lint
+uv run ruff check src tests scripts contrib    # lint
 uv run mypy src/enact                  # type check (lenient)
 uv run python scripts/build_site.py --out _site
 enact ui                               # guided local app (localhost only; see docs/prds/guided-app.md)
 enact ui --no-open --port 43174
+enact-adapt aws-iam --in dump.json --out evidence.json   # P1 adapters (contrib/; no cloud APIs)
 ```
 
 OPA 1.8.x must be on `PATH` (or set `ENACT_OPA`). Pin that version; policies are Rego v1.

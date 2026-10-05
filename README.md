@@ -93,6 +93,10 @@ enact run \
 # passing.json until later slices migrate privileged-review. Validate here:
 enact evidence validate --input examples/access-control/inputs/account-policy.envelope.json
 
+# Or adapt a dump you already exported (no cloud APIs; file in / file out):
+enact-adapt aws-iam --in contrib/adapters/fixtures/aws-iam-password-policy.json --out evidence.json
+enact evidence validate --input evidence.json
+
 # Failing IAM config (exit code 1)
 enact run \
   --oscal examples/access-control/catalog.json \
@@ -194,6 +198,19 @@ v1's output is OSCAL assessment results. Writers are pluggable the same way. `os
 enact engines
 enact writers
 ```
+
+## Evidence adapters
+
+Enact ships `enact.*` payload types. You do not invent schemas. The P1 adapter pack turns dumps you already have into envelopes (`contrib/adapters/`, not `src/enact/`):
+
+```bash
+enact-adapt aws-iam --in password-policy.json --out evidence.json
+enact-adapt terraform --in plan.json --out evidence.json
+enact-adapt aws-scp --in scp.json --out evidence.json
+enact evidence validate --input evidence.json
+```
+
+File in, file out. No cloud API calls. Each run prints a mapping report (filled / empty / ignored / skipped). See [contrib/adapters/README.md](contrib/adapters/README.md).
 
 ## C2P and compliance-trestle
 

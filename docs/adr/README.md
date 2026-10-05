@@ -14,3 +14,4 @@ Numbered documents in this folder. Start from `docs/templates/adr-template.md`.
 | [0008](0008-css-theme-tokens.md) | Shared CSS theme tokens and a System-first toggle | accepted |
 | [0009](0009-draft-rego-checks.md) | Draft Rego checks for unmatched controls | accepted |
 | [0010](0010-evidence-envelope.md) | Shared evidence envelope, validated before OPA | proposed |
+| [0011](0011-adapter-pack-in-contrib.md) | Adapter pack in contrib/, not src/enact | accepted |

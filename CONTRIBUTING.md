@@ -18,7 +18,7 @@ Read [AGENTS.md](AGENTS.md) first. That file is the working agreement for humans
 ```bash
 uv sync --extra dev
 uv run pytest
-uv run ruff check src tests scripts
+uv run ruff check src tests scripts contrib
 uv run mypy src/enact
 uv run python scripts/build_site.py --out _site
 enact ui --no-open          # guided app; localhost only (PR #3)

@@ -225,7 +225,7 @@ Contract between adapter and core: **the file**. Done when `enact evidence valid
 | 1 | Thin v1 core | Envelope 1.0 + `enact.iam.account-policy`; `enact evidence validate`; two IAM checks on `input.payload`; provenance; legacy notice |
 | 2 | Library migrate | Remaining checks + logging/crypto types; examples as bundles |
 | 3 | Templates | `evidence template` / `types`; schema-generated samples |
-| 4 | **P1 adapters** | aws-iam-password-policy, terraform-plan, aws-scp + fixtures + mapping docs |
+| 4 | **P1 adapters** | aws-iam-password-policy, terraform-plan, aws-scp + fixtures + mapping docs — in progress (`contrib/adapters/`, `enact-adapt`) |
 | 5 | UI Evidence step | validate on upload, field errors, download sample (Mobbin first) |
 | 6 | P2 adapters | okta, aws logging, aws encryption |
 
@@ -261,7 +261,7 @@ Contract between adapter and core: **the file**. Done when `enact evidence valid
 1. **Legacy removal.** How long does bare JSON keep working?
 2. **POA&M for evidence errors.** Keep today's exit 1 + POA&M, or exclude `evidence:` errors from POA&M (maybe exit 2)?
 3. **Custom payload types.** Confirm **out of v1** (only `enact.*` + adapters)?
-4. **Adapter pack home.** `contrib/adapters/` in enact, separate `enact-adapt` repo, or both (scripts in contrib, CLI later)?
+4. **Adapter pack home.** **Decided (slice 4 / ADR 0011):** `contrib/adapters/` in this repo plus an `enact-adapt` console script. Not a separate repo; not inside `src/enact/`.
 5. **Freshness.** Warn/fail on old `collected_at`, or ignore for now?
 6. **Multi-account subjects.** Needed soon, or stick to one-per-type in v1?
 7. **Payload granularity.** Keep one type per domain (current draft)?
