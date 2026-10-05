@@ -1,0 +1,29 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.5.7",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_cloudtrail.main",
+          "mode": "managed",
+          "type": "aws_cloudtrail",
+          "name": "main",
+          "values": {
+            "enable_logging": true,
+            "name": "org-trail"
+          }
+        },
+        {
+          "address": "aws_s3_bucket_server_side_encryption_configuration.logs",
+          "mode": "managed",
+          "type": "aws_s3_bucket_server_side_encryption_configuration",
+          "name": "logs",
+          "values": {
+            "bucket": "acme-logs"
+          }
+        }
+      ]
+    }
+  }
+}

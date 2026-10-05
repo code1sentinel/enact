@@ -1,0 +1,75 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.5.7",
+  "timestamp": "2026-10-05T08:30:00Z",
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_iam_account_password_policy.strict",
+          "mode": "managed",
+          "type": "aws_iam_account_password_policy",
+          "name": "strict",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "schema_version": 0,
+          "values": {
+            "allow_users_to_change_password": true,
+            "hard_expiry": false,
+            "max_password_age": 90,
+            "minimum_password_length": 14,
+            "password_reuse_prevention": 24,
+            "require_lowercase_characters": true,
+            "require_numbers": true,
+            "require_symbols": true,
+            "require_uppercase_characters": true
+          }
+        },
+        {
+          "address": "aws_s3_bucket.logs",
+          "mode": "managed",
+          "type": "aws_s3_bucket",
+          "name": "logs",
+          "values": {
+            "bucket": "acme-logs"
+          }
+        }
+      ],
+      "child_modules": [
+        {
+          "address": "module.audit",
+          "resources": [
+            {
+              "address": "module.audit.aws_cloudtrail.main",
+              "mode": "managed",
+              "type": "aws_cloudtrail",
+              "name": "main",
+              "values": {
+                "enable_logging": true,
+                "name": "org-trail",
+                "s3_bucket_name": "acme-logs"
+              }
+            },
+            {
+              "address": "module.audit.aws_s3_bucket_server_side_encryption_configuration.logs",
+              "mode": "managed",
+              "type": "aws_s3_bucket_server_side_encryption_configuration",
+              "name": "logs",
+              "values": {
+                "bucket": "acme-logs",
+                "rule": [
+                  {
+                    "apply_server_side_encryption_by_default": [
+                      {
+                        "sse_algorithm": "aws:kms"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

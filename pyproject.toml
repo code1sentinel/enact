@@ -30,6 +30,7 @@ dev = [
 
 [project.scripts]
 enact = "enact.cli:app"
+enact-adapt = "enact_adapt.cli:app"
 
 [project.urls]
 Homepage = "https://github.com/code1sentinel/enact"
@@ -45,14 +46,16 @@ packages = ["src/enact"]
 [tool.hatch.build.targets.wheel.force-include]
 "schemas" = "enact/schemas"
 "examples/access-control/catalog.json" = "enact/examples/access-control/catalog.json"
+"contrib/adapters/enact_adapt" = "enact_adapt"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+pythonpath = ["contrib/adapters"]
 
 [tool.ruff]
 target-version = "py310"
-src = ["src", "tests", "scripts"]
+src = ["src", "tests", "scripts", "contrib"]
 line-length = 120
 
 [tool.ruff.lint]

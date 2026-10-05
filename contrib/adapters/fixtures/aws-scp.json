@@ -1,0 +1,13 @@
+{
+  "Policy": {
+    "PolicySummary": {
+      "Id": "p-example",
+      "Arn": "arn:aws:organizations::123456789012:policy/o-example/service_control_policy/p-example",
+      "Name": "iam-account-guards",
+      "Description": "Require MFA and a minimum password length; leave unrelated denies unmapped.",
+      "Type": "SERVICE_CONTROL_POLICY",
+      "AwsManaged": false
+    },
+    "Content": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"DenyWeakPasswordLength\",\"Effect\":\"Deny\",\"Action\":\"iam:UpdateAccountPasswordPolicy\",\"Resource\":\"*\",\"Condition\":{\"NumericLessThan\":{\"iam:MinimumPasswordLength\":\"14\"}}},{\"Sid\":\"DenyNoMFA\",\"Effect\":\"Deny\",\"NotAction\":[\"iam:CreateVirtualMFADevice\",\"iam:EnableMFADevice\",\"iam:GetUser\",\"iam:ListMFADevices\",\"iam:ListVirtualMFADevices\",\"iam:ResyncMFADevice\",\"sts:GetSessionToken\"],\"Resource\":\"*\",\"Condition\":{\"BoolIfExists\":{\"aws:MultiFactorAuthPresent\":\"false\"}}},{\"Sid\":\"DenyLockoutWeakerThanThree\",\"Effect\":\"Deny\",\"Action\":\"iam:UpdateAccountPasswordPolicy\",\"Resource\":\"*\",\"Condition\":{\"NumericGreaterThan\":{\"iam:LockoutThreshold\":\"3\"}}},{\"Sid\":\"DenyUnrelatedS3Deletes\",\"Effect\":\"Deny\",\"Action\":\"s3:DeleteBucket\",\"Resource\":\"*\"},{\"Sid\":\"PreventPasswordPolicyDelete\",\"Effect\":\"Deny\",\"Action\":\"iam:DeleteAccountPasswordPolicy\",\"Resource\":\"*\"}]}"
+  }
+}
