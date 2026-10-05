@@ -287,3 +287,9 @@ def test_run_step_fills_command_panel_before_assessment() -> None:
     assert "if (step === " in js and "renderRun()" in js
     assert RUN_CLI_PLACEHOLDER in js
     assert "enact run" in js
+
+
+def test_ui_css_honors_hidden_attribute() -> None:
+    css = (Path(__file__).resolve().parents[1] / "src" / "enact" / "static" / "app.css").read_text(encoding="utf-8")
+    assert "[hidden]" in css
+    assert "display: none" in css
