@@ -36,7 +36,11 @@
         "title": { "type": "string" },
         "description": { "type": "string" },
         "evidence": { "type": "string", "description": "Path to supporting evidence for the report." },
-        "evidence_needed": { "type": "string", "description": "What a person must still provide for manual or hybrid checks." }
+        "evidence_needed": { "type": "string", "description": "What a person must still provide for manual or hybrid checks." },
+        "review_status": {
+          "enum": ["draft", "reviewed"],
+          "description": "draft means the Rego stub is untrusted. Generation never writes reviewed."
+        }
       }
     }
   }

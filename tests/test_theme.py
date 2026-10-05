@@ -161,6 +161,8 @@ def test_stylesheet_contains_both_theme_sets_and_color_scheme() -> None:
     assert parsed["dark"]["bg"] == DARK_COLORS["bg"]
     assert parsed["light"]["pass"] == LIGHT_COLORS["pass"]
     assert parsed["dark"]["fail"] == DARK_COLORS["fail"]
+    assert parsed["light"]["draft"] == LIGHT_COLORS["draft"]
+    assert parsed["dark"]["draft"] == DARK_COLORS["draft"]
 
 
 def test_report_is_self_contained_with_toggle_and_both_token_sets() -> None:

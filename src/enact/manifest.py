@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from enact.models import CheckSpec, CheckType, Manifest
+from enact.models import CheckSpec, CheckType, Manifest, ReviewStatus
 from enact.oscal_io import OscalBundle
 
 CHECK_TYPES = {"automated", "manual", "hybrid"}
@@ -84,6 +84,10 @@ def _parse_check(item: Any, index: int) -> CheckSpec:
     params = item.get("params") or []
     if not isinstance(params, list) or any(not isinstance(p, str) for p in params):
         raise ValueError(f"checks[{index}].params must be an array of strings")
+    raw_review = item.get("review_status")
+    if raw_review not in (None, "", "draft", "reviewed"):
+        raise ValueError(f"checks[{index}].review_status must be draft or reviewed")
+    review_status: ReviewStatus | None = raw_review if raw_review in {"draft", "reviewed"} else None
     return CheckSpec(
         rule_id=rule_id,
         control_id=control_id,
@@ -98,6 +102,7 @@ def _parse_check(item: Any, index: int) -> CheckSpec:
         description=item.get("description"),
         evidence=item.get("evidence"),
         evidence_needed=item.get("evidence_needed"),
+        review_status=review_status,
     )
 
 
@@ -127,6 +132,7 @@ def dump_manifest(manifest: Manifest) -> dict[str, Any]:
                 **({"description": check.description} if check.description else {}),
                 **({"evidence": check.evidence} if check.evidence else {}),
                 **({"evidence_needed": check.evidence_needed} if check.evidence_needed else {}),
+                **({"review_status": check.review_status} if check.review_status else {}),
             }
             for check in manifest.checks
         ],

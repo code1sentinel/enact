@@ -8,7 +8,8 @@ from pathlib import Path
 from typing import Any, Literal
 
 CheckType = Literal["automated", "manual", "hybrid"]
-OutcomeStatus = Literal["pass", "fail", "not_automated", "needs_evidence", "error"]
+OutcomeStatus = Literal["pass", "fail", "not_automated", "needs_evidence", "error", "draft"]
+ReviewStatus = Literal["draft", "reviewed"]
 
 ENGINE_STUBS = ("inspec", "checkov", "cloud-config")
 
@@ -30,6 +31,7 @@ class CheckSpec:
     description: str | None = None
     evidence: str | None = None
     evidence_needed: str | None = None
+    review_status: ReviewStatus | None = None
 
     def display_title(self) -> str:
         return self.title or self.rule_id
@@ -90,6 +92,7 @@ class AssessmentRun:
             "not_automated": 0,
             "needs_evidence": 0,
             "error": 0,
+            "draft": 0,
         }
         for outcome in self.outcomes:
             tallies[outcome.status] += 1

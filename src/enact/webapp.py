@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from enact.drafts import drafts_as_dicts, generate_drafts, unmatched_controls
 from enact.library import (
     check_as_dict,
     example_catalog_path,
@@ -64,10 +65,14 @@ def inspect_catalog(document: dict[str, Any]) -> dict[str, Any]:
                 "props": record.props,
             }
         )
+    missing = unmatched_controls(bundle, list_checks())
     return {
         "kind": kind,
         "title": bundle.title() or "Untitled catalog",
         "controls": controls,
+        "unmatched": [
+            {"id": record.control_id, "title": record.title, "statement": record.statement} for record in missing
+        ],
     }
 
 
@@ -128,6 +133,11 @@ def run_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
             text = policies.get(check.rule_id) or check.policy
             (work / "policies" / f"{check.rule_id}.rego").write_text(text, encoding="utf-8")
 
+        drafts_dir = None
+        if payload.get("include_drafts") or payload.get("drafts"):
+            drafts_dir = work / "drafts"
+            generate_drafts(load_bundle([catalog_path]), drafts_dir, library=list_checks(), manifest=manifest)
+
         run, bundle = run_assessment(
             [catalog_path],
             manifest_path=manifest_path,
@@ -135,6 +145,7 @@ def run_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
             workdir=work,
             title=str(payload.get("title") or "Guided Enact run"),
             param_overrides=overrides,
+            drafts_dir=drafts_dir,
         )
         html = HtmlWriter().render(run, bundle)
         markdown = MarkdownWriter().render(run, bundle)
@@ -150,6 +161,7 @@ def run_from_payload(payload: dict[str, Any]) -> dict[str, Any]:
         "manifest": dump_manifest(run.manifest),
         "counts": counts,
         "cli": cli_for_run(),
+        "drafts": [spec.rule_id for spec in run.manifest.checks if spec.review_status == "draft"],
     }
 
 
@@ -168,6 +180,28 @@ def cli_for_catalog(*, example: bool) -> dict[str, Any]:
         flags = [{"flag": "--oscal", "text": "Your uploaded catalog, profile, or component-definition."}]
         summary = "You uploaded an OSCAL file from your computer. It stayed on this machine."
     return {"command": command, "flags": flags, "summary": summary}
+
+
+def generate_drafts_from_catalog(catalog: dict[str, Any]) -> dict[str, Any]:
+    inspect_catalog(catalog)
+    with tempfile.TemporaryDirectory(prefix="enact-drafts-") as tmp:
+        catalog_path = Path(tmp) / "catalog.json"
+        catalog_path.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
+        bundle = load_bundle([catalog_path])
+        dest = Path(tmp) / "drafts"
+        created = generate_drafts(bundle, dest, library=list_checks())
+        return {
+            "drafts": drafts_as_dicts(created),
+            "count": len(created),
+            "cli": {
+                "command": "enact checks draft --oscal catalog.json --out drafts",
+                "summary": "Draft stubs stay draft until you run enact checks review.",
+                "flags": [
+                    {"flag": "--oscal", "text": "The catalog whose unmatched controls get a stub."},
+                    {"flag": "--out", "text": "Folder for drafts/<id>/check.json and policy.rego."},
+                ],
+            },
+        }
 
 
 def cli_for_checks(rule_ids: list[str]) -> dict[str, Any]:
@@ -321,6 +355,11 @@ class UiHandler(BaseHTTPRequestHandler):
                     self,
                     {"suggestions": suggestions, "cli": cli_for_checks([check.rule_id for check in list_checks()])},
                 )
+            if path == "/api/drafts":
+                catalog = payload.get("catalog")
+                if not isinstance(catalog, dict):
+                    raise UiError("Load a catalog first so we can draft unmatched controls.")
+                return _json_response(self, generate_drafts_from_catalog(catalog))
             if path == "/api/run":
                 return _json_response(self, run_from_payload(payload))
             if path == "/api/project":

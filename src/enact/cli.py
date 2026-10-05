@@ -10,9 +10,10 @@ from typing import Optional
 import typer
 
 from enact import __version__
+from enact.drafts import DraftError, generate_drafts, list_drafts, review_draft
 from enact.engines import EngineRegistry
 from enact.library import get_check, list_checks
-from enact.manifest import derive_manifest, dump_manifest
+from enact.manifest import derive_manifest, dump_manifest, load_manifest
 from enact.oscal_io import load_bundle
 from enact.project import default_control_id, write_project
 from enact.runner import run_assessment
@@ -42,6 +43,11 @@ def run(
     format: str = typer.Option("oscal,poam,markdown,html", "--format", "-f", help="Comma-separated writers."),
     title: Optional[str] = typer.Option(None, "--title", help="Title for the assessment results."),
     workdir: Optional[Path] = typer.Option(None, "--workdir", help="Root for policy and evidence paths. Defaults to the manifest directory."),
+    drafts: Optional[Path] = typer.Option(
+        None,
+        "--drafts",
+        help="Directory of unreviewed draft checks to include. Draft results never count as passed.",
+    ),
     validate: bool = typer.Option(True, "--validate/--no-validate", help="Validate OSCAL output against NIST 1.1.2 schemas."),
     serve: bool = typer.Option(False, "--serve", help="Serve the HTML summary after the run."),
     port: int = typer.Option(43173, "--port", help="Port for --serve."),
@@ -62,6 +68,7 @@ def run(
             input_path=input_path,
             workdir=workdir.resolve() if workdir else None,
             title=title,
+            drafts_dir=drafts.resolve() if drafts else None,
         )
     except ValueError as exc:
         typer.secho(str(exc), fg=typer.colors.RED, err=True)
@@ -86,7 +93,8 @@ def run(
     counts = assessment.counts()
     typer.echo(
         f"{len(assessment.outcomes)} checks: {counts['pass']} passed, {counts['fail']} failed, "
-        f"{counts['needs_evidence'] + counts['not_automated']} need evidence, {counts['error']} errors."
+        f"{counts['needs_evidence'] + counts['not_automated']} need evidence, "
+        f"{counts['draft']} draft, {counts['error']} errors."
     )
     for path in written:
         typer.echo(f"wrote {path}")
@@ -165,10 +173,90 @@ def serve(
 
 
 @checks_app.command("list")
-def checks_list() -> None:
-    """List bundled library checks."""
-    for check in list_checks():
-        typer.echo(f"{check.rule_id}\t{check.check_type}\t{check.title}")
+def checks_list(
+    status: Optional[str] = typer.Option(
+        None,
+        "--status",
+        help="library (default), draft, or reviewed.",
+    ),
+    drafts: Path = typer.Option(Path("drafts"), "--drafts", help="Project drafts directory."),
+    library: Path = typer.Option(Path("library"), "--library", help="Project library for reviewed drafts."),
+) -> None:
+    """List bundled library checks, or project drafts / reviewed drafts."""
+    wanted = (status or "library").strip().lower()
+    if wanted in {"", "library"}:
+        for check in list_checks():
+            typer.echo(f"{check.rule_id}\t{check.check_type}\t{check.title}")
+        return
+    if wanted == "draft":
+        items = list_drafts(drafts.resolve(), status="draft")
+        if not items:
+            typer.echo("no draft checks")
+            return
+        for item in items:
+            typer.echo(f"{item.rule_id}\tdraft\t{item.title}")
+        return
+    if wanted == "reviewed":
+        items = list_drafts(library.resolve(), status="reviewed")
+        if not items:
+            typer.echo("no reviewed drafts")
+            return
+        for item in items:
+            typer.echo(f"{item.rule_id}\treviewed\t{item.title}")
+        return
+    raise typer.BadParameter("status must be library, draft, or reviewed")
+
+
+@checks_app.command("draft")
+def checks_draft(
+    oscal: list[Path] = typer.Option(..., "--oscal", "-o", help="OSCAL catalog, profile, and/or component-definition."),
+    output: Path = typer.Option(Path("drafts"), "--out", help="Directory for generated draft checks."),
+    manifest: Optional[Path] = typer.Option(None, "--manifest", "-m", help="Existing manifest; those controls are skipped."),
+) -> None:
+    """Generate draft Rego stubs for catalog controls that have no library check."""
+    bundle = load_bundle(_paths(oscal))
+    loaded = None
+    if manifest:
+        manifest_path = manifest.resolve()
+        if not manifest_path.is_file():
+            raise typer.BadParameter(f"manifest not found: {manifest_path}")
+        loaded = load_manifest(manifest_path)
+    try:
+        created = generate_drafts(bundle, output.resolve(), library=list_checks(), manifest=loaded)
+    except DraftError as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from exc
+    if not created:
+        typer.echo("no unmatched controls; nothing to draft")
+        return
+    typer.echo(f"wrote {len(created)} draft check(s) under {output}")
+    for item in created:
+        typer.echo(f"{item.rule_id}\tdraft\t{item.title}")
+
+
+@checks_app.command("review")
+def checks_review(
+    rule_id: str = typer.Argument(..., help="Draft rule id, for example draft-c-cm-2."),
+    reviewer: Optional[str] = typer.Option(None, "--reviewer", help="Name of the person accepting the draft."),
+    note: Optional[str] = typer.Option(None, "--note", help="Optional review note."),
+    drafts: Path = typer.Option(Path("drafts"), "--drafts", help="Directory that holds draft checks."),
+    library: Path = typer.Option(Path("library"), "--library", help="Trusted project library to promote into."),
+) -> None:
+    """Promote a draft into the project library after a human edits or accepts it."""
+    try:
+        promoted = review_draft(
+            rule_id,
+            drafts_dir=drafts.resolve(),
+            library_dir=library.resolve(),
+            reviewer=reviewer or "",
+            note=note,
+        )
+    except DraftError as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from exc
+    typer.echo(f"reviewed {promoted.rule_id} by {promoted.reviewer}")
+    if promoted.directory:
+        typer.echo(f"wrote {promoted.directory}")
 
 
 @checks_app.command("show")

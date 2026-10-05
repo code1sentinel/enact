@@ -23,6 +23,8 @@ def test_passing_report_has_count_cards_and_filters(
     assert 'aria-valuenow="100"' in html
     assert 'id="q"' in html
     assert 'data-filter="fail"' in html
+    assert 'data-filter="draft"' in html
+    assert "Draft" in html
     assert "getElementById" in html
     assert "https://" not in html
     assert "http://" not in html

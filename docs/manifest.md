@@ -40,6 +40,7 @@ component-definition `set-parameters`.
 | `ksi_id` | no | FedRAMP 20x Key Security Indicator id. Stored on observations; unused in v1 writers. |
 | `evidence` | no | Path to supporting evidence linked from the report. |
 | `evidence_needed` | manual/hybrid | What a person must still provide. |
+| `review_status` | draft checks | `draft` until `enact checks review`. Draft results never count as passed. |
 
 The JSON Schema is [`schemas/check-manifest.schema.json`](../schemas/check-manifest.schema.json).
 
@@ -75,6 +76,10 @@ Rego policy compares against. Change the catalog (or a profile
 
 Manual and hybrid controls are recorded as observations. They do not create
 POA&M items unless the automated half of a hybrid check failed.
+
+Unreviewed **draft** stubs (see [docs/prds/draft-checks.md](prds/draft-checks.md))
+are also observations: OSCAL props `result=draft` and `status=draft`, no finding,
+no POA&M item. Promote with `enact checks review <id> --reviewer NAME`.
 
 ## OSCAL props
 

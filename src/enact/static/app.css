@@ -66,6 +66,8 @@ h2 { margin: 0 0 .35rem; font-size: 1.1rem; }
 .pill.automated { background: var(--pass-bg); color: var(--pass); }
 .pill.manual { background: var(--wait-bg); color: var(--wait); }
 .pill.hybrid { background: var(--hybrid-bg); color: var(--hybrid); }
+.pill.draft { background: var(--draft-bg); color: var(--draft); }
+.unmatched { margin: 0 0 1rem; }
 .plain { margin: .4rem 0 0; padding-left: 1.1rem; }
 .plain li { margin: .25rem 0; }
 label.field { display: block; margin: .55rem 0; font-size: .9rem; color: var(--muted); }

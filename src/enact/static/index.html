@@ -66,7 +66,16 @@
 
     <section id="step-checks" class="step" hidden>
       <h1>Choose checks</h1>
-      <p class="lede">Each check is a plain-English question Enact can ask. We suggest a control from your catalog when we can. You can change the mapping and the parameter values. Advanced users may edit the Rego.</p>
+      <p class="lede">Each check is a plain-English question Enact can ask. We suggest a control from your catalog when we can. You can change the mapping and the parameter values. Advanced users may edit the Rego. Unmatched catalog controls can get a <strong>draft</strong> stub — untrusted until you review it from the CLI.</p>
+      <div id="unmatched-box" class="card unmatched" hidden>
+        <h2>Unmatched controls</h2>
+        <p class="note" id="unmatched-copy">These catalog controls have no library check. Generate a draft Rego stub for each. Drafts never count as passed.</p>
+        <ul id="unmatched-list" class="plain"></ul>
+        <div class="actions">
+          <button type="button" class="btn btn--ghost" id="generate-drafts">Generate draft checks</button>
+        </div>
+        <p id="drafts-summary" class="note" hidden></p>
+      </div>
       <div id="checks-empty" class="empty" hidden>
         <h2>Load a catalog first</h2>
         <p>Go back to step 1 so we know which controls these checks should map to.</p>
