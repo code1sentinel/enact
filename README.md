@@ -8,7 +8,7 @@ Nothing leaves the machine. There are no third-party calls.
 
 **Live demo:** https://code1sentinel.github.io/enact/
 
-The demo is the bundled access-control example: CI runs Enact on a passing and a failing IAM config and publishes the HTML reports plus the raw OSCAL `assessment-results` and POA&M JSON. The hosted Pages site stays a static showcase — it does not run the guided app. On your machine, start with `enact ui`. See [docs/prds/ui-first.md](docs/prds/ui-first.md).
+The demo is the bundled access-control example: CI runs Enact on a passing and a failing IAM config and publishes the HTML reports plus the raw OSCAL `assessment-results` and POA&M JSON. The hosted Pages site stays a static showcase — it does not run the guided app. On your machine, start with `enact ui`. See [docs/prds/ui-first.md](docs/prds/ui-first.md). A [browser OPA spike](site/browser-spike/) (see [ADR 0013](docs/adr/0013-browser-only-guided-app.md)) evaluates a vendored lockout policy in WebAssembly in the tab; it is not a replacement for `enact ui` and does not accept catalog uploads.
 
 ## Install
 

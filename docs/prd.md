@@ -2,7 +2,7 @@
 
 - Status: shipped (v0.1 on `main`)
 - Date: 2026-10-04
-- Related ADRs: 0001–0008
+- Related ADRs: 0001–0013
 
 Enact turns OSCAL controls into runnable checks and writes the results back as OSCAL.
 
@@ -24,7 +24,7 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 
 - FedRAMP SDR / Accepted Vulnerabilities JSON (writer slot reserved; see ADR 0005).
 - InSpec, Checkov, or cloud-config engines (adapter stubs only).
-- Hosting a live check runner on GitHub Pages.
+- Hosting a live check runner that **accepts uploads** on GitHub Pages (a static client-side evaluator of vendored samples is [ADR 0013](adr/0013-browser-only-guided-app.md), not a secrets host).
 - A runtime dependency on trestle or C2P.
 
 ## Users and privacy
@@ -73,6 +73,7 @@ enact run \
 - User-facing `checks.json` / `--checks` (`--manifest` remains a deprecated alias): [docs/prds/checks-json.md](prds/checks-json.md), [ADR 0012](adr/0012-checks-json-user-facing-name.md).
 - Draft Rego checks for unmatched catalog controls: [docs/prds/draft-checks.md](prds/draft-checks.md), [ADR 0009](adr/0009-draft-rego-checks.md).
 - Evidence envelope (thin v1): [docs/prds/evidence-schema.md](prds/evidence-schema.md), [ADR 0010](adr/0010-evidence-envelope.md) (proposed). P1 adapters: [ADR 0011](adr/0011-adapter-pack-in-contrib.md).
+- Fully client-side guided app (browser OPA/WASM): [docs/prds/browser-ui.md](prds/browser-ui.md), [ADR 0013](adr/0013-browser-only-guided-app.md). Spike only in this round; `enact ui` stays.
 
 ## Acceptance (product-level)
 

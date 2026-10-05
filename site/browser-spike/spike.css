@@ -1,0 +1,82 @@
+.spike {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+.spike h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.6rem;
+  letter-spacing: -0.02em;
+}
+.spike .lede {
+  color: var(--muted);
+  margin: 0 0 1.1rem;
+}
+.spike .banner {
+  border: 1px solid var(--line);
+  background: var(--accent-soft);
+  color: var(--ink);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.95rem;
+  margin: 0 0 1.25rem;
+  font-size: 0.92rem;
+}
+.spike .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+}
+.spike button.btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+.spike label {
+  display: block;
+  font-weight: 650;
+  margin: 0 0 0.35rem;
+}
+.spike textarea {
+  width: 100%;
+  min-height: 11rem;
+  font: 0.82rem/1.45 var(--mono);
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.85rem;
+  margin: 0 0 1rem;
+}
+.spike .status {
+  margin: 0 0 0.85rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.spike .status[data-kind="ok"] { color: var(--pass); }
+.spike .status[data-kind="error"] { color: var(--fail); }
+.spike .verdict {
+  display: inline-flex;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin: 0 0 0.55rem;
+}
+.spike .verdict[data-kind="pass"] { background: var(--pass-bg); color: var(--pass); }
+.spike .verdict[data-kind="fail"] { background: var(--fail-bg); color: var(--fail); }
+.spike .verdict[data-kind="error"] { background: var(--wait-bg); color: var(--wait); }
+.spike pre {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.85rem 0.95rem;
+  overflow-x: auto;
+  font: 0.78rem/1.5 var(--mono);
+  white-space: pre-wrap;
+}
+.spike h2 {
+  margin: 1.6rem 0 0.45rem;
+  font-size: 1.1rem;
+}
