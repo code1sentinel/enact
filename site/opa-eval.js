@@ -1,5 +1,5 @@
 /**
- * Minimal OPA WASM ABI 1.2 loader for Enact's browser spike.
+ * Minimal OPA WASM ABI 1.2 loader for Enact.
  *
  * Evaluates a module produced by `opa build -t wasm` (OPA 1.8.x, Rego v1).
  * Implements the sprintf host builtin used by the library policies.
@@ -48,7 +48,7 @@
   }
 
   function loadPolicy(wasmBytes) {
-    var memory = new WebAssembly.Memory({ initial: 16 });
+    var memory = new WebAssembly.Memory({ initial: 32 });
     var exports = null;
     var builtinById = {};
 

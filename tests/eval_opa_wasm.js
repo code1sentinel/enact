@@ -3,8 +3,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const spike = path.join(__dirname, "..", "site", "browser-spike");
-const { loadPolicy, interpretResult } = require(path.join(spike, "opa-eval.js"));
+const { loadPolicy, interpretResult } = require(path.join(__dirname, "..", "site", "opa-eval.js"));
 
 async function main() {
   const wasmPath = process.argv[2];

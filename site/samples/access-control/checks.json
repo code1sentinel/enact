@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "title": "Acme access-control checks",
+  "checks": [
+    {
+      "rule_id": "ac-account-review",
+      "control_id": "c-ac-2",
+      "check_type": "automated",
+      "engine": "opa",
+      "policy": "policies/account_review.rego",
+      "params": [
+        "c-ac-2_prm_1"
+      ],
+      "ksi_id": "KSI-IAM-AAM",
+      "payload_type": "enact.iam.account-policy",
+      "payload_versions": [
+        "1.0"
+      ],
+      "payload_requires": [
+        "account_review_days"
+      ],
+      "title": "Account review cadence",
+      "description": "Configured review interval must be at most the OSCAL parameter (days)."
+    },
+    {
+      "rule_id": "ac-login-lockout",
+      "control_id": "c-ac-7",
+      "check_type": "automated",
+      "engine": "opa",
+      "policy": "policies/login_lockout.rego",
+      "params": [
+        "c-ac-7_prm_1"
+      ],
+      "ksi_id": "KSI-IAM-AAM",
+      "payload_type": "enact.iam.account-policy",
+      "payload_versions": [
+        "1.0"
+      ],
+      "payload_requires": [
+        "lockout_threshold"
+      ],
+      "title": "Login lockout threshold"
+    },
+    {
+      "rule_id": "ac-access-agreements",
+      "control_id": "c-ac-8",
+      "check_type": "manual",
+      "evidence": "evidence/access-agreements.md",
+      "evidence_needed": "Signed access agreements for every user with a system account.",
+      "title": "Access agreements"
+    },
+    {
+      "rule_id": "ac-privileged-review",
+      "control_id": "c-ac-2p",
+      "check_type": "hybrid",
+      "engine": "opa",
+      "policy": "policies/privileged_review.rego",
+      "params": [
+        "c-ac-2p_prm_1"
+      ],
+      "ksi_id": "KSI-IAM-AAM",
+      "evidence": "evidence/privileged-review.md",
+      "evidence_needed": "Reviewer sign-off that the privileged-account listing was examined.",
+      "title": "Privileged account review"
+    }
+  ]
+}

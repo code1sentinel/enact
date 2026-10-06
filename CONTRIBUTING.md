@@ -28,7 +28,7 @@ Python 3.10+ and OPA 1.8.x on `PATH`. See the README install section.
 
 ## Privacy
 
-No new outbound calls in product code. Servers bind to `127.0.0.1`. The Pages site is static. See [ADR 0007](docs/adr/0007-local-only-privacy-model.md).
+No new outbound calls in product code. Servers bind to `127.0.0.1`. The GitHub Pages site is a static host for the in-tab app plus sample reports. It does not accept uploads. See [ADR 0007](docs/adr/0007-local-only-privacy-model.md) and [ADR 0014](docs/adr/0014-browser-app-is-primary.md).
 
 ## Source of truth
 

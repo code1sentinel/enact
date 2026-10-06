@@ -281,8 +281,9 @@ def report_csp() -> str:
 def pages_csp() -> str:
     return (
         "default-src 'none'; img-src 'self' data:; style-src 'self'; "
-        f"script-src 'self' '{theme_bootstrap_csp_hash()}'; connect-src 'none'; "
-        "font-src 'none'; base-uri 'none'; form-action 'none'"
+        f"script-src 'self' '{theme_bootstrap_csp_hash()}' 'wasm-unsafe-eval'; "
+        "connect-src 'self'; font-src 'none'; base-uri 'none'; form-action 'none'; "
+        "object-src 'none'"
     )
 
 

@@ -17,3 +17,4 @@ Numbered documents in this folder. Start from `docs/templates/adr-template.md`.
 | [0011](0011-adapter-pack-in-contrib.md) | Adapter pack in contrib/, not src/enact | accepted |
 | [0012](0012-checks-json-user-facing-name.md) | User-facing name is checks.json, not manifest | accepted |
 | [0013](0013-browser-only-guided-app.md) | Browser-only guided app (client-side OPA) | accepted |
+| [0014](0014-browser-app-is-primary.md) | Browser app is the primary Enact path | accepted |

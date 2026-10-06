@@ -1,6 +1,6 @@
 name: Pages
 
-# Builds the static demo from the bundled example and publishes it to GitHub Pages.
+# Builds the Enact Pages app (library WASM + sample reports) and publishes it.
 # One-time setup: Settings > Pages > Source: GitHub Actions.
 
 on:
