@@ -21,16 +21,11 @@ def test_landing_page_uses_relative_demo_links() -> None:
     html = INDEX.read_text(encoding="utf-8")
     for href in REQUIRED_HREFS:
         assert f'href="{href}"' in html
-    assert 'href="/enact/' not in html
+    assert 'href="/enact/"' not in html
     assert "OSCAL" in html
     assert "POA&amp;M" in html or "POA&M" in html
     assert "https://code1sentinel.github.io/policy-golden-path/" in html
     assert "enact ui" in html
-    assert 'src="guided-app.png"' in html
-    assert "This Pages site stays a static showcase" in html or "does not host the app" in html
-    assert (ROOT / "site" / "guided-app.png").is_file()
-    assert (ROOT / "site" / "theme.css").is_file()
-    assert (ROOT / "site" / "theme.js").is_file()
     assert "Appearance" in html
     assert 'data-theme-choice="system"' in html
     assert "fonts.googleapis" not in html
@@ -39,19 +34,19 @@ def test_landing_page_uses_relative_demo_links() -> None:
     assert "--manifest" not in html
     assert "manifest.json" not in html
     assert "Local-first compliance CLI" not in html
-    assert "Local-first guided assessment" in html
-    assert html.find("enact ui") < html.find("enact run")
-    assert "The guided app on your machine" in html
-    assert 'href="browser-spike/index.html"' in html
+    assert html.find("Catalog") < html.find("enact run")
+    assert (ROOT / "site" / "theme.css").is_file()
+    assert (ROOT / "site" / "theme.js").is_file()
     assert (ROOT / "site" / "browser-spike" / "index.html").is_file()
+    assert "spike" not in html.lower()
 
 
 def test_landing_explains_what_enact_is_and_how_to_use_it() -> None:
     """A newcomer can answer 'what is this?' and 'what do I click first?' from the landing."""
     html = INDEX.read_text(encoding="utf-8")
-    what = html.find("What is Enact?")
+    what = html.lower().find("what is enact")
     how = html.find("How to use it")
-    demo = html.find("Bundled example")
+    demo = html.find("Sample reports")
     assert what != -1
     assert how != -1
     assert demo != -1
@@ -61,9 +56,11 @@ def test_landing_explains_what_enact_is_and_how_to_use_it() -> None:
     assert "assessment results" in html
     assert "Codify writes the catalog" in html
     assert "Enact runs the checks" in html
-    assert "static demo" in html
-    assert "enact ui" in html
+    assert "static demo" not in html
+    assert "spike" not in html.lower()
     for step in ("Catalog", "Checks", "Evidence", "Run"):
         assert step in html
-    assert "project zip" in html.lower() or "Download as project" in html
-    assert "in progress" in html.lower() or "spike" in html.lower()
+    assert "Optional: CLI and CI" in html
+    assert "Custom checks? Use the Enact CLI" in html
+    assert 'id="use-example"' in html
+    assert 'id="run-btn"' in html

@@ -2,42 +2,23 @@
 
 **Turn OSCAL controls into local checks, and those checks back into OSCAL assessment results.**
 
-[Codify](https://github.com/code1sentinel/policy-golden-path) writes the catalog. Enact runs the checks. GRC reviewers start in a local browser; engineers use the same work in CI later. Nothing leaves the machine.
+[Codify](https://github.com/code1sentinel/policy-golden-path) writes the catalog. Enact runs the checks. Open it in your browser: Catalog → Checks → Evidence → Run. Nothing leaves the tab.
 
-**Live demo:** https://code1sentinel.github.io/enact/
+**Enact:** https://code1sentinel.github.io/enact/
 
-The hosted Pages site is a **static demo** — sample reports from the bundled example, not the guided app. On your machine: install once, then `enact ui` (Catalog → Checks → Evidence → Run), then download the report or a project zip for CI. A [browser-only path](site/browser-spike/) is in progress (vendored lockout sample in the tab; no uploads). See [docs/prds/ui-first.md](docs/prds/ui-first.md) and [ADR 0013](docs/adr/0013-browser-only-guided-app.md).
+Open the site, pick the bundled catalog (or your own catalog JSON and evidence JSON — FileReader, no upload), run the library checks, and download OSCAL assessment-results plus the HTML report. Custom checks? Use the Enact CLI. See [docs/prds/ui-first.md](docs/prds/ui-first.md) and [ADR 0014](docs/adr/0014-browser-app-is-primary.md).
 
-## Install
+## Quickstart
 
-Python 3.10+ and the [OPA](https://www.openpolicyagent.org/docs/latest/#running-opa) binary on `PATH`.
+1. Open https://code1sentinel.github.io/enact/
+2. **Catalog** — use the access-control example, or open an OSCAL catalog JSON from this machine.
+3. **Checks** — pick bundled library checks (MFA, lockout, reviews, logging, encryption) or open your `checks.json`.
+4. **Evidence** — open a local evidence JSON, or a passing/failing sample.
+5. **Run** — evaluate in the tab, then download `assessment-results.json` and the HTML report.
 
-```bash
-git clone https://github.com/code1sentinel/enact.git
-cd enact
-pip install -e ".[dev]"   # or: uv sync --extra dev
-```
+Nothing is uploaded. The engine is a vendored OPA WASM module built from the starter library. Sample reports from `examples/access-control/` stay on the site.
 
-Pin OPA 1.8.x (Rego v1). `ENACT_OPA` overrides the binary path.
-
-## Quickstart: `enact ui`
-
-After install, open the guided app:
-
-```bash
-enact ui
-```
-
-That opens a local page at `http://127.0.0.1:43174/`. It only listens on localhost. Nothing is sent off this machine.
-
-1. **Catalog** — upload an OSCAL catalog, profile, or component-definition (a Codify export works as-is), or pick the bundled access-control example.
-2. **Checks** — choose from the bundled library (MFA, lockout, password length, inactive accounts, access reviews, signed agreements, logging, encryption). Each check has a plain-English title. Map it to a control; Enact suggests matches. Edit parameter values such as the lockout threshold in a form. Manual and hybrid checks are labeled. Advanced users can open the Rego.
-3. **Evidence** — upload a config JSON. Download a sample template first if you are unsure of the shape.
-4. **Run** — see the same HTML report the CLI writes, and download `assessment-results.json`, `poam.json`, `summary.md`, and `checks.json`.
-
-Every step shows the equivalent CLI command in a collapsible **command panel**, with a copy button and a one-line note for each flag. After a run, **Download as project** gives you a zip with the catalog, `checks.json`, policies, sample input, and a GitHub Actions workflow that runs `enact run` — the same work, ready for a terminal or CI later.
-
-Appearance defaults to the operating system (`prefers-color-scheme`) on the landing page, the HTML report, and `enact ui`. A Light / Dark / System control is in each header; the choice stays in `localStorage` and never leaves the browser. Generated `summary.html` files are still a single offline document — open them from disk with no network.
+Appearance defaults to the operating system (`prefers-color-scheme`). A Light / Dark / System control is in the header; the choice stays in `localStorage` and never leaves the browser.
 
 ## What it does
 
@@ -60,9 +41,21 @@ checks.json or OSCAL props       ──┤            poam.json
 local config + Rego policies    ──┘
 ```
 
-## CLI and CI
+## Optional: CLI and CI
 
-Optional for day-to-day use. The guided app's **command panel** and **Download as project** zip emit these same commands. Use them in a terminal, a script, or GitHub Actions.
+Power users, custom Rego, draft checks, and pipelines install Python 3.10+ and the [OPA](https://www.openpolicyagent.org/docs/latest/#running-opa) 1.8.x binary on `PATH`. `ENACT_OPA` overrides the binary path. Custom checks? Use this path — there is no in-browser Rego compiler.
+
+```bash
+git clone https://github.com/code1sentinel/enact.git
+cd enact
+pip install -e ".[dev]"   # or: uv sync --extra dev
+
+enact ui
+```
+
+`enact ui` opens a local page at `http://127.0.0.1:43174/` (localhost only). It walks the same Catalog → Checks → Evidence → Run steps, with a command panel and **Download as project** zip for CI later.
+
+The same runner for scripts and GitHub Actions:
 
 The bundled example is four access-control statements in the Codify catalog shape: account review cadence, login lockout, signed access agreements (manual), and privileged-account review (hybrid). Thresholds live in OSCAL params. The Rego policies read `input.oscal_params` and, for migrated IAM checks, `input.payload`.
 

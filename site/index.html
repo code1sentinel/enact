@@ -4,21 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Enact — OSCAL controls to runnable checks</title>
-  <meta name="description" content="Enact turns OSCAL controls into local checks and back into OSCAL assessment results. Codify writes the catalog; Enact runs the checks. Start with enact ui on your machine.">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-EsFVG4LqCF4Icn/J3ZeeTKA3tLbNxDeUgzCMl8eWYDk='; connect-src 'none'; font-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="description" content="Enact turns OSCAL controls into local checks and back into OSCAL assessment results. Open it in this tab: Catalog → Checks → Evidence → Run. Nothing leaves your browser.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self'; script-src 'self' 'sha256-EsFVG4LqCF4Icn/J3ZeeTKA3tLbNxDeUgzCMl8eWYDk=' 'wasm-unsafe-eval'; connect-src 'self'; font-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <script>(function(){var k="enact-theme",m="system";try{var s=localStorage.getItem(k);if(s==="light"||s==="dark"||s==="system")m=s;}catch(e){}var d=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches;var t=m==="dark"||(m!=="light"&&d)?"dark":"light";var r=document.documentElement;r.setAttribute("data-theme",t);r.setAttribute("data-theme-mode",m);r.style.colorScheme=t;})();</script>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f766e'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='16' fill='%23ffffff' font-family='ui-sans-serif, system-ui, sans-serif'%3EE%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="theme.css">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="app.css">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <header class="top">
     <div class="wrap top__row">
-      <p class="brand">Enact</p>
-      <nav class="top__links" aria-label="Project">
-        <a href="https://github.com/code1sentinel/enact">GitHub</a>
-        <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
+      <div>
+        <p class="brand">Enact</p>
+        <p class="tag">OSCAL controls become local checks, then assessment results.</p>
+      </div>
+      <div class="top__meta">
+        <nav class="top__links" aria-label="Project">
+          <a href="#sample-reports">Sample reports</a>
+          <a href="https://github.com/code1sentinel/enact">GitHub</a>
+          <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
+        </nav>
+        <p class="privacy">Nothing leaves this browser. Files stay in this tab.</p>
         <div class="theme-toggle">
           <p class="theme-toggle__label" id="theme-toggle-label">Appearance</p>
           <div class="theme-toggle__group" role="radiogroup" aria-labelledby="theme-toggle-label">
@@ -27,106 +35,154 @@
             <button type="button" role="radio" aria-checked="true" data-theme-choice="system">System</button>
           </div>
         </div>
-      </nav>
+      </div>
     </div>
+    <nav class="stepper wrap" aria-label="Steps">
+      <button type="button" data-go="catalog" aria-current="step">1 Catalog</button>
+      <button type="button" data-go="checks">2 Checks</button>
+      <button type="button" data-go="evidence">3 Evidence</button>
+      <button type="button" data-go="run">4 Run</button>
+    </nav>
   </header>
 
-  <main id="main">
-    <section class="hero wrap">
-      <div class="hero__copy">
-        <p class="kicker">Local-first guided assessment</p>
-        <h1>OSCAL controls become runnable checks, then assessment results.</h1>
-        <p class="lede">
-          <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
-          writes the catalog; Enact runs the checks. Nothing leaves the machine.
-        </p>
-        <div class="hero__actions">
-          <a class="btn" href="#how-to-use">How to use it</a>
-          <a class="btn btn--ghost" href="examples/pass/summary.html">View a passing report</a>
+  <main id="main" class="wrap">
+    <p class="lede" id="what-enact">
+      <strong>What is Enact?</strong>
+      <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
+      writes the catalog; Enact runs the checks. Walk
+      <b>Catalog</b> → <b>Checks</b> → <b>Evidence</b> → <b>Run</b> in this tab,
+      then download OSCAL assessment results. Nothing leaves your browser.
+    </p>
+    <p id="engine-status" class="note" role="status">Loading…</p>
+    <p id="banner" class="banner" hidden role="alert"></p>
+
+    <section id="step-catalog" class="step">
+      <h1>Start with a catalog</h1>
+      <p class="lede">A catalog is the list of controls you want to assess. Use the bundled example, or open an OSCAL catalog JSON from this machine. Bytes stay in this tab — there is no upload.</p>
+      <div class="file-well">
+        <p>Drag is not required. Choose a local file, or start from the example.</p>
+        <p class="filename" id="catalog-file-name">No file yet</p>
+        <div class="actions" style="justify-content:center;margin:0">
+          <button type="button" class="btn" id="use-example">Use the access-control example</button>
+          <label class="btn btn--ghost">
+            Open catalog JSON
+            <input id="catalog-file" type="file" accept="application/json,.json" hidden>
+          </label>
         </div>
       </div>
-      <figure class="terminal" aria-label="Example enact ui">
-        <figcaption class="terminal__bar">
-          <span class="dot" aria-hidden="true"></span>
-          <span class="dot" aria-hidden="true"></span>
-          <span class="dot" aria-hidden="true"></span>
-          <span class="terminal__title">enact ui</span>
-        </figcaption>
-        <pre><code><span class="cmt"># After install — localhost only</span>
-<span class="cmd">$</span> enact ui
-
-<span class="ok">Enact UI (localhost only) at http://127.0.0.1:43174/</span>
-Catalog → Checks → Evidence → Run
-Command panel shows the equivalent CLI for CI later</code></pre>
-      </figure>
+      <div id="catalog-empty" class="empty">
+        <h2>No catalog yet</h2>
+        <p>You do not need to write JSON by hand. Codify can turn a policy into a catalog, or use the example to see the rest of the walk-through.</p>
+      </div>
+      <div id="catalog-summary" class="card" hidden>
+        <h2 id="catalog-title"></h2>
+        <p id="catalog-meta" class="note"></p>
+        <ul id="catalog-controls" class="plain"></ul>
+        <div class="actions">
+          <button type="button" class="btn" data-go="checks">Continue to checks</button>
+        </div>
+      </div>
     </section>
 
-    <section class="wrap explainer" aria-labelledby="what-title">
-      <h2 id="what-title">What is Enact?</h2>
-      <p class="note">
-        Enact turns OSCAL controls into local checks and writes the results back as
-        OSCAL assessment results.
-        <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
-        writes the catalog; Enact runs the checks. Nothing leaves the machine.
-      </p>
-      <h2 id="how-to-use">How to use it</h2>
+    <section id="step-checks" class="step" hidden>
+      <h1>Choose checks</h1>
+      <p class="lede">Each check is a plain-English question Enact can ask of your catalog. Pick from the bundled library, or open a <code>checks.json</code> you already have.</p>
+      <p class="hint-cli">Custom checks? Use the Enact CLI.</p>
+      <div class="actions">
+        <label class="btn btn--ghost">
+          Open checks.json
+          <input id="checks-file" type="file" accept="application/json,.json" hidden>
+        </label>
+      </div>
+      <div id="checks-empty" class="empty" hidden>
+        <h2>Load a catalog first</h2>
+        <p>Go back to step 1 so we know which controls these checks should map to.</p>
+      </div>
+      <div id="check-list" class="stack"></div>
+      <div class="actions">
+        <button type="button" class="btn" data-go="evidence">Continue to evidence</button>
+      </div>
+    </section>
+
+    <section id="step-evidence" class="step" hidden>
+      <h1>Add evidence</h1>
+      <p class="lede">Automated checks read a JSON file that describes how the system is configured. Open one from this machine, or use a bundled sample. FileReader only — nothing is uploaded.</p>
+      <div class="file-well">
+        <p class="filename" id="evidence-file-name">No file yet</p>
+        <div class="actions" style="justify-content:center;margin:0">
+          <button type="button" class="btn btn--ghost" id="use-passing">Use passing sample</button>
+          <button type="button" class="btn btn--ghost" id="use-failing">Use failing sample</button>
+          <label class="btn">
+            Open evidence JSON
+            <input id="evidence-file" type="file" accept="application/json,.json" hidden>
+          </label>
+        </div>
+      </div>
+      <pre id="evidence-preview" class="code" hidden></pre>
+      <div id="evidence-empty" class="empty">
+        <h2>No config file yet</h2>
+        <p>If you are exploring, use a sample. For a real assessment, open the JSON you exported from IAM, logging, or an adapter.</p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn" data-go="run">Continue to run</button>
+      </div>
+    </section>
+
+    <section id="step-run" class="step" hidden>
+      <h1>Run the assessment</h1>
+      <p class="lede">Enact evaluates the bundled library in this tab and writes the same OSCAL assessment-results shape as the CLI.</p>
+      <div class="actions">
+        <button type="button" class="btn" id="run-btn">Run Enact</button>
+        <button type="button" class="btn btn--ghost" id="download-oscal">Download assessment-results.json</button>
+        <button type="button" class="btn btn--ghost" id="download-html">Download HTML report</button>
+        <button type="button" class="btn btn--ghost" id="download-poam">Download poam.json</button>
+      </div>
+      <div id="run-empty" class="empty">
+        <h2>Nothing has been run yet</h2>
+        <p>When you click Run, results appear here. You can then download OSCAL JSON and the HTML report.</p>
+      </div>
+      <div id="run-results" hidden>
+        <div class="cards" aria-label="Result counts">
+          <article class="card"><div class="label">Passed</div><p class="count" id="count-pass">0</p></article>
+          <article class="card"><div class="label">Failed</div><p class="count" id="count-fail">0</p></article>
+          <article class="card"><div class="label">Manual / Not checked</div><p class="count" id="count-manual">0</p></article>
+          <article class="card"><div class="label">Draft</div><p class="count" id="count-draft">0</p></article>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Control ID</th>
+                <th>Rule ID</th>
+                <th>Status</th>
+                <th>Why</th>
+              </tr>
+            </thead>
+            <tbody id="result-rows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="more" id="how-to-use" aria-labelledby="how-title">
+      <h2 id="how-title">How to use it</h2>
       <ol class="path">
-        <li><b>Install</b> Enact on your machine (Python 3.10+ and OPA 1.8.x).</li>
-        <li>Run <code>enact ui</code> — a guided app on localhost only.</li>
-        <li>Walk <b>Catalog</b> → <b>Checks</b> → <b>Evidence</b> → <b>Run</b>.</li>
-        <li>Download the report, or a <b>project zip</b> for CI later.</li>
+        <li><b>Catalog</b> — use the example or open an OSCAL catalog JSON in this tab.</li>
+        <li><b>Checks</b> — pick bundled library checks (or open your <code>checks.json</code>).</li>
+        <li><b>Evidence</b> — open a local evidence JSON, or a passing/failing sample.</li>
+        <li><b>Run</b> — evaluate here, then download <code>assessment-results.json</code> and the HTML report.</li>
       </ol>
       <p class="note">
-        This hosted Pages site is a <strong>static demo</strong>. The guided app runs on
-        your machine; this site does not host the app. A browser-only path (no install)
-        is in progress — try the
-        <a href="browser-spike/index.html">OPA spike</a> (vendored sample only; no uploads).
+        <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a> writes the catalog;
+        Enact runs the checks. Custom checks? Use the Enact CLI.
       </p>
     </section>
 
-    <section class="wrap guided" aria-labelledby="guided-title">
-      <h2 id="guided-title">The guided app on your machine</h2>
+    <section class="more" id="sample-reports" aria-labelledby="demo-title">
+      <h2 id="demo-title">Sample reports</h2>
       <p class="note">
-        After you install, <code>enact ui</code> opens Catalog, Checks, Evidence, and Run
-        in a local browser, with the same HTML report the CLI writes. It binds to
-        localhost only. This Pages site stays a static showcase; it does not host the app.
-      </p>
-      <figure class="guided__shot">
-        <img src="guided-app.png" alt="The Enact guided app: catalog step, four-step stepper, and the command panel showing the equivalent CLI.">
-        <figcaption>
-          After you install Enact locally, <code>enact ui</code> walks through a catalog,
-          the check library, evidence JSON, and a run. The command panel shows the CLI
-          for each step so you can move to a terminal or GitHub Actions later.
-        </figcaption>
-      </figure>
-    </section>
-
-    <section class="wrap steps" aria-labelledby="how-title">
-      <h2 id="how-title" class="visually-hidden">How Enact works</h2>
-      <ol class="strip">
-        <li>
-          <span class="num">01</span>
-          <b>OSCAL controls</b>
-          <p>Catalog, profile, or component-definition. Parameters stay in OSCAL.</p>
-        </li>
-        <li>
-          <span class="num">02</span>
-          <b>OPA checks</b>
-          <p><code>checks.json</code> maps each <code>rule_id</code> to a <code>control_id</code>, engine, and automated, manual, or hybrid type.</p>
-        </li>
-        <li>
-          <span class="num">03</span>
-          <b>OSCAL results / POA&amp;M</b>
-          <p>Assessment-results JSON, POA&amp;M items for automated failures, plus HTML and Markdown reports.</p>
-        </li>
-      </ol>
-    </section>
-
-    <section class="wrap demo" aria-labelledby="demo-title">
-      <h2 id="demo-title">Bundled example, generated by Enact</h2>
-      <p class="note">
-        GitHub Actions runs <code>enact run</code> on <code>examples/access-control/</code>.
-        The HTML reports and raw OSCAL JSON below are not hand-written.
+        GitHub Actions also runs <code>enact run</code> on <code>examples/access-control/</code>.
+        These HTML reports and raw OSCAL JSON are generated, not hand-written.
       </p>
       <div class="runs">
         <article class="card">
@@ -158,15 +214,15 @@ Command panel shows the equivalent CLI for CI later</code></pre>
       </div>
     </section>
 
-    <section class="wrap install" aria-labelledby="install-title">
-      <h2 id="install-title">Install, then enact ui</h2>
-      <p class="note">Python 3.10+ and the <a href="https://www.openpolicyagent.org/docs/latest/#running-opa">OPA</a> 1.8.x binary on <code>PATH</code>. <code>ENACT_OPA</code> overrides the binary path.</p>
+    <section class="more install" id="optional-cli" aria-labelledby="install-title">
+      <h2 id="install-title">Optional: CLI and CI</h2>
+      <p class="note">Power users and pipelines can install Python 3.10+ and <a href="https://www.openpolicyagent.org/docs/latest/#running-opa">OPA</a> 1.8.x, then use <code>enact ui</code> on localhost or <code>enact run</code> in CI. Custom / draft Rego stays on this path.</p>
 <pre><code>git clone https://github.com/code1sentinel/enact.git
 cd enact
 pip install -e ".[dev]"   # or: uv sync --extra dev
 
 enact ui</code></pre>
-      <p class="note">That is the default path. For CI and scripts, the same runner is <code>enact run</code> (the command panel and Download as project zip emit it):</p>
+      <p class="note">The same runner for scripts and GitHub Actions:</p>
 <pre><code>enact run \
   --oscal examples/access-control/catalog.json \
   --checks examples/access-control/checks.json \
@@ -189,5 +245,9 @@ enact ui</code></pre>
     </div>
   </footer>
   <script src="theme.js"></script>
+  <script src="opa-eval.js"></script>
+  <script src="enact.js"></script>
+  <script src="library.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

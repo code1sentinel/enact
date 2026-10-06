@@ -22,7 +22,10 @@ from enact.validate import SchemaValidationError, validate_assessment_results, v
 from enact.webapp import serve as serve_ui
 from enact.writers import WriterError, WriterRegistry
 
-UI_HELP_HINT = "Prefer a browser? Run: enact ui"
+UI_HELP_HINT = (
+    "Open Enact in your browser: https://code1sentinel.github.io/enact/ — nothing leaves the tab. "
+    "Optional: enact ui (localhost) or enact run (CI)."
+)
 
 app = typer.Typer(
     help="Turn OSCAL controls into runnable checks and OSCAL assessment results.",

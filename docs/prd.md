@@ -2,7 +2,7 @@
 
 - Status: shipped (v0.1 on `main`)
 - Date: 2026-10-04
-- Related ADRs: 0001–0013
+- Related ADRs: 0001–0014
 
 Enact turns OSCAL controls into runnable checks and writes the results back as OSCAL.
 
@@ -17,19 +17,19 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 - Run OPA/Rego (Rego v1, `input.oscal_params`) against a local JSON config.
 - Treat manual and hybrid checks as **not automated** / **needs evidence**, not as failures.
 - Write NIST OSCAL 1.1.2 `assessment-results` and POA&M, plus Markdown and HTML summaries.
-- Stay on the machine: no third-party calls. Hosted Pages is a static demo of the bundled example.
-- Default onboarding is `enact ui`; CLI/`enact run` is the power-user and CI path ([docs/prds/ui-first.md](prds/ui-first.md)).
+- Stay on the machine: no third-party calls. Hosted Pages serves the in-tab app; catalogs and evidence never leave the browser.
+- Default onboarding is the Pages app; CLI/`enact ui`/`enact run` are optional power-user and CI paths ([docs/prds/ui-first.md](prds/ui-first.md)).
 
 ## Non-goals
 
 - FedRAMP SDR / Accepted Vulnerabilities JSON (writer slot reserved; see ADR 0005).
 - InSpec, Checkov, or cloud-config engines (adapter stubs only).
-- Hosting a live check runner that **accepts uploads** on GitHub Pages (a static client-side evaluator of vendored samples is [ADR 0013](adr/0013-browser-only-guided-app.md), not a secrets host).
+- Hosting a live check runner that **accepts uploads** on GitHub Pages (the in-tab evaluator is [ADR 0014](adr/0014-browser-app-is-primary.md), not a secrets host).
 - A runtime dependency on trestle or C2P.
 
 ## Users and privacy
 
-**GRC reviewers** start with `enact ui` on localhost (Catalog → Checks → Evidence → Run). Hosted Pages is a static demo; the guided app is local. **Engineers in CI** run the same work later with `enact run`. Inputs are local files. Reports are local files. The [live demo](https://code1sentinel.github.io/enact/) is generated in Actions from `examples/access-control/` and contains no customer data. Product stance: [docs/prds/ui-first.md](prds/ui-first.md).
+**GRC reviewers** start at https://code1sentinel.github.io/enact/ (Catalog → Checks → Evidence → Run in the tab). **Engineers in CI** run the same work later with `enact run`. Optional localhost: `enact ui`. Inputs are local files. Reports are local files. Product stance: [docs/prds/ui-first.md](prds/ui-first.md).
 
 ## Shape
 
@@ -41,13 +41,9 @@ checks.json or OSCAL props       ──┤            poam.json
 local config + Rego policies    ──┘
 ```
 
-Default path:
+Default path: open https://code1sentinel.github.io/enact/
 
-```bash
-enact ui
-```
-
-CI / power-user path:
+Optional CI / power-user path:
 
 ```bash
 enact run \
@@ -68,16 +64,11 @@ enact run \
 
 ## In flight
 
-- UI-first onboarding (README, `--help`, Pages copy): [docs/prds/ui-first.md](prds/ui-first.md).
-- Dark mode (Light / Dark / System) on the Pages landing, HTML report, and `enact ui`: [docs/prds/dark-mode.md](prds/dark-mode.md).
-- User-facing `checks.json` / `--checks` (`--manifest` remains a deprecated alias): [docs/prds/checks-json.md](prds/checks-json.md), [ADR 0012](adr/0012-checks-json-user-facing-name.md).
-- Draft Rego checks for unmatched catalog controls: [docs/prds/draft-checks.md](prds/draft-checks.md), [ADR 0009](adr/0009-draft-rego-checks.md).
 - Evidence envelope (thin v1): [docs/prds/evidence-schema.md](prds/evidence-schema.md), [ADR 0010](adr/0010-evidence-envelope.md) (proposed). P1 adapters: [ADR 0011](adr/0011-adapter-pack-in-contrib.md).
-- Fully client-side guided app (browser OPA/WASM): [docs/prds/browser-ui.md](prds/browser-ui.md), [ADR 0013](adr/0013-browser-only-guided-app.md). Spike only in this round; `enact ui` stays.
 
 ## Acceptance (product-level)
 
 - [x] `uv run pytest` and example schema validation are green on `main`
 - [x] Pages demo at https://code1sentinel.github.io/enact/
-- [x] README describes install, `enact ui` as the primary quickstart, then CLI/CI, Codify contract, engines/writers
+- [x] README describes the in-browser app as the primary quickstart, then optional CLI/CI
 - [x] Local-only: no product network calls

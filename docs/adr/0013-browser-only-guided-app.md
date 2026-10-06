@@ -1,6 +1,6 @@
 # ADR 0013: Browser-only guided app (client-side OPA)
 
-- Status: accepted (direction; product host is not this PR)
+- Status: accepted (superseded in product stance by [ADR 0014](0014-browser-app-is-primary.md); wasm evaluation path still stands)
 - Date: 2026-10-05
 - PRD: [docs/prds/browser-ui.md](../prds/browser-ui.md)
 
@@ -22,13 +22,13 @@ ADR 0007 already forbids outbound product calls and forbids a hosted runner that
 
 Pursue **option 3**. The privacy invariant holds: no server sees user catalogs or evidence; AI keys are still never written; no new product outbound that transmits those files. CDN loads of OPA WASM or the JS SDK are **not** allowed (that would be a third-party fetch of the engine, and a surprise network call). Vendor the compiled `policy.wasm` and a small same-origin loader.
 
-`enact ui` stays until a browser app reaches parity (library, catalog mapping, evidence envelope, drafts, report, project zip). CI stays `enact run` on the CLI. GitHub Pages may ship a **static** client-side spike or later SPA; it still must not accept uploads to a server and must not present itself as a place to park secrets.
+`enact ui` stays as an optional localhost path (library, catalog mapping, evidence envelope, drafts, report, project zip). CI stays `enact run` on the CLI. GitHub Pages ships the client-side app; it still must not accept uploads to a server and must not present itself as a place to park secrets.
 
 This ADR does **not** replace ADR 0004 (OPA remains the reference engine) or ADR 0007 (local-only). It says *where* OPA may run: in the browser, on a precompiled wasm module, with user data staying in that browser.
 
-## Spike (this PR)
+## Hello-world (shipped in the ADR 0013 PR)
 
-A hello-world lives at [site/browser-spike/](../../site/browser-spike/) (notes: [docs/spikes/browser-opa.md](../spikes/browser-opa.md)):
+A first evaluator lived at `site/browser-spike/` (notes: [docs/spikes/browser-opa.md](../spikes/browser-opa.md)). ADR 0014 promotes that path to the Pages front door.
 
 - `opa build -t wasm` on the library `ac-login-lockout` policy (Rego v1) produces ~140 KiB `policy.wasm`.
 - A vendored JS loader implements OPA WASM ABI 1.2 `opa_eval` plus the one host builtin the library needs (`sprintf`).

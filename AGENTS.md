@@ -30,7 +30,7 @@ OPA 1.8.x must be on `PATH` (or set `ENACT_OPA`). Pin that version; policies are
 
 ## Invariants
 
-- **Local-first.** No new outbound network calls in product code. The CLI, the guided app, and generated reports talk only to the machine they run on. The hosted Pages site is a static showcase.
+- **Local-first.** No new outbound network calls in product code. The CLI, `enact ui`, and generated reports talk only to the machine they run on. The hosted Pages app evaluates in the tab; it does not accept uploads.
 - **OSCAL 1.1.2.** Vendored NIST schemas in `schemas/`. Do not take a runtime dependency on compliance-trestle or C2P (see ADRs).
 - **GitHub is the source of truth.** Origin is legacy history. Open PRs into `main` on this repo.
 - **Mobbin for UI.** Any frontend or UI change (report HTML, `enact ui`, Pages landing, or other user-facing layout) must cite [Mobbin](https://mobbin.com) design references on the PRD and the slice. Put the links in the **Design references** field. If no Mobbin links were provided, **ask for them and stop** — do not invent a visual design.
