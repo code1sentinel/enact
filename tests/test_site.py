@@ -44,9 +44,9 @@ def test_landing_page_uses_relative_demo_links() -> None:
 def test_landing_explains_what_enact_is_and_how_to_use_it() -> None:
     """A newcomer can answer 'what is this?' and 'what do I click first?' from the landing."""
     html = INDEX.read_text(encoding="utf-8")
-    what = html.lower().find("what is enact")
+    what = html.find("What is Enact?")
     how = html.find("How to use it")
-    demo = html.find("Sample reports")
+    demo = html.find('id="sample-reports"')
     assert what != -1
     assert how != -1
     assert demo != -1

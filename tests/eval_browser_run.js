@@ -19,6 +19,7 @@ async function main() {
   const library = JSON.parse(fs.readFileSync(libraryPath, "utf8"));
   const catalog = JSON.parse(fs.readFileSync(catalogPath, "utf8"));
   const checks = JSON.parse(fs.readFileSync(checksPath, "utf8"));
+  checks.source = checksPath;
   const evidence = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
   const result = await Enact.runAssessment({
     catalog: catalog,
