@@ -63,6 +63,7 @@ h2 { margin: 0 0 .35rem; font-size: 1.1rem; }
   text-align: center;
 }
 .file-well p { margin: 0 0 .65rem; color: var(--muted); }
+.file-well .actions { justify-content: center; margin: 0; }
 .file-well .filename { color: var(--ink); font-weight: 650; }
 .card, .empty, .check {
   background: var(--card); border: 1px solid var(--line);
