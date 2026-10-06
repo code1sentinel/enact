@@ -41,6 +41,29 @@ def test_landing_page_uses_relative_demo_links() -> None:
     assert "Local-first compliance CLI" not in html
     assert "Local-first guided assessment" in html
     assert html.find("enact ui") < html.find("enact run")
-    assert "Start here: a guided app" in html
+    assert "The guided app on your machine" in html
     assert 'href="browser-spike/index.html"' in html
     assert (ROOT / "site" / "browser-spike" / "index.html").is_file()
+
+
+def test_landing_explains_what_enact_is_and_how_to_use_it() -> None:
+    """A newcomer can answer 'what is this?' and 'what do I click first?' from the landing."""
+    html = INDEX.read_text(encoding="utf-8")
+    what = html.find("What is Enact?")
+    how = html.find("How to use it")
+    demo = html.find("Bundled example")
+    assert what != -1
+    assert how != -1
+    assert demo != -1
+    assert what < demo
+    assert how < demo
+    assert "local checks" in html
+    assert "assessment results" in html
+    assert "Codify writes the catalog" in html
+    assert "Enact runs the checks" in html
+    assert "static demo" in html
+    assert "enact ui" in html
+    for step in ("Catalog", "Checks", "Evidence", "Run"):
+        assert step in html
+    assert "project zip" in html.lower() or "Download as project" in html
+    assert "in progress" in html.lower() or "spike" in html.lower()

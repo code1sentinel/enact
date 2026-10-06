@@ -29,7 +29,7 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 
 ## Users and privacy
 
-**GRC reviewers** start with `enact ui` on localhost (Catalog → Checks → Evidence → Run). **Engineers in CI** run the same work later with `enact run`. Inputs are local files. Reports are local files. The [live demo](https://code1sentinel.github.io/enact/) is generated in Actions from `examples/access-control/` and contains no customer data. Product stance: [docs/prds/ui-first.md](prds/ui-first.md).
+**GRC reviewers** start with `enact ui` on localhost (Catalog → Checks → Evidence → Run). Hosted Pages is a static demo; the guided app is local. **Engineers in CI** run the same work later with `enact run`. Inputs are local files. Reports are local files. The [live demo](https://code1sentinel.github.io/enact/) is generated in Actions from `examples/access-control/` and contains no customer data. Product stance: [docs/prds/ui-first.md](prds/ui-first.md).
 
 ## Shape
 

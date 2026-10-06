@@ -6,6 +6,7 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ### Changed
 
+- Pages landing and README open with a plain **What is Enact?** / **How to use it** path: install → `enact ui` → Catalog / Checks / Evidence / Run → report or project zip. One-sentence product line (OSCAL controls → local checks → OSCAL assessment results) and Codify writes the catalog / Enact runs the checks. Hosted Pages is named a **static demo**; the [browser-only spike](site/browser-spike/) is linked as in progress. Copy-only; CLI docs unchanged. See [docs/prds/ui-first.md](docs/prds/ui-first.md).
 - UI-first onboarding: README, `enact --help` epilog, and the Pages landing lead with `enact ui` (Catalog → Checks → Evidence → Run). CLI/`enact run` stays fully supported as the power-user and CI path; check behavior is unchanged. See [docs/prds/ui-first.md](docs/prds/ui-first.md).
 - User-facing check mapping is `checks.json` / `--checks`, not `manifest.json` / `--manifest`. `--manifest` and `-m` still work as a deprecated alias and print a notice. `enact derive-checks` replaces `derive-manifest` (alias kept). `enact init`, the guided-app zip, and UI downloads write `checks.json`. See [docs/checks.md](docs/checks.md) and [ADR 0012](docs/adr/0012-checks-json-user-facing-name.md).
 
