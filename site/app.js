@@ -90,9 +90,9 @@
       summary.controlCount +
       "</strong>controls</li><li><strong>" +
       summary.checkCount +
-      "</strong>checks</li><li><strong>1</strong>" +
+      "</strong>checks</li><li><strong>" +
       Guide.escapeHtml(summary.evidenceKind) +
-      "</li>";
+      "</strong>evidence</li>";
     document.getElementById("load-summary-hint").textContent = summary.nextHint;
     document.getElementById("run-from-summary").textContent = summary.nextAction;
     box.hidden = false;

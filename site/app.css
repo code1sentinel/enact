@@ -74,7 +74,7 @@ h2 { margin: 0 0 .35rem; font-size: 1.1rem; }
 .check-top { display: flex; justify-content: space-between; gap: .7rem; align-items: flex-start; }
 .pill {
   display: inline-flex; padding: .12rem .5rem; border-radius: 999px;
-  font-size: .75rem; font-weight: 650;
+  font-size: .75rem; font-weight: 650; white-space: nowrap;
 }
 .pill.automated { background: var(--pass-bg); color: var(--pass); }
 .pill.manual { background: var(--wait-bg); color: var(--wait); }
@@ -176,7 +176,7 @@ th {
 }
 .summary-counts strong {
   display: block;
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   line-height: 1.2;
 }
 .check-reason {
