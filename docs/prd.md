@@ -2,7 +2,7 @@
 
 - Status: shipped (v0.1 on `main`)
 - Date: 2026-10-04
-- Related ADRs: 0001–0014
+- Related ADRs: 0001–0015
 
 Enact turns OSCAL controls into runnable checks and writes the results back as OSCAL.
 
@@ -13,7 +13,7 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 ## Goals
 
 - Load a catalog, profile, and/or component-definition.
-- Map controls to checks via [checks.json](checks.md) or OSCAL props.
+- Map controls to checks via [checks.json](checks.md), an OSCAL Component Definition (C2P `Rule_Id` / `Check_Id` conventions; [ADR 0015](adr/0015-oscal-component-definition-mapping.md)), or OSCAL props.
 - Run OPA/Rego (Rego v1, `input.oscal_params`) against a local JSON config.
 - Treat manual and hybrid checks as **not automated** / **needs evidence**, not as failures.
 - Write NIST OSCAL 1.1.2 `assessment-results` and POA&M, plus Markdown and HTML summaries.
@@ -36,7 +36,7 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 ```
 OSCAL catalog (Codify or anyone) ──┐
                                    ├── Enact ──► assessment-results.json
-checks.json or OSCAL props       ──┤            poam.json
+checks.json or Component Def.    ──┤            poam.json
                                    │            summary.md / summary.html
 local config + Rego policies    ──┘
 ```
@@ -65,6 +65,7 @@ enact run \
 ## In flight
 
 - Evidence envelope (thin v1): [docs/prds/evidence-schema.md](prds/evidence-schema.md), [ADR 0010](adr/0010-evidence-envelope.md) (proposed). P1 adapters: [ADR 0011](adr/0011-adapter-pack-in-contrib.md).
+- Component Definition mapping: [docs/prds/component-definition-mapping.md](prds/component-definition-mapping.md), [ADR 0015](adr/0015-oscal-component-definition-mapping.md).
 
 ## Acceptance (product-level)
 

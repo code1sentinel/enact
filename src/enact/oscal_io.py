@@ -50,6 +50,7 @@ class OscalBundle:
     titles: list[str] = field(default_factory=list)
     kinds: list[str] = field(default_factory=list)
     paths: list[Path] = field(default_factory=list)
+    component_definitions: list[dict[str, Any]] = field(default_factory=list)
 
     def title(self) -> str | None:
         return self.titles[0] if self.titles else None
@@ -219,11 +220,17 @@ def _ingest_component_definition(bundle: OscalBundle, cdef: dict[str, Any]) -> N
     meta = cdef.get("metadata") or {}
     if meta.get("title"):
         bundle.titles.append(str(meta["title"]))
+    bundle.component_definitions.append(cdef)
     for component in cdef.get("components") or []:
         for implementation in component.get("control-implementations") or []:
+            for param in implementation.get("set-parameters") or []:
+                pid = param.get("param-id")
+                values = param.get("values") or []
+                if pid and values:
+                    bundle.params[str(pid)] = str(values[0])
             for req in implementation.get("implemented-requirements") or []:
                 control_id = req.get("control-id")
-                if not control_id:
+                if not control_id or str(control_id).lower() in {"na", "n/a"}:
                     continue
                 control_id = str(control_id)
                 record = bundle.controls.get(control_id) or ControlRecord(control_id=control_id)
@@ -235,6 +242,9 @@ def _ingest_component_definition(bundle: OscalBundle, cdef: dict[str, Any]) -> N
                     if pid and values:
                         record.params[str(pid)] = str(values[0])
                         bundle.params[str(pid)] = str(values[0])
+                for pid, value in list(bundle.params.items()):
+                    if pid.startswith(f"{control_id}_") or pid in record.params:
+                        record.params.setdefault(pid, value)
                 if not record.title:
                     record.title = str(component.get("title") or control_id)
                 bundle.controls[control_id] = record

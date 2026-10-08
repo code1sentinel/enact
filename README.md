@@ -12,7 +12,7 @@ Open the site, pick the bundled catalog (or your own catalog JSON and evidence J
 
 1. Open https://code1sentinel.github.io/enact/
 2. **Catalog** — use the access-control example, or open an OSCAL catalog JSON from this machine.
-3. **Checks** — pick bundled library checks (MFA, lockout, reviews, logging, encryption) or open your `checks.json`.
+3. **Checks** — pick bundled library checks (MFA, lockout, reviews, logging, encryption) or open your `checks.json` or OSCAL Component Definition.
 4. **Evidence** — open a local evidence JSON, or a passing/failing sample.
 5. **Run** — evaluate in the tab, then download `assessment-results.json` and the HTML report.
 
@@ -23,7 +23,7 @@ Appearance defaults to the operating system (`prefers-color-scheme`). A Light / 
 ## What it does
 
 1. Load an OSCAL catalog, profile, and/or component-definition.
-2. Load [checks.json](docs/checks.md), or derive one from OSCAL props.
+2. Load [checks.json](docs/checks.md), an OSCAL Component Definition (C2P `Rule_Id` / `Check_Id` shape), or derive from OSCAL props.
 3. Resolve parameter values from OSCAL (not from the check).
 4. Run OPA/Rego policies against a local evidence envelope (or legacy JSON).
 5. Record manual and hybrid controls as **not automated** / **needs evidence**, not as failures. Unreviewed draft stubs are **draft** — not passed, not a POA&M item.
@@ -36,7 +36,7 @@ Appearance defaults to the operating system (`prefers-color-scheme`). A Light / 
 ```
 OSCAL catalog (Codify or anyone) ──┐
                                    ├── Enact ──► assessment-results.json
-checks.json or OSCAL props       ──┤            poam.json
+checks.json or Component Def.    ──┤            poam.json
                                    │            summary.md / summary.html
 local config + Rego policies    ──┘
 ```
@@ -103,6 +103,30 @@ enact derive-checks --oscal examples/access-control/catalog.json -O /tmp/derived
 enact run --oscal examples/access-control/catalog.json --input examples/access-control/inputs/passing.json --workdir examples/access-control --out out/derived
 ```
 
+The access-control example also ships a C2P-shaped OSCAL Component Definition. That is the interchange mapping ([ADR 0015](docs/adr/0015-oscal-component-definition-mapping.md)); `checks.json` stays the authoring format.
+
+```bash
+enact run \
+  --oscal examples/access-control/catalog.json \
+  --oscal examples/access-control/component-definition.json \
+  --input examples/access-control/inputs/passing.json \
+  --workdir examples/access-control \
+  --out out/pass-cd
+
+# Same file is accepted as --checks
+enact run \
+  --oscal examples/access-control/catalog.json \
+  --checks examples/access-control/component-definition.json \
+  --input examples/access-control/inputs/passing.json \
+  --workdir examples/access-control \
+  --out out/pass-cd
+
+enact emit-component-definition \
+  --checks examples/access-control/checks.json \
+  --oscal examples/access-control/catalog.json \
+  -O /tmp/component-definition.json
+```
+
 The bundled **check library** is the same set the guided app uses. Each entry has Rego (when automated or hybrid), OSCAL parameter defaults, pass/fail samples, and a suggested NIST 800-53 mapping. `enact checks show` prints the description and the policy.
 
 ```bash
@@ -164,7 +188,7 @@ See [docs/checks.md](docs/checks.md) for the full convention. The short version:
 - **`ksi_id`** is optional. It is stored on results for a later FedRAMP 20x writer.
 - **`payload_type` / `payload_versions` / `payload_requires`**: evidence contract for automated checks. Invalid or missing evidence is `status=error` (message starts with `evidence:`), never `pass`. See [docs/prds/evidence-schema.md](docs/prds/evidence-schema.md).
 
-The same fields can live as OSCAL props on a control or on a component-definition `implemented-requirement`. C2P-style `Rule_Id` / `Check_Id` names are accepted.
+The same fields can live as an OSCAL Component Definition (C2P Service + Validation components, remarks-grouped `Rule_Id` / `Check_Id` / `Parameter_*` props) or as props on a catalog control. See [docs/checks.md](docs/checks.md) and [ADR 0015](docs/adr/0015-oscal-component-definition-mapping.md).
 
 Rego policies expose a `result` object:
 
@@ -215,7 +239,8 @@ Evaluated before writing Enact (October 2026):
 
 What we reused from both:
 
-- C2P's rule-id / check-id mapping, including the `Rule_Id` prop alias
+- C2P's Component Definition mapping (`Rule_Id` / `Check_Id` / `Parameter_*`, Service + Validation split) as the interchange format ([ADR 0015](docs/adr/0015-oscal-component-definition-mapping.md))
+- C2P observation fields on Assessment Results (`assessment-rule-id`, `subjects` with `resource-id` / `result`)
 - C2P's plugin split (engine adapter in, result writer out)
 - trestle / NIST field layout for assessment results and POA&M
 - official NIST schemas for validation, instead of a second OSCAL model

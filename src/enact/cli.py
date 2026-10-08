@@ -14,6 +14,7 @@ from enact.drafts import DraftError, generate_drafts, list_drafts, review_draft
 from enact.engines import EngineRegistry
 from enact.evidence import LEGACY_NOTICE, EvidenceError, validate_evidence_document
 from enact.library import get_check, list_checks
+from enact.component_definition import emit_component_definition
 from enact.manifest import derive_manifest, dump_manifest, load_manifest
 from enact.oscal_io import load_bundle
 from enact.project import default_control_id, write_project
@@ -70,7 +71,7 @@ def run(
     checks: Optional[Path] = typer.Option(
         None,
         "--checks",
-        help="checks.json mapping of rule_id to control_id. Derived from OSCAL props if omitted.",
+        help="checks.json or an OSCAL Component Definition mapping. Derived from OSCAL props if omitted.",
     ),
     manifest: Optional[Path] = typer.Option(
         None,
@@ -92,7 +93,7 @@ def run(
     serve: bool = typer.Option(False, "--serve", help="Serve the HTML summary after the run."),
     port: int = typer.Option(43173, "--port", help="Port for --serve."),
 ) -> None:
-    """Load OSCAL + checks.json, run checks, write assessment results."""
+    """Load OSCAL + checks.json or a Component Definition, run checks, write assessment results."""
     oscal_paths = _paths(oscal)
     manifest_path = resolve_checks_path(checks, manifest)
     input_path = input_file.resolve() if input_file else None
@@ -192,6 +193,56 @@ def _write_derived_checks(oscal: list[Path], output: Path) -> None:
         typer.secho(str(exc), fg=typer.colors.RED, err=True)
         raise typer.Exit(code=2) from exc
     output.write_text(json.dumps(dump_manifest(parsed), indent=2) + "\n", encoding="utf-8")
+    typer.echo(f"wrote {output} ({len(parsed.checks)} checks)")
+
+
+@app.command("emit-component-definition")
+def emit_component_definition_cmd(
+    checks: Optional[Path] = typer.Option(
+        None,
+        "--checks",
+        help="checks.json to convert. Derived from --oscal if omitted.",
+    ),
+    manifest: Optional[Path] = typer.Option(
+        None,
+        "--manifest",
+        "-m",
+        help="Deprecated alias for --checks.",
+    ),
+    oscal: list[Path] = typer.Option(
+        [],
+        "--oscal",
+        "-o",
+        help="Optional catalog/profile used for parameter values and, if --checks is omitted, to derive the mapping.",
+    ),
+    output: Path = typer.Option(Path("component-definition.json"), "--output", "-O"),
+    catalog_href: str = typer.Option("catalog.json", "--catalog-href", help="control-implementation source href."),
+) -> None:
+    """Write an OSCAL Component Definition (C2P Rule_Id / Check_Id shape) from checks.json."""
+    checks_path = resolve_checks_path(checks, manifest)
+    oscal_paths = _paths(oscal) if oscal else []
+    bundle = load_bundle(oscal_paths) if oscal_paths else None
+    try:
+        if checks_path:
+            parsed = load_manifest(checks_path)
+        elif bundle is not None:
+            parsed = derive_manifest(bundle)
+        else:
+            raise typer.BadParameter("pass --checks or --oscal")
+    except ValueError as exc:
+        typer.secho(str(exc), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2) from exc
+    param_values = dict(bundle.params) if bundle else {}
+    if bundle:
+        for record in bundle.controls.values():
+            param_values.update(record.params)
+    document = emit_component_definition(
+        parsed,
+        catalog_href=catalog_href,
+        param_values=param_values,
+        component_title=(bundle.title() if bundle and bundle.title() else None) or parsed.title,
+    )
+    output.write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
     typer.echo(f"wrote {output} ({len(parsed.checks)} checks)")
 
 

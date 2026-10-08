@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from enact.component_definition import manifest_from_component_definition
 from enact.models import CheckSpec, CheckType, Manifest, ReviewStatus
 from enact.oscal_io import OscalBundle
 
@@ -16,6 +17,8 @@ def load_manifest(path: Path) -> Manifest:
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
         raise ValueError(f"{path} is not a JSON object")
+    if "component-definition" in data:
+        return manifest_from_component_definition(data["component-definition"], source=str(path))
     return parse_manifest(data, source=str(path))
 
 
@@ -33,7 +36,29 @@ def parse_manifest(data: dict[str, Any], source: str | None = None) -> Manifest:
 
 
 def derive_manifest(bundle: OscalBundle) -> Manifest:
-    """Build a manifest from rule-id / check-type props on controls or a component-definition."""
+    """Build a manifest from a Component Definition or rule-id props on controls."""
+    if bundle.component_definitions:
+        derived: list[CheckSpec] = []
+        titles: list[str] = []
+        for cdef in bundle.component_definitions:
+            try:
+                parsed = manifest_from_component_definition(cdef, source="oscal-component-definition")
+            except ValueError:
+                continue
+            titles.append(parsed.title)
+            derived.extend(parsed.checks)
+        if derived:
+            for check in derived:
+                if check.params:
+                    continue
+                control = bundle.controls.get(check.control_id)
+                if control and control.params:
+                    check.params = list(control.params.keys())
+            return Manifest(
+                title=titles[0] if titles else bundle.title() or "Derived checks",
+                checks=derived,
+                source="oscal-component-definition",
+            )
     checks: list[CheckSpec] = []
     for control in bundle.controls.values():
         props = control.props
@@ -112,6 +137,7 @@ def _parse_check(item: Any, index: int) -> CheckSpec:
         payload_type=str(item["payload_type"]) if item.get("payload_type") else None,
         payload_versions=list(payload_versions),
         payload_requires=list(payload_requires),
+        check_id=str(item["check_id"]) if item.get("check_id") else None,
     )
 
 
@@ -145,6 +171,7 @@ def dump_manifest(manifest: Manifest) -> dict[str, Any]:
                 **({"payload_type": check.payload_type} if check.payload_type else {}),
                 **({"payload_versions": check.payload_versions} if check.payload_versions else {}),
                 **({"payload_requires": check.payload_requires} if check.payload_requires else {}),
+                **({"check_id": check.check_id} if check.check_id and check.check_id != check.rule_id else {}),
             }
             for check in manifest.checks
         ],

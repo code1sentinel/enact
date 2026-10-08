@@ -193,6 +193,7 @@ def test_project_zip_endpoint(ui_server: str, tmp_path: Path) -> None:
     with zipfile.ZipFile(zip_path) as archive:
         names = archive.namelist()
         assert "checks.json" in names
+        assert "component-definition.json" in names
         assert "manifest.json" not in names
         workflow = archive.read(".github/workflows/enact.yml").decode("utf-8")
         assert "--checks checks.json" in workflow

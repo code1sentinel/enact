@@ -1,7 +1,8 @@
 # checks.json convention
 
-Enact maps OSCAL controls to runnable checks with a small JSON document, or
-with the same fields stored as OSCAL props.
+Enact maps OSCAL controls to runnable checks with a small JSON document, an
+OSCAL Component Definition (C2P `Rule_Id` / `Check_Id` shape), or the same
+fields stored as OSCAL props.
 
 The user-facing file is **`checks.json`**. Pass it as `--checks`. `--manifest`
 (and `-m`) still work as a deprecated alias.
@@ -63,7 +64,16 @@ already does that. The same rule can satisfy more than one control by
 repeating the row with a different `control_id`.
 
 C2P-style `Rule_Id` / `Check_Id` props are accepted as aliases when
-checks.json is derived from OSCAL.
+checks.json is derived from OSCAL. A full Component Definition is the
+**interchange** mapping ([ADR 0015](adr/0015-oscal-component-definition-mapping.md)):
+a `service` component binds controls to `Rule_Id`, a `validation` component
+titled `OPA` binds `Rule_Id` to `Check_Id`, and parameters live as
+`Parameter_Id` plus `set-parameters`. `checks.json` stays the authoring file.
+
+```
+enact emit-component-definition --checks checks.json --oscal catalog.json -O component-definition.json
+enact run --oscal catalog.json --oscal component-definition.json --input evidence.json --workdir . --out out
+```
 
 ## Parameters
 
@@ -90,9 +100,9 @@ no POA&M item. Promote with `enact checks review <id> --reviewer NAME`.
 
 ## OSCAL props
 
-On a catalog control or a component-definition `implemented-requirement`,
-these props (namespace `https://grcengineering.club/ns/enact`) are enough
-to derive checks.json:
+On a catalog control, or as Enact extensions on a Component Definition
+Validation rule set, these props (namespace `https://grcengineering.club/ns/enact`)
+are enough to derive checks.json:
 
 | Prop | Maps to |
 | --- | --- |
@@ -105,4 +115,5 @@ to derive checks.json:
 
 ```
 enact derive-checks --oscal catalog.json -O checks.json
+enact derive-checks --oscal component-definition.json -O checks.json
 ```

@@ -37,9 +37,15 @@ def test_derive_from_catalog_props(catalog_path: Path) -> None:
 def test_derive_from_component_definition(example_dir: Path) -> None:
     bundle = load_bundle([example_dir / "component-definition.json"])
     manifest = derive_manifest(bundle)
-    assert {check.rule_id for check in manifest.checks} == {"ac-account-review", "ac-login-lockout"}
+    assert [check.rule_id for check in manifest.checks] == [
+        "ac-account-review",
+        "ac-login-lockout",
+        "ac-access-agreements",
+        "ac-privileged-review",
+    ]
     account = next(check for check in manifest.checks if check.control_id == "c-ac-2")
     assert account.engine == "opa"
+    assert account.policy == "policies/account_review.rego"
     assert bundle.get_params("c-ac-2", ["c-ac-2_prm_1"]) == {"c-ac-2_prm_1": "90"}
 
 

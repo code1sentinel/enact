@@ -176,7 +176,13 @@
     if (state.checksDoc) {
       var note = document.createElement("p");
       note.className = "note";
-      note.textContent = "Using " + (state.checksName || "checks.json") + " from this tab.";
+      note.textContent =
+        "Using " +
+        (state.checksName || "checks.json") +
+        (state.checksDoc && state.checksDoc["component-definition"]
+          ? " (OSCAL Component Definition)"
+          : "") +
+        " from this tab.";
       list.appendChild(note);
     }
     (library.checks || []).forEach(function (check) {
@@ -409,6 +415,11 @@
   document.getElementById("catalog-file").addEventListener("change", function (event) {
     readFile(event.target)
       .then(function (file) {
+        if (file.data["component-definition"]) {
+          throw new Error(
+            "That is a Component Definition. Open a catalog here, then open the Component Definition on Checks."
+          );
+        }
         setCatalog(file.data, file.name);
       })
       .catch(function (err) {
@@ -418,9 +429,13 @@
   document.getElementById("checks-file").addEventListener("change", function (event) {
     readFile(event.target)
       .then(function (file) {
+        var parsed = window.Enact.parseChecks(file.data);
         state.checksDoc = file.data;
         state.checksName = file.name;
-        file.data.checks.forEach(function (check) {
+        if (file.data["component-definition"] && state.catalog) {
+          state.bundle = window.Enact.loadBundle([state.catalog, file.data]);
+        }
+        parsed.checks.forEach(function (check) {
           state.selected[check.rule_id] = {
             enabled: true,
             control_id: check.control_id,

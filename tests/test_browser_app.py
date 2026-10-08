@@ -206,3 +206,56 @@ def test_browser_oscal_matches_python_access_control_example(tmp_path: Path) -> 
     assert browser["counts"]["pass"] == 2
     assert browser["counts"]["not_automated"] == 1
     assert browser["counts"]["needs_evidence"] == 1
+    observation = browser["oscal"]["assessment-results"]["results"][0]["observations"][0]
+    names = {prop["name"]: prop["value"] for prop in observation["props"]}
+    assert names["assessment-rule-id"]
+    assert observation["subjects"][0]["type"] == "inventory-item"
+
+
+def test_browser_oscal_from_component_definition(tmp_path: Path) -> None:
+    if not (os.environ.get("ENACT_OPA") or shutil.which("opa")):
+        pytest.skip("OPA 1.8.x is required to rebuild the library wasm")
+    wasm = _load_builder().build(tmp_path)
+    library = tmp_path / "library.json"
+
+    def clock_pass():
+        moments = iter([FIXED_START, FIXED_END])
+        return lambda: next(moments)
+
+    run, bundle = run_assessment(
+        [EXAMPLE / "catalog.json"],
+        manifest_path=EXAMPLE / "component-definition.json",
+        input_path=EXAMPLE / "inputs" / "passing.json",
+        workdir=EXAMPLE,
+        title="Access-control example (passing)",
+        clock=clock_pass(),
+    )
+    python_oscal = OscalAssessmentResultsWriter().render(run, bundle)
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node is required to evaluate the browser runner")
+    proc = subprocess.run(
+        [
+            node,
+            str(ROOT / "tests" / "eval_browser_run.js"),
+            str(wasm),
+            str(EXAMPLE / "catalog.json"),
+            str(EXAMPLE / "component-definition.json"),
+            str(EXAMPLE / "inputs" / "passing.json"),
+            FIXED_START.isoformat(),
+            FIXED_END.isoformat(),
+            "Access-control example (passing)",
+            str(library),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+        cwd=ROOT,
+    )
+    assert proc.returncode == 0, proc.stderr or proc.stdout
+    browser = json.loads(proc.stdout)
+    assert browser["oscal"] == python_oscal
+    validate_assessment_results(browser["oscal"])
+    assert browser["counts"]["pass"] == 2
+    assert browser["counts"]["not_automated"] == 1
+    assert browser["counts"]["needs_evidence"] == 1

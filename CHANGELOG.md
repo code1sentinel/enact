@@ -4,6 +4,10 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ## [Unreleased]
 
+### Added
+
+- OSCAL 1.1.2 Component Definition as the control-to-check interchange mapping, using C2P `Rule_Id` / `Check_Id` / `Parameter_*` conventions (Service + Validation components, remarks-grouped rule sets). `checks.json` still works. `enact emit-component-definition` converts existing checks. The CLI accepts a Component Definition as `--oscal` or `--checks`; the in-browser app accepts it on the Checks step. Assessment Results add C2P-shaped `assessment-rule-id` and `subjects` while remaining NIST 1.1.2 valid. See [ADR 0015](docs/adr/0015-oscal-component-definition-mapping.md) and [docs/prds/component-definition-mapping.md](docs/prds/component-definition-mapping.md).
+
 ### Changed
 
 - The in-browser OPA WASM app is **Enact**: https://code1sentinel.github.io/enact/ opens Catalog → Checks → Evidence → Run. README, `--help` epilog, and Pages copy lead with that path. `enact ui` and `enact run` sit under **Optional: CLI and CI**. User-facing “spike” / “static demo” framing is gone. See [ADR 0014](docs/adr/0014-browser-app-is-primary.md) and [docs/prds/ui-first.md](docs/prds/ui-first.md).

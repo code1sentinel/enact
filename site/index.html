@@ -86,11 +86,11 @@
 
     <section id="step-checks" class="step" hidden>
       <h1>Choose checks</h1>
-      <p class="lede">Each check is a plain-English question Enact can ask of your catalog. Pick from the bundled library, or open a <code>checks.json</code> you already have.</p>
+      <p class="lede">Each check is a plain-English question Enact can ask of your catalog. Pick from the bundled library, or open a <code>checks.json</code> or OSCAL Component Definition you already have.</p>
       <p class="hint-cli">Custom checks? Use the Enact CLI.</p>
       <div class="actions">
         <label class="btn btn--ghost">
-          Open checks.json
+          Open checks.json or Component Definition
           <input id="checks-file" type="file" accept="application/json,.json" hidden>
         </label>
       </div>
@@ -168,7 +168,7 @@
       <h2 id="how-title">How to use it</h2>
       <ol class="path">
         <li><b>Catalog</b> — use the example or open an OSCAL catalog JSON in this tab.</li>
-        <li><b>Checks</b> — pick bundled library checks (or open your <code>checks.json</code>).</li>
+        <li><b>Checks</b> — pick bundled library checks, or open your <code>checks.json</code> or Component Definition.</li>
         <li><b>Evidence</b> — open a local evidence JSON, or a passing/failing sample.</li>
         <li><b>Run</b> — evaluate here, then download <code>assessment-results.json</code> and the HTML report.</li>
       </ol>
@@ -229,7 +229,15 @@ enact ui</code></pre>
   --input examples/access-control/inputs/passing.json \
   --workdir examples/access-control \
   --out out/pass \
-  --title "Access-control example (passing)"</code></pre>
+  --title "Access-control example (passing)"
+
+# Or pass the C2P-shaped Component Definition as the mapping
+enact run \
+  --oscal examples/access-control/catalog.json \
+  --oscal examples/access-control/component-definition.json \
+  --input examples/access-control/inputs/passing.json \
+  --workdir examples/access-control \
+  --out out/pass-cd</code></pre>
       <p class="note">The failing run exits 1. That is expected: automated failures are the signal.</p>
     </section>
   </main>

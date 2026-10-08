@@ -73,6 +73,7 @@ def _library_payload() -> dict:
         checks.append(item)
     catalog = json.loads((EXAMPLE / "catalog.json").read_text(encoding="utf-8"))
     manifest = json.loads((EXAMPLE / "checks.json").read_text(encoding="utf-8"))
+    component_definition = json.loads((EXAMPLE / "component-definition.json").read_text(encoding="utf-8"))
     passing = json.loads((EXAMPLE / "inputs" / "passing.json").read_text(encoding="utf-8"))
     failing = json.loads((EXAMPLE / "inputs" / "failing.json").read_text(encoding="utf-8"))
     return {
@@ -87,6 +88,7 @@ def _library_payload() -> dict:
                 "title": "Access-control example",
                 "catalog": catalog,
                 "checks": manifest,
+                "componentDefinition": component_definition,
                 "passing": passing,
                 "failing": failing,
             }
@@ -107,6 +109,9 @@ def _write_library(out: Path, payload: dict) -> None:
     sample = payload["samples"]["access-control"]
     (samples / "catalog.json").write_text(json.dumps(sample["catalog"], indent=2) + "\n", encoding="utf-8")
     (samples / "checks.json").write_text(json.dumps(sample["checks"], indent=2) + "\n", encoding="utf-8")
+    (samples / "component-definition.json").write_text(
+        json.dumps(sample["componentDefinition"], indent=2) + "\n", encoding="utf-8"
+    )
     (samples / "passing.json").write_text(json.dumps(sample["passing"], indent=2) + "\n", encoding="utf-8")
     (samples / "failing.json").write_text(json.dumps(sample["failing"], indent=2) + "\n", encoding="utf-8")
 

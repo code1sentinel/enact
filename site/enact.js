@@ -11,6 +11,8 @@
   var VERSION = "0.1.0";
   var NS = "https://grcengineering.club/ns/enact";
   var CODIFY_NS = "https://grcengineering.club/ns/codify";
+  var C2P_NS = "http://oscal-compass.github.io/compliance-trestle/schemas/oscal/cd/ibmcloud";
+  var PVP_TITLE = "OPA";
   var OSCAL_VERSION = "1.1.2";
   var UUID_NS = "d4c6f1e2-7a91-4b33-9c0e-3e8f2a1b5d70";
   var PACKAGE_RE = /^\s*package\s+([A-Za-z_][\w.]*)/m;
@@ -303,6 +305,299 @@
     return out;
   }
 
+  function isValidationComponent(component) {
+    return String((component && component.type) || "").toLowerCase() === "validation";
+  }
+
+  function groupPropsByRemarks(item) {
+    var grouped = {};
+    var order = [];
+    ((item && item.props) || []).forEach(function (prop) {
+      if (!prop || !prop.name || prop.value === undefined || prop.value === null) {
+        return;
+      }
+      var remarks = String(prop.remarks || "");
+      if (!grouped[remarks]) {
+        grouped[remarks] = {};
+        order.push(remarks);
+      }
+      grouped[remarks][String(prop.name)] = String(prop.value);
+    });
+    return order.map(function (key) {
+      return grouped[key];
+    });
+  }
+
+  function firstNamed(group, names) {
+    var i;
+    for (i = 0; i < names.length; i += 1) {
+      if (group[names[i]]) {
+        return group[names[i]];
+      }
+    }
+    return null;
+  }
+
+  function collectNamed(props, names) {
+    var found = [];
+    (props || []).forEach(function (prop) {
+      if (prop && names.indexOf(prop.name) !== -1 && prop.value) {
+        found.push(String(prop.value));
+      }
+    });
+    return found;
+  }
+
+  function csvList(value) {
+    if (!value) {
+      return [];
+    }
+    return String(value)
+      .split(",")
+      .map(function (part) {
+        return part.trim();
+      })
+      .filter(Boolean);
+  }
+
+  function enactFields(group) {
+    var map = {
+      "check-type": "check-type",
+      check_type: "check-type",
+      engine: "engine",
+      "policy-path": "policy-path",
+      policy_path: "policy-path",
+      policy: "policy-path",
+      query: "query",
+      "ksi-id": "ksi-id",
+      ksi_id: "ksi-id",
+      KSI_Id: "ksi-id",
+      "evidence-needed": "evidence-needed",
+      evidence_needed: "evidence-needed",
+      evidence: "evidence",
+      "payload-type": "payload-type",
+      payload_type: "payload-type",
+      "payload-versions": "payload-versions",
+      payload_versions: "payload-versions",
+      "payload-requires": "payload-requires",
+      payload_requires: "payload-requires",
+    };
+    var fields = {};
+    Object.keys(group || {}).forEach(function (name) {
+      if (map[name]) {
+        fields[map[name]] = group[name];
+      }
+    });
+    return fields;
+  }
+
+  function uniqueIds(ids) {
+    var out = [];
+    (ids || []).forEach(function (id) {
+      if (id && out.indexOf(id) === -1) {
+        out.push(id);
+      }
+    });
+    return out;
+  }
+
+  function ingestComponentDefinition(bundle, cdef) {
+    var meta = cdef.metadata || {};
+    if (meta.title) {
+      bundle.titles.push(String(meta.title));
+    }
+    bundle.componentDefinitions.push(cdef);
+    (cdef.components || []).forEach(function (component) {
+      (component["control-implementations"] || []).forEach(function (implementation) {
+        (implementation["set-parameters"] || []).forEach(function (param) {
+          if (param["param-id"] && param.values && param.values.length) {
+            bundle.params[String(param["param-id"])] = String(param.values[0]);
+          }
+        });
+        (implementation["implemented-requirements"] || []).forEach(function (req) {
+          var controlId = req["control-id"];
+          if (!controlId || String(controlId).toLowerCase() === "na") {
+            return;
+          }
+          controlId = String(controlId);
+          var record = bundle.controls[controlId] || {
+            control_id: controlId,
+            title: "",
+            statement: "",
+            statement_id: null,
+            params: {},
+            param_labels: {},
+            props: {},
+          };
+          var merged = {};
+          Object.keys(record.props || {}).forEach(function (key) {
+            merged[key] = record.props[key];
+          });
+          Object.keys(propsMap(implementation)).forEach(function (key) {
+            merged[key] = propsMap(implementation)[key];
+          });
+          Object.keys(propsMap(req)).forEach(function (key) {
+            merged[key] = propsMap(req)[key];
+          });
+          record.props = merged;
+          (req["set-parameters"] || []).forEach(function (param) {
+            if (param["param-id"] && param.values && param.values.length) {
+              record.params[String(param["param-id"])] = String(param.values[0]);
+              bundle.params[String(param["param-id"])] = String(param.values[0]);
+            }
+          });
+          Object.keys(bundle.params).forEach(function (pid) {
+            if (pid.indexOf(controlId + "_") === 0 || record.params[pid]) {
+              if (!record.params[pid]) {
+                record.params[pid] = bundle.params[pid];
+              }
+            }
+          });
+          if (!record.title) {
+            record.title = String(component.title || controlId);
+          }
+          bundle.controls[controlId] = record;
+        });
+      });
+    });
+  }
+
+  function preferValidation(components) {
+    var validation = (components || []).filter(isValidationComponent);
+    var opa = validation.filter(function (comp) {
+      return String(comp.title || "").toUpperCase() === PVP_TITLE;
+    });
+    return opa.length ? opa : validation;
+  }
+
+  function specFromGroups(ruleId, controlId, ruleSet, irProps, implProps, paramIds, titleFallback, descriptionFallback) {
+    var enact = Object.assign({}, enactFields(implProps), enactFields(irProps), enactFields(ruleSet));
+    var checkId = firstNamed(ruleSet, ["Check_Id", "check-id", "check_id"]) || ruleId;
+    var policy = enact["policy-path"] || null;
+    if (!policy && String(checkId).slice(-5) === ".rego") {
+      policy = checkId;
+    }
+    var checkType = enact["check-type"] || "automated";
+    return {
+      rule_id: ruleId,
+      control_id: controlId,
+      check_type: checkType,
+      engine: enact.engine || (checkType === "manual" ? "none" : "opa"),
+      policy: policy,
+      query: enact.query || null,
+      params: uniqueIds(paramIds),
+      ksi_id: enact["ksi-id"] || null,
+      title: firstNamed(ruleSet, ["Check_Description", "Rule_Description"]) || irProps.title || titleFallback,
+      description: firstNamed(ruleSet, ["Rule_Description", "Check_Description"]) || descriptionFallback || null,
+      evidence: enact.evidence || null,
+      evidence_needed: enact["evidence-needed"] || null,
+      payload_type: enact["payload-type"] || null,
+      payload_versions: csvList(enact["payload-versions"]),
+      payload_requires: csvList(enact["payload-requires"]),
+      check_id: checkId !== ruleId ? checkId : null,
+    };
+  }
+
+  function manifestFromComponentDefinition(cdef, source) {
+    var components = (cdef && cdef.components) || [];
+    if (!components.length) {
+      throw new Error("component-definition has no components");
+    }
+    var ruleSets = {};
+    preferValidation(components).forEach(function (comp) {
+      groupPropsByRemarks(comp).forEach(function (group) {
+        var ruleId = firstNamed(group, ["Rule_Id", "rule-id", "rule_id"]);
+        if (ruleId) {
+          ruleSets[ruleId] = group;
+        }
+      });
+    });
+    var paramsByRule = {};
+    var service = components.filter(function (comp) {
+      return !isValidationComponent(comp);
+    });
+    service.forEach(function (comp) {
+      groupPropsByRemarks(comp).forEach(function (group) {
+        var ruleId = firstNamed(group, ["Rule_Id", "rule-id", "rule_id"]);
+        var paramId = group.Parameter_Id || group["parameter-id"];
+        if (ruleId && paramId) {
+          if (!paramsByRule[ruleId]) {
+            paramsByRule[ruleId] = [];
+          }
+          if (paramsByRule[ruleId].indexOf(paramId) === -1) {
+            paramsByRule[ruleId].push(paramId);
+          }
+        }
+      });
+    });
+    var mapping = service.length ? service : components;
+    var checks = [];
+    var seen = {};
+    mapping.forEach(function (comp) {
+      if (isValidationComponent(comp) && service.length) {
+        return;
+      }
+      (comp["control-implementations"] || []).forEach(function (implementation) {
+        var implProps = propsMap(implementation);
+        (implementation["implemented-requirements"] || []).forEach(function (req) {
+          var controlId = req["control-id"];
+          if (!controlId || String(controlId).toLowerCase() === "na") {
+            return;
+          }
+          controlId = String(controlId);
+          var ruleIds = collectNamed(req.props, ["Rule_Id", "rule-id", "rule_id"]);
+          if (!ruleIds.length) {
+            ruleIds = collectNamed(req.props, ["Check_Id", "check-id", "check_id"]);
+          }
+          var irProps = propsMap(req);
+          var irParamIds = (req["set-parameters"] || [])
+            .filter(function (item) {
+              return item["param-id"];
+            })
+            .map(function (item) {
+              return String(item["param-id"]);
+            });
+          var titleFallback = String(req.description || comp.title || controlId);
+          ruleIds.forEach(function (ruleId) {
+            var key = ruleId + "|" + controlId;
+            if (seen[key]) {
+              return;
+            }
+            seen[key] = true;
+            checks.push(
+              specFromGroups(
+                ruleId,
+                controlId,
+                ruleSets[ruleId] || {},
+                irProps,
+                implProps,
+                (paramsByRule[ruleId] || []).concat(irParamIds),
+                titleFallback,
+                String(req.description || "")
+              )
+            );
+          });
+        });
+      });
+    });
+    if (!checks.length) {
+      throw new Error(
+        "no check mappings found on the component-definition. Add implemented-requirement Rule_Id props, or a checks.json."
+      );
+    }
+    var meta = cdef.metadata || {};
+    return {
+      schema_version: "1.0",
+      title: String(meta.title || "Component definition checks"),
+      source: source || "oscal-component-definition",
+      checks: checks,
+    };
+  }
+
+  function effectiveCheckId(spec) {
+    return (spec && spec.check_id) || (spec && spec.rule_id) || "";
+  }
+
   function ingestCatalog(bundle, catalog) {
     var meta = catalog.metadata || {};
     if (meta.title) {
@@ -346,7 +641,7 @@
   }
 
   function loadBundle(documents) {
-    var bundle = { controls: {}, params: {}, titles: [], kinds: [] };
+    var bundle = { controls: {}, params: {}, titles: [], kinds: [], componentDefinitions: [] };
     (documents || []).forEach(function (data) {
       if (!data || typeof data !== "object") {
         throw new Error("OSCAL document must be a JSON object");
@@ -367,15 +662,19 @@
           }
         });
       } else if (data["component-definition"]) {
-        throw new Error("Open a catalog JSON in this tab. Component-definitions still run on the Enact CLI.");
+        bundle.kinds.push("component-definition");
+        ingestComponentDefinition(bundle, data["component-definition"]);
       } else {
-        throw new Error("Unrecognised OSCAL document: expected a catalog.");
+        throw new Error("Unrecognised OSCAL document: expected a catalog, profile, or component-definition.");
       }
     });
     return bundle;
   }
 
   function parseChecks(data) {
+    if (data && data["component-definition"]) {
+      return manifestFromComponentDefinition(data["component-definition"], data.source || "oscal-component-definition");
+    }
     if (!data || !Array.isArray(data.checks) || !data.checks.length) {
       throw new Error("checks.json must contain a non-empty checks array");
     }
@@ -408,6 +707,7 @@
           payload_type: item.payload_type ? String(item.payload_type) : null,
           payload_versions: Array.isArray(item.payload_versions) ? item.payload_versions.map(String) : [],
           payload_requires: Array.isArray(item.payload_requires) ? item.payload_requires.map(String) : [],
+          check_id: item.check_id ? String(item.check_id) : null,
         };
       }),
     };
@@ -933,36 +1233,53 @@
         Object.keys(outcome.evidence_provenance || {}).forEach(function (name) {
           provenanceProps.push(prop(name, outcome.evidence_provenance[name]));
         });
-        var observation = {
-          uuid: obsUuid,
-          title: displayTitle(outcome.spec),
-          description: outcome.message,
-          props: props(
-            prop("rule-id", outcome.spec.rule_id),
-            prop("control-id", outcome.spec.control_id, false),
-            prop("check-type", outcome.spec.check_type),
-            prop("result", outcome.status),
-            prop("status", outcome.status === "draft" ? outcome.status : null),
-            prop("review-status", outcome.spec.review_status),
-            prop("engine", outcome.engine),
-            prop("ksi-id", outcome.spec.ksi_id)
-          )
-            .concat(paramProps.filter(Boolean))
-            .concat(provenanceProps.filter(Boolean)),
-          methods: observationMethods(outcome),
-          types: outcome.status === "pass" || outcome.status === "fail" ? ["finding"] : ["control-objective"],
-          collected: nowIso(run.endedIso),
-        };
-        if (outcome.evidence && outcome.evidence.length) {
-          observation["relevant-evidence"] = outcome.evidence.map(function (item) {
-            var row = { description: item.description };
-            if (item.href) {
-              row.href = item.href;
-            }
-            return row;
-          });
-        }
-        return observation;
+        return makeUuid("subj", outcome.spec.rule_id, outcome.spec.control_id, outcome.status).then(function (subjUuid) {
+          var observation = {
+            uuid: obsUuid,
+            title: displayTitle(outcome.spec),
+            description: outcome.message,
+            props: props(
+              prop("assessment-rule-id", outcome.spec.rule_id, false),
+              prop("Check_Id", effectiveCheckId(outcome.spec), false),
+              prop("rule-id", outcome.spec.rule_id),
+              prop("control-id", outcome.spec.control_id, false),
+              prop("check-type", outcome.spec.check_type),
+              prop("result", outcome.status),
+              prop("status", outcome.status === "draft" ? outcome.status : null),
+              prop("review-status", outcome.spec.review_status),
+              prop("engine", outcome.engine),
+              prop("ksi-id", outcome.spec.ksi_id)
+            )
+              .concat(paramProps.filter(Boolean))
+              .concat(provenanceProps.filter(Boolean)),
+            methods: observationMethods(outcome),
+            types: outcome.status === "pass" || outcome.status === "fail" ? ["finding"] : ["control-objective"],
+            collected: nowIso(run.endedIso),
+            subjects: [
+              {
+                "subject-uuid": subjUuid,
+                type: "inventory-item",
+                title: "Enact check: " + outcome.spec.rule_id,
+                props: [
+                  { name: "resource-id", value: effectiveCheckId(outcome.spec) },
+                  { name: "result", value: outcome.status },
+                  { name: "evaluated-on", value: nowIso(run.endedIso) },
+                  { name: "reason", value: String(outcome.message || "").replace(/\n/g, " ") },
+                ],
+              },
+            ],
+          };
+          if (outcome.evidence && outcome.evidence.length) {
+            observation["relevant-evidence"] = outcome.evidence.map(function (item) {
+              var row = { description: item.description };
+              if (item.href) {
+                row.href = item.href;
+              }
+              return row;
+            });
+          }
+          return observation;
+        });
       }
     );
   }
@@ -1312,6 +1629,9 @@
   function runAssessment(options) {
     options = options || {};
     var documents = options.catalogs || (options.catalog ? [options.catalog] : []);
+    if (options.checks && options.checks["component-definition"]) {
+      documents = documents.concat([options.checks]);
+    }
     if (!documents.length) {
       return Promise.reject(new Error("Open a catalog JSON, or use the bundled example."));
     }
@@ -1391,6 +1711,8 @@
     NS: NS,
     loadBundle: loadBundle,
     parseChecks: parseChecks,
+    manifestFromComponentDefinition: manifestFromComponentDefinition,
+    groupPropsByRemarks: groupPropsByRemarks,
     suggestControl: suggestControl,
     manifestFromLibrary: manifestFromLibrary,
     resolveParams: resolveParams,

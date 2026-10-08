@@ -183,6 +183,8 @@ def _observation(run: AssessmentRun, outcome: CheckOutcome) -> dict[str, Any]:
         "title": outcome.spec.display_title(),
         "description": outcome.message,
         "props": _props(
+            _prop("assessment-rule-id", outcome.rule_id, ns=False),
+            _prop("Check_Id", outcome.spec.effective_check_id(), ns=False),
             _prop("rule-id", outcome.rule_id),
             _prop("control-id", outcome.control_id, ns=False),
             _prop("check-type", outcome.spec.check_type),
@@ -197,6 +199,19 @@ def _observation(run: AssessmentRun, outcome: CheckOutcome) -> dict[str, Any]:
         "methods": methods,
         "types": ["finding"] if outcome.status in {"pass", "fail"} else ["control-objective"],
         "collected": _now_iso(run.ended),
+        "subjects": [
+            {
+                "subject-uuid": _uuid("subj", outcome.rule_id, outcome.control_id, outcome.status),
+                "type": "inventory-item",
+                "title": f"Enact check: {outcome.rule_id}",
+                "props": [
+                    {"name": "resource-id", "value": outcome.spec.effective_check_id()},
+                    {"name": "result", "value": outcome.status},
+                    {"name": "evaluated-on", "value": _now_iso(run.ended)},
+                    {"name": "reason", "value": outcome.message.replace("\n", " ")},
+                ],
+            }
+        ],
     }
     if evidence:
         observation["relevant-evidence"] = evidence

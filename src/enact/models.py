@@ -35,9 +35,13 @@ class CheckSpec:
     payload_type: str | None = None
     payload_versions: list[str] = field(default_factory=list)
     payload_requires: list[str] = field(default_factory=list)
+    check_id: str | None = None
 
     def display_title(self) -> str:
         return self.title or self.rule_id
+
+    def effective_check_id(self) -> str:
+        return self.check_id or self.rule_id
 
 
 @dataclass
