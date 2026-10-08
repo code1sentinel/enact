@@ -221,6 +221,85 @@ def test_derive_checks_writes_file(example_dir: Path, tmp_path: Path) -> None:
     assert "deprecated" not in combined.lower() or "derive-manifest" not in combined
 
 
+def test_emit_component_definition_from_checks(example_dir: Path, tmp_path: Path) -> None:
+    dest = tmp_path / "component-definition.json"
+    result = runner.invoke(
+        app,
+        [
+            "emit-component-definition",
+            "--checks",
+            str(example_dir / "checks.json"),
+            "--oscal",
+            str(example_dir / "catalog.json"),
+            "-O",
+            str(dest),
+        ],
+    )
+    assert result.exit_code == 0, result.stdout + result.stderr
+    payload = json.loads(dest.read_text(encoding="utf-8"))
+    assert "component-definition" in payload
+    types = {comp["type"] for comp in payload["component-definition"]["components"]}
+    assert "validation" in types
+    assert "service" in types
+
+
+def test_run_with_component_definition_oscal(example_dir: Path, tmp_path: Path) -> None:
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--oscal",
+            str(example_dir / "catalog.json"),
+            "--oscal",
+            str(example_dir / "component-definition.json"),
+            "--input",
+            str(example_dir / "inputs" / "passing.json"),
+            "--workdir",
+            str(example_dir),
+            "--out",
+            str(tmp_path / "from-cd"),
+            "--title",
+            "CLI CD",
+        ],
+    )
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert "2 passed" in result.stdout
+    ar = json.loads((tmp_path / "from-cd" / "assessment-results.json").read_text(encoding="utf-8"))
+    props = ar["assessment-results"]["results"][0]["observations"][0]["props"]
+    assert any(item["name"] == "assessment-rule-id" for item in props)
+
+
+def test_run_with_component_definition_as_checks(example_dir: Path, tmp_path: Path) -> None:
+    result = runner.invoke(
+        app,
+        [
+            "run",
+            "--oscal",
+            str(example_dir / "catalog.json"),
+            "--checks",
+            str(example_dir / "component-definition.json"),
+            "--input",
+            str(example_dir / "inputs" / "passing.json"),
+            "--workdir",
+            str(example_dir),
+            "--out",
+            str(tmp_path / "checks-cd"),
+        ],
+    )
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert "2 passed" in result.stdout
+
+
+def test_init_writes_component_definition(tmp_path: Path) -> None:
+    dest = tmp_path / "project"
+    result = runner.invoke(app, ["init", "--check", "ac-login-lockout", "--out", str(dest)])
+    assert result.exit_code == 0, result.stdout + result.stderr
+    assert (dest / "checks.json").is_file()
+    assert (dest / "component-definition.json").is_file()
+    cdef = json.loads((dest / "component-definition.json").read_text(encoding="utf-8"))
+    assert cdef["component-definition"]["components"]
+
+
 def test_derive_manifest_alias_still_works(example_dir: Path, tmp_path: Path) -> None:
     dest = tmp_path / "from-alias.json"
     result = runner.invoke(

@@ -16,6 +16,12 @@ def test_catalog_params_and_statements(catalog_path: Path) -> None:
     assert "insert: param, c-ac-2_prm_1" in bundle.controls["c-ac-2"].statement
 
 
+def test_component_definition_set_parameters_overlay_bundle(example_dir: Path) -> None:
+    bundle = load_bundle([example_dir / "component-definition.json"])
+    assert bundle.get_params("c-ac-2", ["c-ac-2_prm_1"]) == {"c-ac-2_prm_1": "90"}
+    assert bundle.get_params("c-ac-7", ["c-ac-7_prm_1"]) == {"c-ac-7_prm_1": "5"}
+
+
 def test_profile_overrides_param(catalog_path: Path, tmp_path: Path) -> None:
     profile = {
         "profile": {

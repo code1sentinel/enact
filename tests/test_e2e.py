@@ -107,3 +107,62 @@ def test_derived_manifest_without_json(example_dir: Path, catalog_path: Path, pa
 def test_every_result_traces_to_control(catalog_path: Path) -> None:
     bundle = load_bundle([catalog_path])
     assert all(control.control_id for control in bundle.controls.values())
+
+
+def test_component_definition_end_to_end_matches_checks_json(
+    example_dir: Path, catalog_path: Path, manifest_path: Path, passing_input: Path, fixed_clock
+) -> None:
+    from datetime import datetime, timezone
+
+    def clock():
+        moments = iter(
+            [
+                datetime(2026, 10, 3, 12, 0, 0, tzinfo=timezone.utc),
+                datetime(2026, 10, 3, 12, 0, 2, tzinfo=timezone.utc),
+            ]
+        )
+        return lambda: next(moments)
+
+    json_run, _json_bundle = run_assessment(
+        [catalog_path],
+        manifest_path=manifest_path,
+        input_path=passing_input,
+        workdir=example_dir,
+        title="Access-control example",
+        clock=clock(),
+    )
+    cd_run, cd_bundle = run_assessment(
+        [catalog_path, example_dir / "component-definition.json"],
+        input_path=passing_input,
+        workdir=example_dir,
+        title="Access-control example",
+        clock=clock(),
+    )
+    assert [o.rule_id for o in cd_run.outcomes] == [o.rule_id for o in json_run.outcomes]
+    assert [o.status for o in cd_run.outcomes] == [o.status for o in json_run.outcomes]
+
+    ar = OscalAssessmentResultsWriter().render(cd_run, cd_bundle)
+    validate_assessment_results(ar)
+    observation = ar["assessment-results"]["results"][0]["observations"][0]
+    names = {prop["name"]: prop["value"] for prop in observation["props"]}
+    assert names["assessment-rule-id"] == cd_run.outcomes[0].rule_id
+    assert names["Check_Id"]
+    assert observation["subjects"][0]["type"] == "inventory-item"
+    subject_props = {prop["name"]: prop["value"] for prop in observation["subjects"][0]["props"]}
+    assert subject_props["resource-id"]
+    assert subject_props["result"] == cd_run.outcomes[0].status
+    validate_poam(OscalPoamWriter().render(cd_run, cd_bundle))
+
+
+def test_component_definition_as_checks_flag(
+    example_dir: Path, catalog_path: Path, passing_input: Path, fixed_clock
+) -> None:
+    run, _bundle = run_assessment(
+        [catalog_path],
+        manifest_path=example_dir / "component-definition.json",
+        input_path=passing_input,
+        workdir=example_dir,
+        clock=fixed_clock,
+    )
+    assert len(run.outcomes) == 4
+    assert run.outcomes[0].status == "pass"

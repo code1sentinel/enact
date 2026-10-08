@@ -8,8 +8,10 @@ import zipfile
 from pathlib import Path
 from typing import Any
 
+from enact.component_definition import emit_component_definition
 from enact.library import LibraryCheck, catalog_from_library, manifest_from_library, merge_inputs, oscal_control_id
 from enact.manifest import dump_manifest
+from enact.models import Manifest
 from enact.oscal_io import load_bundle
 
 WORKFLOW = """name: Enact
@@ -62,8 +64,10 @@ enact run \\
   --out out
 ```
 
-`--oscal` is the catalog you assessed. `--checks` maps each library check to a control.
-`--input` is the JSON config you exported. `--workdir` is where the Rego files live.
+`--oscal` is the catalog you assessed. `--checks` maps each library check to a control
+(a `checks.json` or an OSCAL Component Definition). `component-definition.json` is the
+C2P-shaped interchange mapping. `--input` is the JSON config you exported. `--workdir`
+is where the Rego files live.
 """
 
 
@@ -81,13 +85,18 @@ def write_project(
     (dest / "inputs").mkdir(exist_ok=True)
     (dest / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
 
-    manifest = dump_manifest(manifest_from_library(selections, title=title))
+    loaded = manifest_from_library(selections, title=title)
+    manifest = dump_manifest(loaded)
     sample = input_data if input_data is not None else merge_inputs(check.passing for check, _ in selections if check.passing)
     catalog_doc = catalog if catalog is not None else catalog_from_library(selections)
     written: list[Path] = []
 
     path = dest / "checks.json"
     path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    written.append(path)
+
+    path = dest / "component-definition.json"
+    path.write_text(json.dumps(_component_definition_for(loaded, catalog_doc), indent=2) + "\n", encoding="utf-8")
     written.append(path)
 
     path = dest / "catalog.json"
@@ -126,10 +135,15 @@ def project_zip(
 ) -> bytes:
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-        manifest = dump_manifest(manifest_from_library(selections, title=title))
+        loaded = manifest_from_library(selections, title=title)
+        manifest = dump_manifest(loaded)
         sample = input_data if input_data is not None else merge_inputs(check.passing for check, _ in selections if check.passing)
         catalog_doc = catalog if catalog is not None else catalog_from_library(selections)
         zf.writestr("checks.json", json.dumps(manifest, indent=2) + "\n")
+        zf.writestr(
+            "component-definition.json",
+            json.dumps(_component_definition_for(loaded, catalog_doc), indent=2) + "\n",
+        )
         zf.writestr("catalog.json", json.dumps(catalog_doc, indent=2) + "\n")
         zf.writestr("inputs/sample.json", json.dumps(sample, indent=2) + "\n")
         for check, _control_id in selections:
@@ -142,6 +156,39 @@ def project_zip(
         zf.writestr(".github/workflows/enact.yml", WORKFLOW)
         zf.writestr("README.md", README)
     return buffer.getvalue()
+
+
+def _component_definition_for(manifest: Manifest, catalog: dict[str, Any] | None) -> dict[str, Any]:
+    param_values: dict[str, str] = {}
+    title = manifest.title
+    if catalog and isinstance(catalog.get("catalog"), dict):
+        cat = catalog["catalog"]
+        meta = cat.get("metadata") or {}
+        if meta.get("title"):
+            title = str(meta["title"])
+        for control in cat.get("controls") or []:
+            for param in control.get("params") or []:
+                pid = param.get("id")
+                values = param.get("values") or []
+                if pid and values:
+                    param_values[str(pid)] = str(values[0])
+        for group in cat.get("groups") or []:
+            for control in group.get("controls") or []:
+                for param in control.get("params") or []:
+                    pid = param.get("id")
+                    values = param.get("values") or []
+                    if pid and values:
+                        param_values[str(pid)] = str(values[0])
+    for check in manifest.checks:
+        for pid in check.params:
+            param_values.setdefault(pid, "")
+    param_values = {key: value for key, value in param_values.items() if value}
+    return emit_component_definition(
+        manifest,
+        catalog_href="catalog.json",
+        param_values=param_values,
+        component_title=title or "System under assessment",
+    )
 
 
 def default_control_id(check: LibraryCheck, catalog: dict[str, Any] | None) -> str:
