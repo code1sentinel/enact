@@ -18,8 +18,8 @@ from enact.theme import (
 HTML_STATUS: dict[OutcomeStatus, str] = {
     "pass": "Passed",
     "fail": "Failed",
-    "not_automated": "Manual",
-    "needs_evidence": "Not checked",
+    "not_automated": "Need evidence",
+    "needs_evidence": "Need evidence",
     "error": "Failed",
     "draft": "Draft",
 }
@@ -359,7 +359,7 @@ def render_html(run: AssessmentRun, bundle: OscalBundle | None = None) -> str:
       </div>
       {theme_toggle_html()}
     </div>
-    <p class="lede">Each row is a check. Pass and fail come from automation. Manual and not-checked controls still need a person — that is not a failure. Draft stubs are unreviewed and never count as passed.</p>
+    <p class="lede">Each row is a check. Pass and fail come from automation. Controls that need evidence still need a person — that is not a failure. Draft stubs are unreviewed and never count as passed.</p>
     <div class="cards" aria-label="Result counts">
       <article class="card">
         <div class="card-top">
@@ -382,8 +382,8 @@ def render_html(run: AssessmentRun, bundle: OscalBundle | None = None) -> str:
       </article>
       <article class="card">
         <div class="card-top">
-          <span class="label">Manual / Not checked</span>
-          <span class="pill wait">Manual</span>
+          <span class="label">Need evidence</span>
+          <span class="pill wait">Need evidence</span>
         </div>
         <p class="count">{manual}</p>
         <p class="hint">Recorded as observations, not as failures.</p>
@@ -404,7 +404,7 @@ def render_html(run: AssessmentRun, bundle: OscalBundle | None = None) -> str:
         <button type="button" data-filter="all" aria-pressed="true">All</button>
         <button type="button" data-filter="pass">Passed</button>
         <button type="button" data-filter="fail">Failed</button>
-        <button type="button" data-filter="manual">Manual</button>
+        <button type="button" data-filter="manual">Need evidence</button>
         <button type="button" data-filter="draft">Draft</button>
       </div>
     </div>

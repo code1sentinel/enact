@@ -18,7 +18,7 @@
     <div class="wrap top__row">
       <div>
         <p class="brand">Enact</p>
-        <p class="tag">OSCAL controls become local checks, then assessment results.</p>
+        <p class="tag">Turn a list of security controls into checks you can run in this tab.</p>
       </div>
       <div class="top__meta">
         <nav class="top__links" aria-label="Project">
@@ -43,6 +43,14 @@
       <button type="button" data-go="evidence">3 Evidence</button>
       <button type="button" data-go="run">4 Run</button>
     </nav>
+    <aside id="progress-rail" class="progress wrap" aria-label="What is loaded">
+      <ul>
+        <li><span class="progress__label">Catalog</span> <span class="progress__value" id="progress-catalog">Not yet</span></li>
+        <li><span class="progress__label">Checks</span> <span class="progress__value" id="progress-checks">Not yet</span></li>
+        <li><span class="progress__label">Evidence</span> <span class="progress__value" id="progress-evidence">Not yet</span></li>
+        <li><span class="progress__label">Run</span> <span class="progress__value" id="progress-run">Not yet</span></li>
+      </ul>
+    </aside>
   </header>
 
   <main id="main" class="wrap">
@@ -50,17 +58,19 @@
       <strong>What is Enact?</strong>
       Codify writes the catalog; Enact runs the checks.
       <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
-      exports OSCAL; Enact runs Catalog → Checks → Evidence → Run in this tab,
-      then download OSCAL assessment results. Nothing leaves your browser.
+      exports
+      <span class="term" tabindex="0">OSCAL<span class="term__tip" role="tooltip">A standard way to write security controls as files so tools can share them.</span></span>;
+      Enact runs Catalog → Checks → Evidence → Run in this tab,
+      then you download assessment results. Nothing leaves your browser.
     </p>
     <p id="engine-status" class="note" role="status">Loading…</p>
     <p id="banner" class="banner" hidden role="alert"></p>
 
     <section id="step-catalog" class="step">
       <h1>Start with a catalog</h1>
-      <p class="lede">A catalog is the list of controls you want to assess. Use the bundled example, or open an OSCAL catalog JSON from this machine. Bytes stay in this tab — there is no upload.</p>
+      <p class="lede">A <span class="term" tabindex="0">catalog<span class="term__tip" role="tooltip">The list of controls you want to assess.</span></span> is the list of controls you want to assess. Use the bundled example, or open an OSCAL catalog JSON from this computer. Nothing is sent anywhere — there is no upload.</p>
       <div class="file-well">
-        <p>Drag is not required. Choose a local file, or start from the example.</p>
+        <p>Choose a local file, or start from the example.</p>
         <p class="filename" id="catalog-file-name">No file yet</p>
         <div class="actions">
           <button type="button" class="btn" id="use-example">Use the access-control example</button>
@@ -74,31 +84,57 @@
         <h2>No catalog yet</h2>
         <p>You do not need to write JSON by hand. Codify can turn a policy into a catalog, or use the example to see the rest of the walk-through.</p>
       </div>
+      <div id="load-summary" class="card load-summary" hidden>
+        <h2 id="load-summary-title">Example loaded — ready to run</h2>
+        <p id="load-summary-lede" class="note"></p>
+        <ul class="summary-counts" id="load-summary-counts"></ul>
+        <p id="load-summary-hint" class="note"></p>
+        <div class="actions">
+          <button type="button" class="btn" id="run-from-summary">Run the assessment</button>
+          <button type="button" class="btn btn--ghost" data-go="checks">Review checks first</button>
+        </div>
+      </div>
       <div id="catalog-summary" class="card" hidden>
         <h2 id="catalog-title"></h2>
         <p id="catalog-meta" class="note"></p>
         <ul id="catalog-controls" class="plain"></ul>
         <div class="actions">
-          <button type="button" class="btn" data-go="checks">Continue to checks</button>
+          <button type="button" class="btn btn--ghost" data-go="checks">Continue to checks</button>
         </div>
       </div>
     </section>
 
     <section id="step-checks" class="step" hidden>
       <h1>Choose checks</h1>
-      <p class="lede">Each check is a plain-English question Enact can ask of your catalog. Pick from the bundled library, or open a <code>checks.json</code> or OSCAL Component Definition you already have.</p>
-      <p class="hint-cli">Custom checks? Use the Enact CLI.</p>
-      <div class="actions">
-        <label class="btn btn--ghost">
-          Open checks.json or Component Definition
-          <input id="checks-file" type="file" accept="application/json,.json" hidden>
-        </label>
+      <p class="lede">Each check is a plain-English question Enact can ask. Checks that match this catalog are listed first, with the reason they apply.</p>
+      <div class="file-well" id="mapping-well">
+        <p>
+          Already have a mapping file? Open
+          <span class="term" tabindex="0">checks.json<span class="term__tip" role="tooltip">Enact's list of which check covers which control.</span></span>
+          or an
+          <span class="term" tabindex="0">OSCAL<span class="term__tip" role="tooltip">A standard way to write security controls as files so tools can share them.</span></span>
+          <span class="term" tabindex="0">Component Definition<span class="term__tip" role="tooltip">An OSCAL file that says which check implements which control. Same job as checks.json, in the standard OSCAL shape.</span></span>
+          — a standard list of which check implements which control.
+        </p>
+        <div class="actions">
+          <label class="btn btn--ghost">
+            Open a mapping file
+            <input id="checks-file" type="file" accept="application/json,.json" hidden>
+          </label>
+        </div>
       </div>
       <div id="checks-empty" class="empty" hidden>
         <h2>Load a catalog first</h2>
         <p>Go back to step 1 so we know which controls these checks should map to.</p>
       </div>
-      <div id="check-list" class="stack"></div>
+      <p id="checks-summary" class="note" hidden></p>
+      <div id="checks-used" class="stack"></div>
+      <details id="checks-unused" class="fold" hidden>
+        <summary id="checks-unused-summary">Other library checks</summary>
+        <p class="note">These starter checks do not match a control in the loaded catalog. Open one only if you want to map it by hand.</p>
+        <div id="checks-unused-list" class="stack"></div>
+      </details>
+      <div id="check-list" hidden></div>
       <div class="actions">
         <button type="button" class="btn" data-go="evidence">Continue to evidence</button>
       </div>
@@ -106,7 +142,11 @@
 
     <section id="step-evidence" class="step" hidden>
       <h1>Add evidence</h1>
-      <p class="lede">Automated checks read a JSON file that describes how the system is configured. Open one from this machine, or use a bundled sample. FileReader only — nothing is uploaded.</p>
+      <p class="lede">
+        <span class="term" tabindex="0">Evidence<span class="term__tip" role="tooltip">A settings file that describes how the system is configured right now.</span></span>
+        is a settings file — how often accounts are reviewed, the lockout threshold, and so on.
+        Open one from this computer, or use a bundled sample. Nothing is uploaded.
+      </p>
       <div class="file-well">
         <p class="filename" id="evidence-file-name">No file yet</p>
         <div class="actions">
@@ -118,10 +158,30 @@
           </label>
         </div>
       </div>
-      <pre id="evidence-preview" class="code" hidden></pre>
+      <p id="evidence-help" class="note">For a real assessment, bring a JSON settings file from your identity system (an IAM export) or an Enact adapter. The samples on this page are only for trying the walk-through.</p>
       <div id="evidence-empty" class="empty">
         <h2>No config file yet</h2>
         <p>If you are exploring, use a sample. For a real assessment, open the JSON you exported from IAM, logging, or an adapter.</p>
+      </div>
+      <div id="evidence-board" hidden>
+        <div class="view-toggle" role="tablist" aria-label="Evidence view">
+          <button type="button" id="evidence-view-table" aria-selected="true">Readable</button>
+          <button type="button" id="evidence-view-raw" aria-selected="false">Raw JSON</button>
+        </div>
+        <div id="evidence-table-wrap" class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Setting</th>
+                <th>Value</th>
+                <th>Limit from check</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="evidence-table"></tbody>
+          </table>
+        </div>
+        <pre id="evidence-preview" class="code" hidden></pre>
       </div>
       <div class="actions">
         <button type="button" class="btn" data-go="run">Continue to run</button>
@@ -130,59 +190,65 @@
 
     <section id="step-run" class="step" hidden>
       <h1>Run the assessment</h1>
-      <p class="lede">Enact evaluates the bundled library in this tab and writes the same OSCAL assessment-results shape as the CLI.</p>
+      <p class="lede">Enact evaluates the bundled library in this tab and writes the same assessment-results file as the CLI.</p>
       <div class="actions">
         <button type="button" class="btn" id="run-btn">Run Enact</button>
         <button type="button" class="btn btn--ghost" id="download-oscal">Download assessment-results.json</button>
         <button type="button" class="btn btn--ghost" id="download-html">Download HTML report</button>
-        <button type="button" class="btn btn--ghost" id="download-poam">Download poam.json</button>
+        <button type="button" class="btn btn--ghost" id="download-poam">Download <span class="term" tabindex="0">poam.json<span class="term__tip" role="tooltip">The downloadable list of failed checks that still need a fix (a POA&amp;M).</span></span></button>
       </div>
       <div id="run-empty" class="empty">
         <h2>Nothing has been run yet</h2>
-        <p>When you click Run, results appear here. You can then download OSCAL JSON and the HTML report.</p>
+        <p>When you click Run, results appear here. You can then download the results file and the HTML report.</p>
       </div>
       <div id="run-results" hidden>
         <div class="cards" aria-label="Result counts">
           <article class="card"><div class="label">Passed</div><p class="count" id="count-pass">0</p></article>
           <article class="card"><div class="label">Failed</div><p class="count" id="count-fail">0</p></article>
-          <article class="card"><div class="label">Manual / Not checked</div><p class="count" id="count-manual">0</p></article>
+          <article class="card"><div class="label">Need evidence</div><p class="count" id="count-manual">0</p></article>
           <article class="card"><div class="label">Draft</div><p class="count" id="count-draft">0</p></article>
         </div>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Control ID</th>
-                <th>Rule ID</th>
+                <th>Control</th>
+                <th>Check</th>
                 <th>Status</th>
                 <th>Why</th>
+                <th>Next step</th>
               </tr>
             </thead>
             <tbody id="result-rows"></tbody>
           </table>
         </div>
+        <details class="fold" id="oscal-preview-box">
+          <summary>Preview assessment-results.json</summary>
+          <p class="note">This is the official results file you can download. It uses the OSCAL standard so other GRC tools can read it.</p>
+          <pre id="oscal-preview" class="code"></pre>
+        </details>
       </div>
     </section>
 
     <section class="more" id="how-to-use" aria-labelledby="how-title">
       <h2 id="how-title">How to use it</h2>
       <ol class="path">
-        <li><b>Catalog</b> — use the example or open an OSCAL catalog JSON in this tab.</li>
-        <li><b>Checks</b> — pick bundled library checks, or open your <code>checks.json</code> or Component Definition.</li>
-        <li><b>Evidence</b> — open a local evidence JSON, or a passing/failing sample.</li>
-        <li><b>Run</b> — evaluate here, then download <code>assessment-results.json</code> and the HTML report.</li>
+        <li><b>Catalog</b> — use the example or open a catalog JSON in this tab.</li>
+        <li><b>Checks</b> — review the checks that apply, or open your mapping file.</li>
+        <li><b>Evidence</b> — open a local settings JSON, or a passing/failing sample.</li>
+        <li><b>Run</b> — evaluate here, then download the results and the HTML report.</li>
       </ol>
       <p class="note">
         <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a> writes the catalog;
-        Enact runs the checks. Custom checks? Use the Enact CLI.
+        Enact runs the checks.
       </p>
     </section>
 
     <section class="more" id="sample-reports" aria-labelledby="demo-title">
       <h2 id="demo-title">Sample reports</h2>
       <p class="note">
-        GitHub Actions also runs <code>enact run</code> on <code>examples/access-control/</code>.
-        These HTML reports and raw OSCAL JSON are generated, not hand-written.
+        GitHub Actions also runs Enact on the access-control example.
+        These HTML reports and raw results JSON are generated, not hand-written.
       </p>
       <div class="runs">
         <article class="card">
@@ -190,7 +256,7 @@
             <h3>Passing IAM config</h3>
             <span class="pill pass">Passed</span>
           </div>
-          <p>Review every 30 days, lockout after 3 tries, privileged review every 14 days — inside the OSCAL thresholds.</p>
+          <p>Review every 30 days, lockout after 3 tries, privileged review every 14 days — inside the catalog limits.</p>
           <p class="meta">2 passed · 2 need evidence · 0 POA&amp;M items</p>
           <ul class="links">
             <li><a href="examples/pass/summary.html">HTML report</a></li>
@@ -204,7 +270,7 @@
             <span class="pill fail">Failed</span>
           </div>
           <p>Review every 180 days, lockout after 20 tries, privileged review every 365 days — over the catalog limits.</p>
-          <p class="meta">3 failed · 1 not automated · 3 POA&amp;M items</p>
+          <p class="meta">3 failed · 1 need evidence · 3 POA&amp;M items</p>
           <ul class="links">
             <li><a href="examples/fail/summary.html">HTML report</a></li>
             <li><a href="examples/fail/assessment-results.json"><code>assessment-results.json</code></a></li>
@@ -215,14 +281,16 @@
     </section>
 
     <section class="more install" id="optional-cli" aria-labelledby="install-title">
-      <h2 id="install-title">Optional: CLI and CI</h2>
-      <p class="note">Power users and pipelines can install Python 3.10+ and <a href="https://www.openpolicyagent.org/docs/latest/#running-opa">OPA</a> 1.8.x, then use <code>enact ui</code> on localhost or <code>enact run</code> in CI. Custom / draft Rego stays on this path.</p>
+      <details class="advanced">
+        <summary id="install-title">Advanced — CLI, CI, and custom checks</summary>
+        <p class="note">For engineers: install locally to write your own checks or run Enact in GitHub Actions. Custom checks? Use the Enact CLI.</p>
+        <p class="note">Power users and pipelines can install Python 3.10+ and <a href="https://www.openpolicyagent.org/docs/latest/#running-opa">OPA</a> 1.8.x, then use <code>enact ui</code> on localhost or <code>enact run</code> in CI. Custom / draft <span class="term" tabindex="0">Rego<span class="term__tip" role="tooltip">The language used to write an automated check for OPA.</span></span> stays on this path.</p>
 <pre><code>git clone https://github.com/code1sentinel/enact.git
 cd enact
 pip install -e ".[dev]"   # or: uv sync --extra dev
 
 enact ui</code></pre>
-      <p class="note">The same runner for scripts and GitHub Actions:</p>
+        <p class="note">The same runner for scripts and GitHub Actions:</p>
 <pre><code>enact run \
   --oscal examples/access-control/catalog.json \
   --checks examples/access-control/checks.json \
@@ -238,7 +306,8 @@ enact run \
   --input examples/access-control/inputs/passing.json \
   --workdir examples/access-control \
   --out out/pass-cd</code></pre>
-      <p class="note">The failing run exits 1. That is expected: automated failures are the signal.</p>
+        <p class="note">The failing run exits 1. That is expected: automated failures are the signal.</p>
+      </details>
     </section>
   </main>
 
@@ -255,6 +324,7 @@ enact run \
   <script src="theme.js"></script>
   <script src="opa-eval.js"></script>
   <script src="enact.js"></script>
+  <script src="guide.js"></script>
   <script src="library.js"></script>
   <script src="app.js"></script>
 </body>

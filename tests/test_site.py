@@ -60,7 +60,11 @@ def test_landing_explains_what_enact_is_and_how_to_use_it() -> None:
     assert "spike" not in html.lower()
     for step in ("Catalog", "Checks", "Evidence", "Run"):
         assert step in html
-    assert "Optional: CLI and CI" in html
+    assert "Advanced" in html
+    assert "Optional: CLI and CI" in html or "CLI, CI, and custom checks" in html
     assert "Custom checks? Use the Enact CLI" in html
     assert 'id="use-example"' in html
     assert 'id="run-btn"' in html
+    assert 'id="load-summary"' in html
+    assert "Need evidence" in html
+    assert "Advanced" in html

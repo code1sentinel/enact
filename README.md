@@ -6,7 +6,7 @@
 
 **Enact:** https://code1sentinel.github.io/enact/
 
-Open the site, pick the bundled catalog (or your own catalog JSON and evidence JSON — FileReader, no upload), run the library checks, and download OSCAL assessment-results plus the HTML report. Custom checks? Use the Enact CLI. See [docs/prds/ui-first.md](docs/prds/ui-first.md) and [ADR 0014](docs/adr/0014-browser-app-is-primary.md).
+Open the site, pick the bundled catalog (or your own catalog JSON and evidence JSON — nothing is uploaded), run the library checks, and download OSCAL assessment-results plus the HTML report. The example load lists what was filled in and offers **Run**. Custom checks? Use the Enact CLI (under Advanced on the site). See [docs/prds/ui-first.md](docs/prds/ui-first.md) and [ADR 0014](docs/adr/0014-browser-app-is-primary.md).
 
 ## Quickstart
 

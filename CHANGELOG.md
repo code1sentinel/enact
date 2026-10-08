@@ -4,6 +4,10 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ## [Unreleased]
 
+### Changed
+
+- First-time walk-through on the in-browser app: after **Use the access-control example**, a summary lists how many controls and checks were loaded and which sample evidence, with **Run the assessment** as the next action. Checks that apply to the catalog (with a reason) sit above unused library checks. Evidence is a readable table plus a Raw JSON toggle. Results use **Need evidence** (same wording as the sample reports), add a next-step column, explain hybrid sign-off for `c-ac-2p`, and preview `assessment-results.json` in the page. Jargon has dotted-underline tooltips; CLI/Rego/install sit under **Advanced**. Component Definition loading from #16 stays on Checks with a one-line explanation. See [docs/prds/first-time-walkthrough.md](docs/prds/first-time-walkthrough.md).
+
 ### Added
 
 - OSCAL 1.1.2 Component Definition as the control-to-check interchange mapping, using C2P `Rule_Id` / `Check_Id` / `Parameter_*` conventions (Service + Validation components, remarks-grouped rule sets). `checks.json` still works. `enact emit-component-definition` converts existing checks. The CLI accepts a Component Definition as `--oscal` or `--checks`; the in-browser app accepts it on the Checks step. Assessment Results add C2P-shaped `assessment-rule-id` and `subjects` while remaining NIST 1.1.2 valid. See [ADR 0015](docs/adr/0015-oscal-component-definition-mapping.md) and [docs/prds/component-definition-mapping.md](docs/prds/component-definition-mapping.md).

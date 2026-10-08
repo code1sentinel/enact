@@ -56,6 +56,7 @@ def test_app_page_stays_same_origin_and_offline_of_cdns() -> None:
         assert host not in (SITE / "opa-eval.js").read_text(encoding="utf-8")
         assert host not in (SITE / "app.js").read_text(encoding="utf-8")
         assert host not in (SITE / "enact.js").read_text(encoding="utf-8")
+        assert host not in (SITE / "guide.js").read_text(encoding="utf-8")
     assert "Content-Security-Policy" in html
     assert "wasm-unsafe-eval" in html
     assert "connect-src 'self'" in html or "connect-src 'none'" in html
@@ -75,6 +76,7 @@ def test_app_page_stays_same_origin_and_offline_of_cdns() -> None:
     assert "assessment-results.json" in html
     assert 'src="opa-eval.js"' in html
     assert 'src="enact.js"' in html
+    assert 'src="guide.js"' in html
     assert 'src="app.js"' in html
 
 
@@ -259,3 +261,46 @@ def test_browser_oscal_from_component_definition(tmp_path: Path) -> None:
     assert browser["counts"]["pass"] == 2
     assert browser["counts"]["not_automated"] == 1
     assert browser["counts"]["needs_evidence"] == 1
+
+
+def test_first_time_walkthrough_copy_and_structure() -> None:
+    html = (SITE / "index.html").read_text(encoding="utf-8")
+    css = (SITE / "app.css").read_text(encoding="utf-8")
+    app = (SITE / "app.js").read_text(encoding="utf-8")
+    assert 'id="load-summary"' in html
+    assert 'id="run-from-summary"' in html
+    assert 'id="progress-rail"' in html
+    assert 'id="checks-used"' in html
+    assert 'id="checks-unused"' in html
+    assert "Component Definition" in html
+    assert "which check implements which control" in html or "which check covers which control" in html
+    assert 'id="evidence-table"' in html
+    assert 'id="evidence-view-table"' in html
+    assert 'id="evidence-view-raw"' in html
+    assert 'id="evidence-help"' in html
+    assert 'id="oscal-preview"' in html
+    assert "Need evidence" in html
+    assert "Manual / Not checked" not in html
+    assert "EnactGuide" in app
+    assert "optional-cli" in html
+    assert "<details" in html
+    assert "Advanced" in html
+    assert "FileReader only" not in html
+    assert "Drag is not required" not in html
+    assert "Bytes stay in this tab" not in html
+    assert ".term" in css
+
+
+def test_guide_helpers_cover_example_summary_evidence_and_results() -> None:
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node is required to evaluate walk-through helpers")
+    proc = subprocess.run(
+        [node, str(ROOT / "tests" / "eval_guide.js")],
+        capture_output=True,
+        text=True,
+        check=False,
+        cwd=ROOT,
+    )
+    assert proc.returncode == 0, proc.stderr or proc.stdout
+    assert "ok" in proc.stdout
