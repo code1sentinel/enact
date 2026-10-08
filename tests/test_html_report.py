@@ -19,7 +19,8 @@ def test_passing_report_has_count_cards_and_filters(
     html = HtmlWriter().render(run, bundle)
     assert "<h1>Access-control example</h1>" in html
     assert ">2</p>" in html  # passed count
-    assert "Manual / Not checked" in html
+    assert "Need evidence" in html
+    assert "Manual / Not checked" not in html
     assert 'aria-valuenow="100"' in html
     assert 'id="q"' in html
     assert 'data-filter="fail"' in html

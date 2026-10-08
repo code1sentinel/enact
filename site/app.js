@@ -2,9 +2,11 @@
   "use strict";
 
   var library = window.ENACT_LIBRARY || { checks: [], samples: {} };
+  var Guide = window.EnactGuide;
   var policy = null;
   var themeCss = "";
   var themeJs = "";
+  var evidenceView = "table";
   var state = {
     step: "catalog",
     catalog: null,
@@ -16,6 +18,7 @@
     evidenceName: "",
     selected: {},
     result: null,
+    exampleLoaded: false,
   };
 
   var banner = document.getElementById("banner");
@@ -37,6 +40,64 @@
     statusEl.dataset.kind = kind || "";
   }
 
+  function enabledChecks() {
+    return (library.checks || []).filter(function (check) {
+      return state.selected[check.rule_id] && state.selected[check.rule_id].enabled;
+    });
+  }
+
+  function renderProgress() {
+    var progress = Guide.progressFromState({
+      controls: state.bundle ? state.bundle.controls : {},
+      selected: state.selected,
+      evidenceName: state.evidenceName || "",
+      hasResult: Boolean(state.result),
+    });
+    document.getElementById("progress-catalog").textContent = progress.catalog;
+    document.getElementById("progress-checks").textContent = progress.checks;
+    document.getElementById("progress-evidence").textContent = progress.evidence;
+    document.getElementById("progress-run").textContent = progress.run;
+  }
+
+  function renderLoadSummary() {
+    var box = document.getElementById("load-summary");
+    var ready = Boolean(state.bundle && state.evidence && enabledChecks().length);
+    if (!ready) {
+      box.hidden = true;
+      return;
+    }
+    var summary = Guide.exampleLoadSummary({
+      title: state.exampleLoaded ? "Access-control example is ready" : "Ready to run",
+      controls: state.bundle.controls,
+      libraryChecks: library.checks,
+      selected: state.selected,
+      evidenceName: state.evidenceName,
+    });
+    document.getElementById("load-summary-title").textContent = summary.title;
+    document.getElementById("load-summary-lede").textContent =
+      "Loaded " +
+      summary.controlCount +
+      " controls and these checks: " +
+      summary.checkTitles.join("; ") +
+      ". Evidence: " +
+      summary.evidenceKind +
+      " (" +
+      summary.evidenceName +
+      ").";
+    var counts = document.getElementById("load-summary-counts");
+    counts.innerHTML =
+      "<li><strong>" +
+      summary.controlCount +
+      "</strong>controls</li><li><strong>" +
+      summary.checkCount +
+      "</strong>checks</li><li><strong>" +
+      Guide.escapeHtml(summary.evidenceKind) +
+      "</strong>evidence</li>";
+    document.getElementById("load-summary-hint").textContent = summary.nextHint;
+    document.getElementById("run-from-summary").textContent = summary.nextAction;
+    box.hidden = false;
+  }
+
   function go(step) {
     state.step = step;
     ["catalog", "checks", "evidence", "run"].forEach(function (name) {
@@ -50,6 +111,9 @@
         }
       }
     });
+    if (step === "catalog") {
+      renderLoadSummary();
+    }
     if (step === "checks") {
       renderChecks();
     }
@@ -59,6 +123,7 @@
     if (step === "run") {
       renderRun();
     }
+    renderProgress();
   }
 
   function readFile(input) {
@@ -113,6 +178,8 @@
     if (!state.checksDoc) {
       seedLibrarySelection();
     }
+    renderLoadSummary();
+    renderProgress();
     showBanner("");
   }
 
@@ -145,6 +212,7 @@
     state.checksName = "access-control/checks.json";
     state.evidence = sample.passing;
     state.evidenceName = "passing.json";
+    state.exampleLoaded = true;
     var selected = {};
     sample.checks.checks.forEach(function (check) {
       selected[check.rule_id] = {
@@ -160,98 +228,35 @@
     });
     state.selected = selected;
     renderEvidence();
-    showBanner("Loaded the access-control example. Catalog, checks, and passing evidence are in this tab.");
+    renderLoadSummary();
+    renderProgress();
+    showBanner("");
   }
 
-  function renderChecks() {
-    var empty = document.getElementById("checks-empty");
-    var list = document.getElementById("check-list");
-    if (!state.bundle) {
-      empty.hidden = false;
-      list.innerHTML = "";
-      return;
-    }
-    empty.hidden = true;
-    list.innerHTML = "";
-    if (state.checksDoc) {
-      var note = document.createElement("p");
-      note.className = "note";
-      note.textContent =
-        "Using " +
-        (state.checksName || "checks.json") +
-        (state.checksDoc && state.checksDoc["component-definition"]
-          ? " (OSCAL Component Definition)"
-          : "") +
-        " from this tab.";
-      list.appendChild(note);
-    }
-    (library.checks || []).forEach(function (check) {
-      var sel = state.selected[check.rule_id] || { enabled: false, control_id: "", params: {} };
-      var card = document.createElement("article");
-      card.className = "check";
-      var controls = Object.keys(state.bundle.controls);
-      var options = ['<option value="">—</option>']
-        .concat(
-          controls.map(function (id) {
-            var selected = sel.control_id === id ? " selected" : "";
-            return '<option value="' + id + '"' + selected + ">" + id + " — " + (state.bundle.controls[id].title || "") + "</option>";
-          })
-        )
-        .join("");
-      var params = (check.params || [])
-        .map(function (param) {
-          var value = sel.params[param.id] || (param.values && param.values[0]) || "";
-          return (
-            '<label class="field">' +
-            param.label +
-            ' <input data-param="' +
-            check.rule_id +
-            ":" +
-            param.id +
-            '" value="' +
-            String(value).replace(/"/g, "&quot;") +
-            '"></label>'
-          );
-        })
-        .join("");
-      card.innerHTML =
-        '<div class="check-top"><label class="check-enable"><input type="checkbox" data-enable="' +
-        check.rule_id +
-        '"' +
-        (sel.enabled ? " checked" : "") +
-        "> " +
-        check.title +
-        '</label><span class="pill ' +
-        check.check_type +
-        '">' +
-        check.check_type +
-        "</span></div><p class=\"note\">" +
-        check.description +
-        '</p><label class="field">Map to control <select data-control="' +
-        check.rule_id +
-        '">' +
-        options +
-        "</select></label>" +
-        params;
-      list.appendChild(card);
-    });
-    list.querySelectorAll("[data-enable]").forEach(function (box) {
+  function bindCheckCard(card) {
+    card.querySelectorAll("[data-enable]").forEach(function (box) {
       box.addEventListener("change", function () {
         var id = box.getAttribute("data-enable");
         state.selected[id] = state.selected[id] || { enabled: false, control_id: "", params: {} };
         state.selected[id].enabled = box.checked;
         state.checksDoc = null;
+        state.exampleLoaded = false;
+        renderChecks();
+        renderLoadSummary();
+        renderProgress();
       });
     });
-    list.querySelectorAll("[data-control]").forEach(function (select) {
+    card.querySelectorAll("[data-control]").forEach(function (select) {
       select.addEventListener("change", function () {
         var id = select.getAttribute("data-control");
         state.selected[id] = state.selected[id] || { enabled: false, control_id: "", params: {} };
         state.selected[id].control_id = select.value;
         state.checksDoc = null;
+        renderChecks();
+        renderProgress();
       });
     });
-    list.querySelectorAll("[data-param]").forEach(function (input) {
+    card.querySelectorAll("[data-param]").forEach(function (input) {
       input.addEventListener("input", function () {
         var parts = input.getAttribute("data-param").split(":");
         var id = parts[0];
@@ -262,33 +267,180 @@
     });
   }
 
-  function renderEvidence() {
-    var empty = document.getElementById("evidence-empty");
-    var preview = document.getElementById("evidence-preview");
-    var name = document.getElementById("evidence-file-name");
-    if (!state.evidence) {
+  function renderCheckCard(item, unused) {
+    var check = item.check;
+    var sel = state.selected[check.rule_id] || { enabled: false, control_id: "", params: {} };
+    var card = document.createElement("article");
+    card.className = "check" + (unused ? " check--unused" : " check--used");
+    var controls = state.bundle ? Object.keys(state.bundle.controls) : [];
+    var options = ['<option value="">—</option>']
+      .concat(
+        controls.map(function (id) {
+          var chosen = sel.control_id === id ? " selected" : "";
+          return (
+            '<option value="' +
+            id +
+            '"' +
+            chosen +
+            ">" +
+            id +
+            " — " +
+            (state.bundle.controls[id].title || "") +
+            "</option>"
+          );
+        })
+      )
+      .join("");
+    var params = (check.params || [])
+      .map(function (param) {
+        var value = sel.params[param.id] || (param.values && param.values[0]) || "";
+        return (
+          '<label class="field">' +
+          Guide.escapeHtml(param.label) +
+          ' <input data-param="' +
+          check.rule_id +
+          ":" +
+          param.id +
+          '" value="' +
+          Guide.escapeHtml(value) +
+          '"></label>'
+        );
+      })
+      .join("");
+    var mapping =
+      '<details class="check-map"><summary>Change which control this maps to</summary><label class="field">Map to control <select data-control="' +
+      check.rule_id +
+      '">' +
+      options +
+      "</select></label>" +
+      params +
+      "</details>";
+    card.innerHTML =
+      '<div class="check-top"><label class="check-enable"><input type="checkbox" data-enable="' +
+      check.rule_id +
+      '"' +
+      (sel.enabled ? " checked" : "") +
+      "> " +
+      Guide.escapeHtml(check.title) +
+      '</label><span class="pill ' +
+      check.check_type +
+      '">' +
+      Guide.termHtml(check.check_type, Guide.typeLabel(check.check_type)) +
+      "</span></div><p class=\"check-reason\">" +
+      Guide.escapeHtml(item.reason.text) +
+      '</p><p class="note">' +
+      Guide.escapeHtml(check.description) +
+      "</p>" +
+      mapping;
+    bindCheckCard(card);
+    return card;
+  }
+
+  function renderChecks() {
+    var empty = document.getElementById("checks-empty");
+    var usedBox = document.getElementById("checks-used");
+    var unusedWrap = document.getElementById("checks-unused");
+    var unusedList = document.getElementById("checks-unused-list");
+    var summary = document.getElementById("checks-summary");
+    usedBox.innerHTML = "";
+    unusedList.innerHTML = "";
+    if (!state.bundle) {
       empty.hidden = false;
-      preview.hidden = true;
-      name.textContent = "No file yet";
+      unusedWrap.hidden = true;
+      summary.hidden = true;
       return;
     }
     empty.hidden = true;
-    preview.hidden = false;
-    preview.textContent = JSON.stringify(state.evidence, null, 2);
-    name.textContent = state.evidenceName || "evidence.json";
+    var classified = Guide.classifyLibraryChecks(
+      library.checks || [],
+      state.selected,
+      state.bundle.controls,
+      window.Enact.suggestControl
+    );
+    var mappingNote = "";
+    if (state.checksDoc) {
+      mappingNote =
+        "Using " +
+        (state.checksName || "checks.json") +
+        (state.checksDoc["component-definition"] ? " (OSCAL Component Definition)" : "") +
+        " from this tab. ";
+    }
+    summary.hidden = false;
+    summary.textContent =
+      mappingNote +
+      classified.used.length +
+      " checks apply to this catalog. " +
+      classified.unused.length +
+      " other library checks are unused.";
+    classified.used.forEach(function (item) {
+      usedBox.appendChild(renderCheckCard(item, false));
+    });
+    unusedWrap.hidden = classified.unused.length === 0;
+    document.getElementById("checks-unused-summary").textContent =
+      "Other library checks (" + classified.unused.length + ") — not used for this catalog";
+    classified.unused.forEach(function (item) {
+      unusedList.appendChild(renderCheckCard(item, true));
+    });
   }
 
-  function statusLabel(status) {
-    return (
-      {
-        pass: "Passed",
-        fail: "Failed",
-        not_automated: "Manual",
-        needs_evidence: "Not checked",
-        error: "Failed",
-        draft: "Draft",
-      }[status] || status
-    );
+  function setEvidenceView(view) {
+    evidenceView = view;
+    var tableWrap = document.getElementById("evidence-table-wrap");
+    var raw = document.getElementById("evidence-preview");
+    var tableBtn = document.getElementById("evidence-view-table");
+    var rawBtn = document.getElementById("evidence-view-raw");
+    var showTable = view === "table";
+    tableWrap.hidden = !showTable;
+    raw.hidden = showTable;
+    tableBtn.setAttribute("aria-selected", showTable ? "true" : "false");
+    rawBtn.setAttribute("aria-selected", showTable ? "false" : "true");
+  }
+
+  function renderEvidence() {
+    var empty = document.getElementById("evidence-empty");
+    var board = document.getElementById("evidence-board");
+    var preview = document.getElementById("evidence-preview");
+    var name = document.getElementById("evidence-file-name");
+    var table = document.getElementById("evidence-table");
+    var help = document.getElementById("evidence-help");
+    help.textContent = Guide.evidenceHelp(enabledChecks());
+    if (!state.evidence) {
+      empty.hidden = false;
+      board.hidden = true;
+      name.textContent = "No file yet";
+      renderProgress();
+      return;
+    }
+    empty.hidden = true;
+    board.hidden = false;
+    preview.textContent = JSON.stringify(state.evidence, null, 2);
+    name.textContent = state.evidenceName || "evidence.json";
+    var rows = Guide.evidenceRows(state.evidence, {
+      libraryChecks: library.checks,
+      selected: state.selected,
+      controls: state.bundle ? state.bundle.controls : {},
+    });
+    table.innerHTML = "";
+    rows.forEach(function (row) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" +
+        Guide.escapeHtml(row.label) +
+        "<div class=\"note\"><code>" +
+        Guide.escapeHtml(row.setting) +
+        "</code></div></td><td>" +
+        Guide.escapeHtml(row.value) +
+        "</td><td>" +
+        (row.limit == null ? "—" : Guide.escapeHtml(row.limit)) +
+        '</td><td class="status-' +
+        row.status +
+        '">' +
+        Guide.escapeHtml(row.statusLabel) +
+        "</td>";
+      table.appendChild(tr);
+    });
+    setEvidenceView(evidenceView);
+    renderProgress();
   }
 
   function renderRun() {
@@ -309,21 +461,27 @@
     var body = document.getElementById("result-rows");
     body.innerHTML = "";
     state.result.outcomes.forEach(function (outcome) {
+      var guide = Guide.resultGuidance(outcome);
       var row = document.createElement("tr");
       row.innerHTML =
         "<td><code>" +
-        outcome.control_id +
-        "</code></td><td><code>" +
-        outcome.rule_id +
-        '</code></td><td><span class="pill ' +
+        Guide.escapeHtml(outcome.control_id) +
+        "</code></td><td>" +
+        Guide.escapeHtml(outcome.rule_id) +
+        '</td><td><span class="pill ' +
         outcome.status +
+        " " +
+        (outcome.check_type || "") +
         '">' +
-        statusLabel(outcome.status) +
+        Guide.escapeHtml(guide.label) +
         "</span></td><td>" +
-        outcome.message +
+        Guide.escapeHtml(outcome.message) +
+        '</td><td class="next-step">' +
+        Guide.escapeHtml(guide.next) +
         "</td>";
       body.appendChild(row);
     });
+    document.getElementById("oscal-preview").textContent = JSON.stringify(state.result.oscal, null, 2);
   }
 
   function currentManifest() {
@@ -396,6 +554,7 @@
       .then(function (result) {
         state.result = result;
         renderRun();
+        renderProgress();
         setStatus("Evaluated in this tab. Nothing was uploaded.", "ok");
         showBanner("");
         go("run");
@@ -412,6 +571,7 @@
     });
   });
   document.getElementById("use-example").addEventListener("click", useExample);
+  document.getElementById("run-from-summary").addEventListener("click", runAssessment);
   document.getElementById("catalog-file").addEventListener("change", function (event) {
     readFile(event.target)
       .then(function (file) {
@@ -420,6 +580,7 @@
             "That is a Component Definition. Open a catalog here, then open the Component Definition on Checks."
           );
         }
+        state.exampleLoaded = false;
         setCatalog(file.data, file.name);
       })
       .catch(function (err) {
@@ -443,6 +604,8 @@
           };
         });
         renderChecks();
+        renderLoadSummary();
+        renderProgress();
         showBanner("Loaded " + file.name + " in this tab.");
       })
       .catch(function (err) {
@@ -455,6 +618,7 @@
         state.evidence = file.data;
         state.evidenceName = file.name;
         renderEvidence();
+        renderLoadSummary();
         showBanner("Loaded " + file.name + " in this tab. Nothing was uploaded.");
       })
       .catch(function (err) {
@@ -469,6 +633,7 @@
     state.evidence = sample.passing;
     state.evidenceName = "passing.json";
     renderEvidence();
+    renderLoadSummary();
   });
   document.getElementById("use-failing").addEventListener("click", function () {
     var sample = library.samples && library.samples["access-control"];
@@ -478,6 +643,13 @@
     state.evidence = sample.failing;
     state.evidenceName = "failing.json";
     renderEvidence();
+    renderLoadSummary();
+  });
+  document.getElementById("evidence-view-table").addEventListener("click", function () {
+    setEvidenceView("table");
+  });
+  document.getElementById("evidence-view-raw").addEventListener("click", function () {
+    setEvidenceView("raw");
   });
   document.getElementById("run-btn").addEventListener("click", runAssessment);
   document.getElementById("download-oscal").addEventListener("click", function () {

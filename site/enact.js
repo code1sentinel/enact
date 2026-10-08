@@ -40,8 +40,8 @@
   var HTML_STATUS = {
     pass: "Passed",
     fail: "Failed",
-    not_automated: "Manual",
-    needs_evidence: "Not checked",
+    not_automated: "Need evidence",
+    needs_evidence: "Need evidence",
     error: "Failed",
     draft: "Draft",
   };
@@ -1596,7 +1596,7 @@
         REPORT_CSS +
         "</style>\n</head>\n<body>\n  <div class=\"wrap\">\n    <div class=\"report-head\">\n      <div>\n        <p class=\"kicker\">Enact assessment</p>\n        <h1>" +
         escapeHtml(run.title) +
-        "</h1>\n      </div>\n      <div class=\"theme-toggle\"><p class=\"theme-toggle__label\" id=\"theme-toggle-label\">Appearance</p><div class=\"theme-toggle__group\" role=\"radiogroup\" aria-labelledby=\"theme-toggle-label\"><button type=\"button\" role=\"radio\" aria-checked=\"false\" data-theme-choice=\"light\">Light</button><button type=\"button\" role=\"radio\" aria-checked=\"false\" data-theme-choice=\"dark\">Dark</button><button type=\"button\" role=\"radio\" aria-checked=\"true\" data-theme-choice=\"system\">System</button></div></div>\n    </div>\n    <p class=\"lede\">Each row is a check. Pass and fail come from automation. Manual and not-checked controls still need a person — that is not a failure. Draft stubs are unreviewed and never count as passed.</p>\n    <div class=\"cards\" aria-label=\"Result counts\">\n      <article class=\"card\"><div class=\"card-top\"><span class=\"label\">Passed</span><span class=\"pill pass\">Passed</span></div><p class=\"count\">" +
+        "</h1>\n      </div>\n      <div class=\"theme-toggle\"><p class=\"theme-toggle__label\" id=\"theme-toggle-label\">Appearance</p><div class=\"theme-toggle__group\" role=\"radiogroup\" aria-labelledby=\"theme-toggle-label\"><button type=\"button\" role=\"radio\" aria-checked=\"false\" data-theme-choice=\"light\">Light</button><button type=\"button\" role=\"radio\" aria-checked=\"false\" data-theme-choice=\"dark\">Dark</button><button type=\"button\" role=\"radio\" aria-checked=\"true\" data-theme-choice=\"system\">System</button></div></div>\n    </div>\n    <p class=\"lede\">Each row is a check. Pass and fail come from automation. Controls that need evidence still need a person — that is not a failure. Draft stubs are unreviewed and never count as passed.</p>\n    <div class=\"cards\" aria-label=\"Result counts\">\n      <article class=\"card\"><div class=\"card-top\"><span class=\"label\">Passed</span><span class=\"pill pass\">Passed</span></div><p class=\"count\">" +
         passed +
         '</p><div class="bar" role="progressbar" aria-label="Pass rate" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' +
         rate +
@@ -1608,11 +1608,11 @@
         escapeHtml(rateHint) +
         '</p></article>\n      <article class="card"><div class="card-top"><span class="label">Failed</span><span class="pill fail">Failed</span></div><p class="count">' +
         failed +
-        "</p><p class=\"hint\">Automated and hybrid failures become POA&amp;M items.</p></article>\n      <article class=\"card\"><div class=\"card-top\"><span class=\"label\">Manual / Not checked</span><span class=\"pill wait\">Manual</span></div><p class=\"count\">" +
+        "</p><p class=\"hint\">Automated and hybrid failures become POA&amp;M items.</p></article>\n      <article class=\"card\"><div class=\"card-top\"><span class=\"label\">Need evidence</span><span class=\"pill wait\">Need evidence</span></div><p class=\"count\">" +
         manual +
         "</p><p class=\"hint\">Recorded as observations, not as failures.</p></article>\n      <article class=\"card\"><div class=\"card-top\"><span class=\"label\">Draft</span><span class=\"pill draft\">Draft</span></div><p class=\"count\">" +
         draft +
-        "</p><p class=\"hint\">Generated stubs. Untrusted until <code>enact checks review</code>.</p></article>\n    </div>\n    <div class=\"toolbar\"><label class=\"visually-hidden\" for=\"q\" style=\"position:absolute;left:-9999px\">Search controls</label><input id=\"q\" type=\"search\" placeholder=\"Search control ID, rule ID, or message\"><div class=\"filters\" role=\"group\" aria-label=\"Filter by status\"><button type=\"button\" data-filter=\"all\" aria-pressed=\"true\">All</button><button type=\"button\" data-filter=\"pass\">Passed</button><button type=\"button\" data-filter=\"fail\">Failed</button><button type=\"button\" data-filter=\"manual\">Manual</button><button type=\"button\" data-filter=\"draft\">Draft</button></div></div>\n    <div class=\"table-wrap\"><table><thead><tr><th>Control ID</th><th>Rule ID</th><th>Check type</th><th>Status</th></tr></thead><tbody>" +
+        "</p><p class=\"hint\">Generated stubs. Untrusted until <code>enact checks review</code>.</p></article>\n    </div>\n    <div class=\"toolbar\"><label class=\"visually-hidden\" for=\"q\" style=\"position:absolute;left:-9999px\">Search controls</label><input id=\"q\" type=\"search\" placeholder=\"Search control ID, rule ID, or message\"><div class=\"filters\" role=\"group\" aria-label=\"Filter by status\"><button type=\"button\" data-filter=\"all\" aria-pressed=\"true\">All</button><button type=\"button\" data-filter=\"pass\">Passed</button><button type=\"button\" data-filter=\"fail\">Failed</button><button type=\"button\" data-filter=\"manual\">Need evidence</button><button type=\"button\" data-filter=\"draft\">Draft</button></div></div>\n    <div class=\"table-wrap\"><table><thead><tr><th>Control ID</th><th>Rule ID</th><th>Check type</th><th>Status</th></tr></thead><tbody>" +
         rowsHtml +
         '</tbody></table><p class="empty" id="empty" hidden>No checks match this search or filter.</p></div>\n    <footer class="note">Generated by Enact ' +
         escapeHtml(VERSION) +

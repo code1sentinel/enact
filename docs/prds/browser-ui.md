@@ -43,6 +43,7 @@ Reuse Enact tokens (`site/theme.css`) and the `enact ui` pill stepper. Layout ci
 - Guided progress checklist: [Vanta — Starter guide](https://mobbin.com/flows/81f0e7b6-ece8-4f14-8c2a-7bdbf8d045ce)
 - Local file well + choose file: [Mistral AI — Upload Documents](https://mobbin.com/screens/77f399e9-65be-4bf0-9ae9-462c63a5f547), [Fiverr — Choose files](https://mobbin.com/screens/9feef30c-b0e1-4cde-ac17-6d149f641206)
 - Results count cards after a run: [Codecademy — Completing an assessment](https://mobbin.com/flows/4a76a2f1-e45c-4d90-a3aa-a30debcc9f44)
+- First-time walk-through polish: [first-time-walkthrough.md](first-time-walkthrough.md) (Twingate / Zoho / Vanta / Mixpanel / Supabase / Stripe / Square / Replit / Attio)
 
 ## Shape
 

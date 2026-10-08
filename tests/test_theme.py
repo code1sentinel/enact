@@ -187,7 +187,7 @@ def test_report_is_self_contained_with_toggle_and_both_token_sets() -> None:
     assert "cdn." not in html
     assert "fetch(" not in html
     assert html.count("<link") == 0
-    assert "Passed" in html and "Failed" in html and "Manual" in html
+    assert "Passed" in html and "Failed" in html and "Need evidence" in html
     assert theme_bootstrap_csp_hash() in html or "unsafe-inline" in html
 
 

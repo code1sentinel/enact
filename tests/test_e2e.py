@@ -50,7 +50,7 @@ def test_passing_input_end_to_end(
     assert "Needs a person" in markdown
     assert "c-ac-8" in markdown
     html = HtmlWriter().render(run, bundle)
-    assert "Not checked" in html or "Manual" in html
+    assert "Need evidence" in html or "Not checked" in html or "Manual" in html
     assert 'role="progressbar"' in html
     assert 'data-filter="pass"' in html
 
