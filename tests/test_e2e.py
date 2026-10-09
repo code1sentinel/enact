@@ -47,7 +47,10 @@ def test_passing_input_end_to_end(
     assert poam["plan-of-action-and-milestones"]["poam-items"][0]["title"] == "No open items"
 
     markdown = MarkdownWriter().render(run, bundle)
-    assert "Needs a person" in markdown
+    assert "## Need evidence" in markdown
+    assert "**Need evidence**" in markdown
+    assert "Needs a person" not in markdown
+    assert "Not automated" not in markdown
     assert "c-ac-8" in markdown
     html = HtmlWriter().render(run, bundle)
     assert "Need evidence" in html or "Not checked" in html or "Manual" in html

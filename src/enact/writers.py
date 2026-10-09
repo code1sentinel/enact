@@ -19,8 +19,8 @@ UUID_NS = uuid.UUID("d4c6f1e2-7a91-4b33-9c0e-3e8f2a1b5d70")
 STATUS_LABELS: dict[OutcomeStatus, str] = {
     "pass": "Pass",
     "fail": "Fail",
-    "not_automated": "Not automated",
-    "needs_evidence": "Needs evidence",
+    "not_automated": "Need evidence",
+    "needs_evidence": "Need evidence",
     "error": "Error",
     "draft": "Draft",
 }
@@ -359,7 +359,7 @@ class MarkdownWriter(TextWriter):
             lines.append("")
         pending = [o for o in run.outcomes if o.status in {"needs_evidence", "not_automated"}]
         if pending:
-            lines += ["## Needs a person", ""]
+            lines += ["## Need evidence", ""]
             for outcome in pending:
                 needed = outcome.spec.evidence_needed or outcome.message
                 lines.append(f"- **{outcome.control_id}** (`{outcome.rule_id}`): {needed}")

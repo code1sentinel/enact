@@ -54,21 +54,38 @@
   </header>
 
   <main id="main" class="wrap">
-    <p class="lede" id="what-enact">
-      <strong>What is Enact?</strong>
-      Codify writes the catalog; Enact runs the checks.
-      <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
-      exports
-      <span class="term" tabindex="0">OSCAL<span class="term__tip" role="tooltip">A standard way to write security controls as files so tools can share them.</span></span>;
-      Enact runs Catalog → Checks → Evidence → Run in this tab,
-      then you download assessment results. Nothing leaves your browser.
-    </p>
+    <div class="landing-top" id="landing-top">
+      <div class="landing-copy">
+        <p class="lede" id="what-enact">
+          <strong>What is Enact?</strong>
+          Codify writes the catalog; Enact runs the checks.
+          <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a>
+          exports
+          <span class="term" tabindex="0">OSCAL<span class="term__tip" role="tooltip">A standard way to write security controls as files so tools can share them.</span></span>;
+          Enact runs Catalog → Checks → Evidence → Run in this tab,
+          then you download assessment results. Nothing leaves your browser.
+        </p>
+      </div>
+      <section class="how-card" id="how-to-use" aria-labelledby="how-title">
+        <h2 id="how-title">How to use it</h2>
+        <ol class="path">
+          <li><b>Catalog</b> — use the example or open a catalog JSON in this tab.</li>
+          <li><b>Checks</b> — review the checks that apply, or open your mapping file.</li>
+          <li><b>Evidence</b> — open a local settings JSON, or a passing/failing sample.</li>
+          <li><b>Run</b> — evaluate here, then download the results and the HTML report.</li>
+        </ol>
+        <p class="note">
+          <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a> writes the catalog;
+          Enact runs the checks.
+        </p>
+      </section>
+    </div>
     <p id="engine-status" class="note" role="status">Loading…</p>
     <p id="banner" class="banner" hidden role="alert"></p>
 
     <section id="step-catalog" class="step">
       <h1>Start with a catalog</h1>
-      <p class="lede">A <span class="term" tabindex="0">catalog<span class="term__tip" role="tooltip">The list of controls you want to assess.</span></span> is the list of controls you want to assess. Use the bundled example, or open an OSCAL catalog JSON from this computer. Nothing is sent anywhere — there is no upload.</p>
+      <p class="lede">A <span class="term" tabindex="0">catalog<span class="term__tip" role="tooltip">The list of controls you want to assess.</span></span> is the list of controls you want to assess. Use the bundled example, or open an <span class="term" tabindex="0">OSCAL<span class="term__tip" role="tooltip">A standard way to write security controls as files so tools can share them.</span></span> catalog JSON from this computer. Nothing is sent anywhere — there is no upload.</p>
       <div class="file-well">
         <p>Choose a local file, or start from the example.</p>
         <p class="filename" id="catalog-file-name">No file yet</p>
@@ -193,20 +210,20 @@
       <p class="lede">Enact evaluates the bundled library in this tab and writes the same assessment-results file as the CLI.</p>
       <div class="actions">
         <button type="button" class="btn" id="run-btn">Run Enact</button>
-        <button type="button" class="btn btn--ghost" id="download-oscal">Download assessment-results.json</button>
-        <button type="button" class="btn btn--ghost" id="download-html">Download HTML report</button>
-        <button type="button" class="btn btn--ghost" id="download-poam">Download <span class="term" tabindex="0">poam.json<span class="term__tip" role="tooltip">The downloadable list of failed checks that still need a fix (a POA&amp;M).</span></span></button>
+        <button type="button" class="btn btn--ghost" id="download-oscal" disabled title="Available after you run the assessment.">Download assessment-results.json</button>
+        <button type="button" class="btn btn--ghost" id="download-html" disabled title="Available after you run the assessment.">Download HTML report</button>
+        <button type="button" class="btn btn--ghost" id="download-poam" disabled title="Available after you run the assessment.">Download poam.json</button>
       </div>
       <div id="run-empty" class="empty">
         <h2>Nothing has been run yet</h2>
-        <p>When you click Run, results appear here. You can then download the results file and the HTML report.</p>
+        <p>When you click Run, results appear here. You can then download the official results file (<span class="term" tabindex="0">assessment-results.json<span class="term__tip" role="tooltip">The official results file. Other GRC tools can read it because it uses the OSCAL standard.</span></span>), a readable HTML report, and the <span class="term" tabindex="0">POA&amp;M<span class="term__tip" role="tooltip">Plan of Action and Milestones — the list of failed checks that still need a fix.</span></span> list of failed checks (<span class="term" tabindex="0">poam.json<span class="term__tip" role="tooltip">The downloadable list of failed checks that still need a fix (a POA&amp;M).</span></span>).</p>
       </div>
       <div id="run-results" hidden>
         <div class="cards" aria-label="Result counts">
-          <article class="card"><div class="label">Passed</div><p class="count" id="count-pass">0</p></article>
-          <article class="card"><div class="label">Failed</div><p class="count" id="count-fail">0</p></article>
-          <article class="card"><div class="label">Need evidence</div><p class="count" id="count-manual">0</p></article>
-          <article class="card"><div class="label">Draft</div><p class="count" id="count-draft">0</p></article>
+          <article class="card"><div class="label">Passed</div><p class="count" id="count-pass">0</p><p class="hint">The setting meets the control.</p></article>
+          <article class="card"><div class="label">Failed</div><p class="count" id="count-fail">0</p><p class="hint">Fix these, or they become POA&amp;M items.</p></article>
+          <article class="card"><div class="label"><span class="term" tabindex="0">Need evidence<span class="term__tip" role="tooltip">A person still has to confirm this. That is not a failure.</span></span></div><p class="count" id="count-manual">0</p><p class="hint">A person still has to confirm these. That is not a failure.</p></article>
+          <article class="card"><div class="label"><span class="term" tabindex="0">Draft<span class="term__tip" role="tooltip">A check stub that has not been reviewed yet. Not a pass, not a failure, and not a POA&amp;M item.</span></span></div><p class="count" id="count-draft">0</p><p class="hint">Unreviewed check stubs. Not a pass or a failure.</p></article>
         </div>
         <div class="table-wrap">
           <table>
@@ -225,24 +242,21 @@
         <details class="fold" id="oscal-preview-box">
           <summary>Preview assessment-results.json</summary>
           <p class="note">This is the official results file you can download. It uses the OSCAL standard so other GRC tools can read it.</p>
-          <pre id="oscal-preview" class="code"></pre>
+          <div class="view-toggle" role="tablist" aria-label="Assessment results view">
+            <button type="button" id="oscal-view-readable" aria-selected="true">Readable</button>
+            <button type="button" id="oscal-view-raw" aria-selected="false">Show raw JSON</button>
+          </div>
+          <div id="oscal-readable"></div>
+          <pre id="oscal-preview" class="code" hidden></pre>
         </details>
       </div>
     </section>
 
-    <section class="more" id="how-to-use" aria-labelledby="how-title">
-      <h2 id="how-title">How to use it</h2>
-      <ol class="path">
-        <li><b>Catalog</b> — use the example or open a catalog JSON in this tab.</li>
-        <li><b>Checks</b> — review the checks that apply, or open your mapping file.</li>
-        <li><b>Evidence</b> — open a local settings JSON, or a passing/failing sample.</li>
-        <li><b>Run</b> — evaluate here, then download the results and the HTML report.</li>
-      </ol>
-      <p class="note">
-        <a href="https://code1sentinel.github.io/policy-golden-path/">Codify</a> writes the catalog;
-        Enact runs the checks.
-      </p>
-    </section>
+    <details class="fold" id="later-help" hidden>
+      <summary>How to use it and sample reports</summary>
+      <p class="note">Collapsed so this step stays short. Open for the four steps and the generated sample reports.</p>
+      <div id="later-help-body"></div>
+    </details>
 
     <section class="more" id="sample-reports" aria-labelledby="demo-title">
       <h2 id="demo-title">Sample reports</h2>
@@ -257,11 +271,11 @@
             <span class="pill pass">Passed</span>
           </div>
           <p>Review every 30 days, lockout after 3 tries, privileged review every 14 days — inside the catalog limits.</p>
-          <p class="meta">2 passed · 2 need evidence · 0 POA&amp;M items</p>
+          <p class="meta">2 passed · 2 <span class="term" tabindex="0">Need evidence<span class="term__tip" role="tooltip">A person still has to confirm this. That is not a failure.</span></span> · 0 <span class="term" tabindex="0">POA&amp;M<span class="term__tip" role="tooltip">Plan of Action and Milestones — the list of failed checks that still need a fix.</span></span> items</p>
           <ul class="links">
             <li><a href="examples/pass/summary.html">HTML report</a></li>
-            <li><a href="examples/pass/assessment-results.json"><code>assessment-results.json</code></a></li>
-            <li><a href="examples/pass/poam.json"><code>poam.json</code></a></li>
+            <li><a href="examples/pass/assessment-results.json"><span class="term" tabindex="0">assessment-results.json<span class="term__tip" role="tooltip">The official results file. Other GRC tools can read it because it uses the OSCAL standard.</span></span></a></li>
+            <li><a href="examples/pass/poam.json"><span class="term" tabindex="0">poam.json<span class="term__tip" role="tooltip">The downloadable list of failed checks that still need a fix (a POA&amp;M).</span></span></a></li>
           </ul>
         </article>
         <article class="card">
@@ -270,11 +284,11 @@
             <span class="pill fail">Failed</span>
           </div>
           <p>Review every 180 days, lockout after 20 tries, privileged review every 365 days — over the catalog limits.</p>
-          <p class="meta">3 failed · 1 need evidence · 3 POA&amp;M items</p>
+          <p class="meta">3 failed · 1 <span class="term" tabindex="0">Need evidence<span class="term__tip" role="tooltip">A person still has to confirm this. That is not a failure.</span></span> · 3 <span class="term" tabindex="0">POA&amp;M<span class="term__tip" role="tooltip">Plan of Action and Milestones — the list of failed checks that still need a fix.</span></span> items</p>
           <ul class="links">
             <li><a href="examples/fail/summary.html">HTML report</a></li>
-            <li><a href="examples/fail/assessment-results.json"><code>assessment-results.json</code></a></li>
-            <li><a href="examples/fail/poam.json"><code>poam.json</code></a></li>
+            <li><a href="examples/fail/assessment-results.json"><span class="term" tabindex="0">assessment-results.json<span class="term__tip" role="tooltip">The official results file. Other GRC tools can read it because it uses the OSCAL standard.</span></span></a></li>
+            <li><a href="examples/fail/poam.json"><span class="term" tabindex="0">poam.json<span class="term__tip" role="tooltip">The downloadable list of failed checks that still need a fix (a POA&amp;M).</span></span></a></li>
           </ul>
         </article>
       </div>

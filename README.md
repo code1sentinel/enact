@@ -14,7 +14,7 @@ Open the site, pick the bundled catalog (or your own catalog JSON and evidence J
 2. **Catalog** — use the access-control example, or open an OSCAL catalog JSON from this machine.
 3. **Checks** — pick bundled library checks (MFA, lockout, reviews, logging, encryption) or open your `checks.json` or OSCAL Component Definition.
 4. **Evidence** — open a local evidence JSON, or a passing/failing sample.
-5. **Run** — evaluate in the tab, then download `assessment-results.json` and the HTML report.
+5. **Run** — evaluate in the tab, then download `assessment-results.json` and the HTML report. Pending rows are **Need evidence** (not a failure). Downloads stay disabled until a run exists.
 
 Nothing is uploaded. The engine is a vendored OPA WASM module built from the starter library. Sample reports from `examples/access-control/` stay on the site.
 

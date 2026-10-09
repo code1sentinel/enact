@@ -43,10 +43,49 @@ a:hover { color: var(--accent-hover); }
 }
 h1 { margin: 1.4rem 0 .45rem; font-size: 1.7rem; letter-spacing: -.02em; }
 h2 { margin: 0 0 .35rem; font-size: 1.1rem; }
-.lede { color: var(--muted); max-width: 42rem; margin: 0 0 1.1rem; }
+.lede { color: var(--muted); max-width: 50rem; margin: 0 0 1.1rem; }
+.landing-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, .9fr);
+  gap: 1.25rem 1.75rem;
+  align-items: start;
+  margin: 1.2rem 0 .35rem;
+}
+.landing-copy .lede {
+  max-width: none;
+  margin: 0;
+  font-size: 1.05rem;
+}
+.how-card {
+  margin: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+}
+.how-card h2 { margin: 0 0 .45rem; }
+.how-card .path, #later-help-body .path { margin: 0; padding-left: 1.15rem; }
+.how-card .path li, #later-help-body .path li { margin: .28rem 0; }
+#later-help-body #how-to-use { margin: .75rem 0 1rem; }
+#later-help-body .more { margin: 1rem 0 0; padding: 1rem 0 0; }
+.kv {
+  display: grid;
+  gap: .45rem 1rem;
+  margin: 0 0 1.1rem;
+}
+.kv > div {
+  display: grid;
+  grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr);
+  gap: .35rem 1rem;
+  padding: .4rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.kv dt { color: var(--muted); font-size: .82rem; font-weight: 650; }
+.kv dd { margin: 0; }
+.cards .hint { margin: .4rem 0 0; color: var(--muted); font-size: .85rem; }
 .actions { display: flex; flex-wrap: wrap; gap: .55rem; margin: 0 0 1.1rem; }
 .btn {
-  appearance: none; border: 0; display: inline-flex; align-items: center;
+  appearance: none; border: 0; display: inline-flex; align-items: center; gap: .35rem;
   padding: .55rem .95rem; border-radius: 999px; background: var(--accent-fill);
   color: var(--on-accent); font: 650 14px var(--font); cursor: pointer; text-decoration: none;
 }
@@ -228,8 +267,15 @@ th {
 .next-step { color: var(--ink); max-width: 22rem; }
 .term {
   position: relative;
-  border-bottom: 1px dotted currentColor;
+  color: inherit;
+  border-bottom: 1px dashed var(--ink);
   cursor: help;
+}
+.lede .term,
+.note .term,
+.meta .term,
+.label .term {
+  border-bottom-color: currentColor;
 }
 .term__tip {
   display: none;
@@ -257,7 +303,7 @@ th {
   display: block;
 }
 @media (max-width: 800px) {
-  .cards, .runs, .summary-counts { grid-template-columns: 1fr; }
+  .cards, .runs, .summary-counts, .landing-top, .kv > div { grid-template-columns: 1fr; }
   .top__row, .check-top { flex-direction: column; }
   .top__meta { align-items: flex-start; }
 }

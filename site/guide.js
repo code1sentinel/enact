@@ -16,6 +16,10 @@
       "Open Policy Agent 1.8 — the engine that answers automated checks. Enact vendors that version in this tab.",
     "POA&M": "Plan of Action and Milestones — the list of failed checks that still need a fix.",
     "poam.json": "The downloadable list of failed checks that still need a fix (a POA&M).",
+    "assessment-results.json":
+      "The official results file. Other GRC tools can read it because it uses the OSCAL standard.",
+    Draft: "A check stub that has not been reviewed yet. Not a pass, not a failure, and not a POA&M item.",
+    "Need evidence": "A person still has to confirm this. That is not a failure.",
     manual: "A check a person must confirm. Enact will not pass or fail it from the settings file.",
     automated: "A check Enact can answer from the settings file alone.",
     hybrid:
@@ -108,7 +112,7 @@
     return (
       {
         automated: "Automated",
-        manual: "Needs a person",
+        manual: "Need evidence",
         hybrid: "Hybrid — setting + sign-off",
         draft: "Draft",
       }[checkType] || checkType || ""
@@ -367,7 +371,7 @@
       evidenceName: evidenceName,
       evidenceKind: failing ? "failing sample" : "passing sample",
       nextAction: "Run the assessment",
-      nextHint: "Everything needed is in this tab. Run to see what passed and what still needs a person.",
+      nextHint: "Everything needed is in this tab. Run to see what passed and what still needs evidence.",
     };
   }
 
@@ -375,50 +379,106 @@
     outcome = outcome || {};
     var status = outcome.status;
     var type = outcome.check_type;
-    var message = outcome.message || "";
     if (status === "pass") {
       return {
         label: "Passed",
-        next: "No further action. The setting meets the control.",
+        next: "No further action.",
       };
     }
     if (status === "fail") {
       return {
         label: "Failed",
-        next: "Change the setting so it meets the limit, or record a POA&M item for this finding.",
+        next: "Fix the setting, or add a POA&M item.",
       };
     }
     if (status === "error") {
       return {
         label: "Failed",
-        next: "The check could not run. Confirm the settings file and the control mapping, then run again.",
+        next: "Fix the settings file or mapping, then run again.",
       };
     }
     if (status === "draft") {
       return {
         label: "Draft",
-        next: "Review this stub from the Enact CLI before trusting the result.",
+        next: "Review this stub in the CLI before trusting it.",
       };
     }
     if (status === "not_automated" || type === "manual") {
       return {
         label: "Need evidence",
-        next:
-          "A person must confirm this. " +
-          (message || "Collect the paperwork named in the check.") +
-          " Enact will not pass or fail a manual check from the settings file.",
+        next: "Have a person confirm the paperwork.",
       };
     }
     if (status === "needs_evidence" || type === "hybrid") {
       return {
         label: "Need evidence",
-        next:
-          "The automated half can pass from the settings file, but a reviewer still has to sign off. " +
-          (message || "Attach the sign-off named in the check.") +
-          " This is intentional — hybrid checks are not marked Passed until a person reviews them.",
+        next: "A reviewer must sign off. Not Passed until then.",
       };
     }
-    return { label: statusLabel(status), next: message };
+    return { label: statusLabel(status), next: "See Why for this check." };
+  }
+
+  function collapseSecondary(step) {
+    return step !== "catalog";
+  }
+
+  function oscalReadableSummary(opts) {
+    opts = opts || {};
+    var oscal = opts.oscal || {};
+    var outcomes = opts.outcomes || [];
+    var ar = oscal["assessment-results"] || {};
+    var meta = ar.metadata || {};
+    var result = (ar.results && ar.results[0]) || {};
+    var observations = result.observations || [];
+    var findings = result.findings || [];
+    var counts = { pass: 0, fail: 0, needEvidence: 0, draft: 0 };
+    var rows = outcomes.map(function (outcome) {
+      var status = outcome.status || "";
+      if (status === "pass") {
+        counts.pass += 1;
+      } else if (status === "fail" || status === "error") {
+        counts.fail += 1;
+      } else if (status === "draft") {
+        counts.draft += 1;
+      } else {
+        counts.needEvidence += 1;
+      }
+      return {
+        control: outcome.control_id || "",
+        check: outcome.rule_id || "",
+        status: status,
+        label: statusLabel(status),
+        why: outcome.message || "",
+      };
+    });
+    var title = meta.title || "Assessment results";
+    var oscalVersion = meta["oscal-version"] || "1.1.2";
+    return {
+      title: title,
+      oscalVersion: oscalVersion,
+      lastModified: meta["last-modified"] || "",
+      observationCount: observations.length,
+      findingCount: findings.length,
+      counts: counts,
+      rows: rows,
+      lede:
+        counts.pass +
+        " passed, " +
+        counts.fail +
+        " failed, " +
+        counts.needEvidence +
+        " Need evidence, " +
+        counts.draft +
+        " Draft — " +
+        observations.length +
+        " observations in the OSCAL file.",
+      facts: [
+        { label: "Title", value: title },
+        { label: "OSCAL version", value: oscalVersion },
+        { label: "Observations", value: String(observations.length) },
+        { label: "Findings", value: String(findings.length) },
+      ],
+    };
   }
 
   function progressFromState(state) {
@@ -452,6 +512,8 @@
     exampleLoadSummary: exampleLoadSummary,
     resultGuidance: resultGuidance,
     progressFromState: progressFromState,
+    collapseSecondary: collapseSecondary,
+    oscalReadableSummary: oscalReadableSummary,
   };
 
   if (typeof module === "object" && module.exports) {
