@@ -7,6 +7,7 @@
   var themeCss = "";
   var themeJs = "";
   var evidenceView = "table";
+  var oscalView = "readable";
   var state = {
     step: "catalog",
     catalog: null,
@@ -123,7 +124,50 @@
     if (step === "run") {
       renderRun();
     }
+    placeSecondary(step);
+    setDownloadsEnabled(Boolean(state.result));
     renderProgress();
+  }
+
+  function placeSecondary(step) {
+    var how = document.getElementById("how-to-use");
+    var samples = document.getElementById("sample-reports");
+    var landing = document.getElementById("landing-top");
+    var later = document.getElementById("later-help");
+    var body = document.getElementById("later-help-body");
+    if (Guide.collapseSecondary(step)) {
+      var already = how.parentNode === body;
+      body.appendChild(how);
+      body.appendChild(samples);
+      later.hidden = false;
+      if (!already) {
+        later.open = false;
+      }
+      landing.hidden = true;
+      how.classList.remove("how-card");
+    } else {
+      landing.appendChild(how);
+      later.parentNode.insertBefore(samples, later.nextSibling);
+      later.hidden = true;
+      landing.hidden = false;
+      how.classList.add("how-card");
+    }
+  }
+
+  function setDownloadsEnabled(on) {
+    var hint = on ? "" : "Available after you run the assessment.";
+    ["download-oscal", "download-html", "download-poam"].forEach(function (id) {
+      var btn = document.getElementById(id);
+      btn.disabled = !on;
+      btn.setAttribute("aria-disabled", on ? "false" : "true");
+      if (id === "download-oscal") {
+        btn.title = on ? Guide.glossaryTip("assessment-results.json") : hint;
+      } else if (id === "download-poam") {
+        btn.title = on ? Guide.glossaryTip("poam.json") : hint;
+      } else {
+        btn.title = on ? "A readable HTML report of this run." : hint;
+      }
+    });
   }
 
   function readFile(input) {
@@ -179,6 +223,7 @@
       seedLibrarySelection();
     }
     renderLoadSummary();
+    setDownloadsEnabled(false);
     renderProgress();
     showBanner("");
   }
@@ -443,9 +488,72 @@
     renderProgress();
   }
 
+  function setOscalView(view) {
+    oscalView = view;
+    var readable = document.getElementById("oscal-readable");
+    var raw = document.getElementById("oscal-preview");
+    var readBtn = document.getElementById("oscal-view-readable");
+    var rawBtn = document.getElementById("oscal-view-raw");
+    var showRaw = view === "raw";
+    readable.hidden = showRaw;
+    raw.hidden = !showRaw;
+    readBtn.setAttribute("aria-selected", showRaw ? "false" : "true");
+    rawBtn.setAttribute("aria-selected", showRaw ? "true" : "false");
+  }
+
+  function renderOscalPreview(result) {
+    var summary = Guide.oscalReadableSummary({
+      oscal: result.oscal,
+      outcomes: result.outcomes,
+    });
+    var box = document.getElementById("oscal-readable");
+    var facts = summary.facts
+      .map(function (fact) {
+        return (
+          "<div><dt>" +
+          Guide.escapeHtml(fact.label) +
+          "</dt><dd>" +
+          Guide.escapeHtml(fact.value) +
+          "</dd></div>"
+        );
+      })
+      .join("");
+    var rows = summary.rows
+      .map(function (row) {
+        return (
+          "<tr><td><code>" +
+          Guide.escapeHtml(row.control) +
+          "</code></td><td>" +
+          Guide.escapeHtml(row.check) +
+          "</td><td>" +
+          Guide.escapeHtml(row.label) +
+          "</td></tr>"
+        );
+      })
+      .join("");
+    box.innerHTML =
+      "<p class=\"note\">" +
+      Guide.escapeHtml(summary.lede) +
+      "</p><ul class=\"summary-counts\">" +
+      "<li><strong>" +
+      summary.counts.pass +
+      "</strong>passed</li><li><strong>" +
+      summary.counts.fail +
+      "</strong>failed</li><li><strong>" +
+      summary.counts.needEvidence +
+      "</strong>Need evidence</li></ul><dl class=\"kv\">" +
+      facts +
+      '</dl><div class="table-wrap"><table><thead><tr><th>Control</th><th>Check</th><th>Status</th></tr></thead><tbody>' +
+      rows +
+      "</tbody></table></div>";
+    document.getElementById("oscal-preview").textContent = JSON.stringify(result.oscal, null, 2);
+    setOscalView(oscalView);
+  }
+
   function renderRun() {
     var empty = document.getElementById("run-empty");
     var results = document.getElementById("run-results");
+    setDownloadsEnabled(Boolean(state.result));
     if (!state.result) {
       empty.hidden = false;
       results.hidden = true;
@@ -481,7 +589,7 @@
         "</td>";
       body.appendChild(row);
     });
-    document.getElementById("oscal-preview").textContent = JSON.stringify(state.result.oscal, null, 2);
+    renderOscalPreview(state.result);
   }
 
   function currentManifest() {
@@ -651,6 +759,18 @@
   document.getElementById("evidence-view-raw").addEventListener("click", function () {
     setEvidenceView("raw");
   });
+  document.getElementById("oscal-view-readable").addEventListener("click", function () {
+    setOscalView("readable");
+  });
+  document.getElementById("oscal-view-raw").addEventListener("click", function () {
+    setOscalView("raw");
+  });
+  document.querySelector('a[href="#sample-reports"]').addEventListener("click", function () {
+    var later = document.getElementById("later-help");
+    if (!later.hidden) {
+      later.open = true;
+    }
+  });
   document.getElementById("run-btn").addEventListener("click", runAssessment);
   document.getElementById("download-oscal").addEventListener("click", function () {
     if (!state.result) {
@@ -698,4 +818,6 @@
     .catch(function (err) {
       setStatus(err.message || String(err), "error");
     });
+  placeSecondary(state.step);
+  setDownloadsEnabled(false);
 })();

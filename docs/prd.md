@@ -29,7 +29,7 @@ GRC engineers get OSCAL catalogs (from [Codify](https://github.com/code1sentinel
 
 ## Users and privacy
 
-**GRC reviewers** start at https://code1sentinel.github.io/enact/ (Catalog → Checks → Evidence → Run in the tab). The example load shows a short summary and a Run action; Checks explain which library items apply; Evidence is a table; Results say what to do next. **Engineers in CI** run the same work later with `enact run`. Optional localhost: `enact ui`. Inputs are local files. Reports are local files. Product stance: [docs/prds/ui-first.md](prds/ui-first.md). First-time copy: [docs/prds/first-time-walkthrough.md](prds/first-time-walkthrough.md).
+**GRC reviewers** start at https://code1sentinel.github.io/enact/ (Catalog → Checks → Evidence → Run in the tab). The example load shows a short summary and a Run action; Checks explain which library items apply; Evidence is a table; Results say what to do next. Pending rows use the same **Need evidence** label. **Engineers in CI** run the same work later with `enact run`. Optional localhost: `enact ui`. Inputs are local files. Reports are local files. Product stance: [docs/prds/ui-first.md](prds/ui-first.md). First-time copy: [docs/prds/first-time-walkthrough.md](prds/first-time-walkthrough.md). Polish: [docs/prds/walkthrough-polish.md](prds/walkthrough-polish.md).
 
 ## Shape
 

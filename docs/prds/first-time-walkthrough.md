@@ -1,6 +1,6 @@
 # PRD: First-time GRC walkthrough (in-browser app)
 
-- Status: in progress
+- Status: shipped (PR #17); follow-up polish in [walkthrough-polish.md](walkthrough-polish.md)
 - Owner: GRC Engineering Club
 - Date: 2026-10-08
 - Related ADRs: [0007](../adr/0007-local-only-privacy-model.md), [0014](../adr/0014-browser-app-is-primary.md), [0015](../adr/0015-oscal-component-definition-mapping.md)

@@ -291,6 +291,37 @@ def test_first_time_walkthrough_copy_and_structure() -> None:
     assert ".term" in css
 
 
+def test_walkthrough_polish_wording_preview_downloads_and_layout() -> None:
+    html = (SITE / "index.html").read_text(encoding="utf-8")
+    css = (SITE / "app.css").read_text(encoding="utf-8")
+    app = (SITE / "app.js").read_text(encoding="utf-8")
+    guide = (SITE / "guide.js").read_text(encoding="utf-8")
+    assert "Needs a person" not in html
+    assert "Needs a person" not in guide
+    assert 'id="what-enact"' in html
+    what = html[html.find('id="what-enact"') : html.find('id="engine-status"')]
+    assert "OSCAL" in what
+    assert 'class="term"' in what
+    assert "term__tip" in what
+    assert "POA&amp;M" in html or "POA&M" in html
+    assert "assessment-results.json" in html
+    assert "poam.json" in html
+    assert "term__tip" in html[html.find("sample-reports") :]
+    assert 'id="oscal-readable"' in html
+    assert 'id="oscal-view-raw"' in html
+    assert "Show raw JSON" in html
+    assert "oscalReadableSummary" in app
+    assert 'id="download-oscal"' in html
+    assert "disabled" in html[html.find('id="download-oscal"') : html.find('id="download-oscal"') + 80]
+    assert "Download poam.json" in html
+    assert "Downloadpoam.json" not in html
+    assert 'id="later-help"' in html
+    assert 'id="landing-top"' in html
+    assert ".landing-top" in css
+    assert "collapseSecondary" in app
+    assert "Need evidence" in html
+
+
 def test_guide_helpers_cover_example_summary_evidence_and_results() -> None:
     node = shutil.which("node")
     if node is None:

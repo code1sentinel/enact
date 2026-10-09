@@ -6,6 +6,8 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ### Changed
 
+- Second-pass polish of the in-browser walk-through: the pending state is **Need evidence** everywhere (Checks badge, Results, sample cards, HTML report, Markdown heading). Result **Next step** no longer repeats **Why**. Dotted-underline help covers the first OSCAL, POA&M, Draft, `assessment-results.json`, and `poam.json`. Assessment-results preview starts with a readable summary and a **Show raw JSON** toggle. Download buttons stay disabled until a run, and `Download poam.json` keeps its space. Catalog uses the page width (What is Enact? + How to use it); later steps collapse how-to and sample reports. OSCAL `result` values are unchanged. See [docs/prds/walkthrough-polish.md](docs/prds/walkthrough-polish.md).
+
 - First-time walk-through on the in-browser app: after **Use the access-control example**, a summary lists how many controls and checks were loaded and which sample evidence, with **Run the assessment** as the next action. Checks that apply to the catalog (with a reason) sit above unused library checks. Evidence is a readable table plus a Raw JSON toggle. Results use **Need evidence** (same wording as the sample reports), add a next-step column, explain hybrid sign-off for `c-ac-2p`, and preview `assessment-results.json` in the page. Jargon has dotted-underline tooltips; CLI/Rego/install sit under **Advanced**. Component Definition loading from #16 stays on Checks with a one-line explanation. See [docs/prds/first-time-walkthrough.md](docs/prds/first-time-walkthrough.md).
 
 ### Added
