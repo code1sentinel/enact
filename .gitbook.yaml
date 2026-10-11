@@ -1,0 +1,7 @@
+# GitBook Git Sync reads this file from the repository root.
+# Only the curated book under docs/book/ is published — not the rest of docs/.
+root: ./docs/book/
+
+structure:
+  readme: README.md
+  summary: SUMMARY.md
