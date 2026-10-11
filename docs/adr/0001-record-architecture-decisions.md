@@ -10,7 +10,7 @@ Enact already made several load-bearing choices (OSCAL version, engines, privacy
 
 ## Decision
 
-We record architecture decisions in `docs/adr/NNNN-title.md`, numbered monotonically, using `docs/templates/adr-template.md`. New features start from a PRD; if the work chooses among alternatives, an ADR is part of the slice (or a preceding chore PR). `AGENTS.md` requires this.
+We record architecture decisions in `docs/adr/NNNN-title.md`, numbered monotonically, using `docs/templates/adr-template.md`. New features start from a PRD; if the work chooses among alternatives, an ADR is part of the slice (or a preceding chore PR). The process rule (`.cursor/rules/process.mdc`) requires this.
 
 ## Consequences
 

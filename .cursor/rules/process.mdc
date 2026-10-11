@@ -1,0 +1,16 @@
+---
+description: PRD-first slices, ADRs, one PR, definition of done
+alwaysApply: true
+---
+
+# Process
+
+Agents here run **headless**. Use the written spec. Do not block on mid-run questions.
+
+1. **Start from a PRD.** Product-as-it-stands is `docs/prd.md`. A change gets `docs/prds/<feature>.md` from `docs/templates/prd-template.md`. Do not open a slice issue until the PRD exists.
+2. **Record decisions.** Architecture and “why this, not that” go in `docs/adr/NNNN-title.md`, numbered from the next free integer, using `docs/templates/adr-template.md`.
+3. **Thin vertical slices.** One user-visible path through the stack. One GitHub issue per slice (`.github/ISSUE_TEMPLATE/slice.yml`). Acceptance criteria are **Given / When / Then**. One PR per slice, into `main`, linking the issue. GitHub is the source of truth (ADR 0006); Origin is legacy history.
+4. **Definition of done.** The slice is done when the PR is merged, the Pages demo is updated if output or UI changed (`scripts/build_site.py` / `site/`), README and CHANGELOG are touched, and the issue is closed.
+5. **Retro.** After a feature (all of its slices) lands, add a short note in `docs/retros/` from `docs/templates/retro-template.md`. Fold lasting lessons into templates, `.cursor/rules/`, or a skill — not a growing `AGENTS.md`.
+
+Humans follow the same loop in `CONTRIBUTING.md`.

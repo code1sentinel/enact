@@ -14,7 +14,7 @@
 
 ## Lesson to keep
 
-Fold anything durable into `AGENTS.md` or `docs/templates/` in the same change or the next chore slice.
+Fold anything durable into `.cursor/rules/`, a skill under `.cursor/skills/`, or `docs/templates/` in the same change or the next chore slice. Keep `AGENTS.md` a short index.
 
 ## Follow-ups
 

@@ -1,0 +1,17 @@
+---
+description: Local-first privacy — no new outbound calls, no AI keys, localhost only
+alwaysApply: true
+---
+
+# Privacy
+
+Product code makes **no new outbound network calls**. The CLI, `enact ui`, generated reports, and the Pages app talk only to the machine they run on (ADR 0007, ADR 0014).
+
+- Servers bind `127.0.0.1`.
+- The hosted Pages app evaluates in the tab. It does not accept uploads.
+- Same-origin fetch of vendored `policy.wasm` is allowed. CDNs for the engine, SDK, fonts, or analytics are not.
+- Adapters (`enact-adapt`) are file-in / file-out. No cloud SDKs and no outbound calls from `src/enact/`.
+- A new third-party call (CDN, telemetry, hosted API) needs a new ADR that explicitly allows it. Otherwise reject the change.
+- **AI keys are never written** into source, fixtures, reports, HTML, env samples, or logs.
+
+See `docs/adr/0007-local-only-privacy-model.md` and `docs/adr/0014-browser-app-is-primary.md`.

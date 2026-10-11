@@ -4,12 +4,36 @@ Fixes #
 
 ## Summary
 
-<!-- What this slice delivers. Point at the PRD (`docs/prd.md` or `docs/prds/…`). -->
+<!-- Smallest sketch that makes the change clear: a few lines of pseudocode, a call tree, a file tree, a diff-shaped outline, or Mermaid. Then one or two sentences. Point at the PRD (`docs/prd.md` or `docs/prds/…`). -->
+
+```text
+<!-- e.g.
+enact run
+  load catalog + checks
+  opa eval
++   emit component-definition props
+  write assessment-results.json
+-->
+```
+
+## Evidence
+
+<!-- Before/after that the change works. UI: screenshots. CLI/writers: failing then passing test, or command output. -->
+
+- **Before:**
+- **After:**
+
+## Merge danger
+
+<!-- One-way door: hard to undo (schema, OSCAL shape, privacy). Two-way door: cheap to revert. Blast radius: who/what this can break. -->
+
+- **Door:** one-way / two-way
+- **Blast radius:**
 
 ## Tests
 
 - [ ] Failing test first, from the issue’s Given / When / Then
-- [ ] Implementation + refactor
+- [ ] Implementation until green (refactor in code-review, not in the TDD loop)
 - [ ] Golden-file and/or NIST OSCAL 1.1.2 schema validation for any new or changed OSCAL output
 - [ ] CI green (tests, ruff, mypy, schema, pip-audit, gitleaks). Do not merge on red.
 
@@ -22,6 +46,7 @@ Fixes #
 ## Privacy
 
 - [ ] No new outbound network calls (CLI, UI, HTML report, Pages). Localhost only for servers.
+- [ ] No AI keys written into source, fixtures, reports, or logs.
 
 ## Docs and changelog
 
@@ -34,7 +59,7 @@ Fixes #
 
 - [ ] UI changes cite the Mobbin references used, with before/after screenshots
 
-<!-- If this PR changes the report, landing page, enact ui, or other frontend: paste the mobbin.com links from the PRD/slice. If none were provided, do not invent a design — ask for the references first. CLI-only slices can leave this unchecked and write N/A. -->
+<!-- If this PR changes the report, landing page, enact ui, or other frontend: paste the mobbin.com links from the PRD/slice. If none were provided, do not invent a design — stop until a human adds the references. CLI-only slices can leave this unchecked and write N/A. -->
 
 ## Screenshots
 

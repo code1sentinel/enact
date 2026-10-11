@@ -1,0 +1,24 @@
+---
+description: OSCAL 1.1.2 vendored schemas; no trestle/C2P runtime
+globs:
+  - src/enact/writers.py
+  - src/enact/html_report.py
+  - src/enact/validate.py
+  - src/enact/oscal_io.py
+  - src/enact/component_definition.py
+  - schemas/**
+  - tests/test_oscal*.py
+  - tests/test_writers.py
+  - tests/test_e2e.py
+  - tests/test_component_definition.py
+  - tests/test_browser_app.py
+alwaysApply: false
+---
+
+# OSCAL
+
+NIST **OSCAL 1.1.2** only. Schemas are vendored in `schemas/`. Validate with `enact validate` / `enact.validate`.
+
+- Do not take a runtime dependency on compliance-trestle or C2P (ADR 0002, ADR 0003, ADR 0015).
+- Golden files and schema checks are the contract for writer output. Expected documents are authored independently — never by running the writer under test and blessing its own output.
+- C2P is a format reference (`Rule_Id` / `Check_Id`) only.

@@ -4,6 +4,14 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ## [Unreleased]
 
+### Added
+
+- Headless-agent workflow: adapted TDD, diagnosing-bugs, and code-review skills from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, `49dd158d1076134a641b33efb035946536778336`) under `.cursor/skills/`. PR template now asks for a summary sketch, before/after evidence, and merge danger (one-way vs two-way door + blast radius). See [docs/prds/agent-skills.md](docs/prds/agent-skills.md) and [ADR 0016](docs/adr/0016-agent-skills-progressive-disclosure.md). Attribution: [THIRD_PARTY.md](THIRD_PARTY.md).
+
+### Changed
+
+- `AGENTS.md` is a one-line product description, unusual commands, and pointers. Detailed rules moved to `.cursor/rules/` (privacy, process, TDD, CI, OSCAL, Mobbin). TDD is red → green only; refactoring happens in code-review.
+
 ### Changed
 
 - Second-pass polish of the in-browser walk-through: the pending state is **Need evidence** everywhere (Checks badge, Results, sample cards, HTML report, Markdown heading). Result **Next step** no longer repeats **Why**. Dotted-underline help covers the first OSCAL, POA&M, Draft, `assessment-results.json`, and `poam.json`. Assessment-results preview starts with a readable summary and a **Show raw JSON** toggle. Download buttons stay disabled until a run, and `Download poam.json` keeps its space. Catalog uses the page width (What is Enact? + How to use it); later steps collapse how-to and sample reports. OSCAL `result` values are unchanged. See [docs/prds/walkthrough-polish.md](docs/prds/walkthrough-polish.md).

@@ -1,0 +1,14 @@
+---
+description: Red-green TDD from Given/When/Then; refactor in code-review
+alwaysApply: true
+---
+
+# TDD
+
+Follow `.cursor/skills/tdd` on every implementation slice.
+
+- Write a **failing test first** from the slice **Given / When / Then**. Then only enough code to go green.
+- Seams come from the PRD/slice, not from asking a human.
+- Prefer golden-file tests for HTML / Markdown / JSON writers. Expected values are independent of the code under test.
+- Validate new or changed OSCAL against the vendored NIST **1.1.2** schemas (`enact validate` / `enact.validate`).
+- **Do not refactor in the red → green loop.** Refactoring belongs to `.cursor/skills/code-review`.

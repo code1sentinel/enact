@@ -257,7 +257,7 @@ FedRAMP 20x publishes 46 Key Security Indicators mapped to 800-53 controls. Clas
 
 ## Development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) for the PRD → slice → TDD → PR loop.
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) for the PRD → slice → TDD → PR loop. Coding-agent skills live under `.cursor/skills/`; scoped rules under `.cursor/rules/`.
 
 ```bash
 uv sync --extra dev
@@ -276,4 +276,4 @@ uv run python scripts/build_site.py --out _site
 
 ## License
 
-MIT.
+MIT. Third-party notices: [THIRD_PARTY.md](THIRD_PARTY.md).
