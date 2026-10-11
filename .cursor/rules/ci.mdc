@@ -1,0 +1,10 @@
+---
+description: CI gates stay green; nothing merges on red
+alwaysApply: true
+---
+
+# CI and merge
+
+Nothing merges on red CI. Required gates: **tests**, **ruff**, **mypy**, **schema validation**, **pip-audit**, and **gitleaks**.
+
+Do not skip, ignore, or weaken a gate to land a change. Review every PR against `.github/pull_request_template.md`.

@@ -19,3 +19,4 @@ Numbered documents in this folder. Start from `docs/templates/adr-template.md`.
 | [0013](0013-browser-only-guided-app.md) | Browser-only guided app (client-side OPA) | accepted |
 | [0014](0014-browser-app-is-primary.md) | Browser app is the primary Enact path | accepted |
 | [0015](0015-oscal-component-definition-mapping.md) | OSCAL Component Definition is the interchange mapping | accepted |
+| [0016](0016-agent-skills-progressive-disclosure.md) | Agent skills and progressive-disclosure AGENTS.md | accepted |

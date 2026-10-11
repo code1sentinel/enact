@@ -1,0 +1,23 @@
+---
+description: Mobbin-first UI; cite design references or stop
+globs:
+  - site/**
+  - src/enact/static/**
+  - src/enact/html_report.py
+  - src/enact/writers.py
+  - src/enact/webapp.py
+  - src/enact/theme.py
+  - scripts/build_site.py
+  - scripts/build_browser_app.py
+  - "**/*.html"
+  - "**/*.css"
+alwaysApply: false
+---
+
+# Mobbin-first UI
+
+Any frontend or UI change (report HTML, `enact ui`, Pages landing, or other user-facing layout) must cite [Mobbin](https://mobbin.com) design references on the PRD and the slice. Put the links in the **Design references** field.
+
+If those fields are empty, **stop**. Do not invent a visual design. A human supplies Mobbin links before UI work continues.
+
+PRs that change UI include those citations plus before/after screenshots. The HTML report stays a single offline file. No new fonts, CDNs, or analytics.
