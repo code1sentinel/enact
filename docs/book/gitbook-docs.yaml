@@ -1,0 +1,18 @@
+# GitBook Site Git Sync reads this file from the Project directory (docs/book).
+# Schema: https://gitbook.com/docs/docs-as-code/git-sync/content-configuration
+# Monorepos / project directory: https://gitbook.com/docs/docs-as-code/git-sync/monorepos
+# Contract: https://api.gitbook.com/gitbook-docs.yaml
+#
+# The single space is this directory: README.md and SUMMARY.md are the first
+# page and navigation (GitBook defaults; also set in the repo-root .gitbook.yaml).
+$schema: https://api.gitbook.com/gitbook-docs.yaml
+site:
+  title: Enact
+  structure:
+    - type: space
+      key: enact
+      title: Enact
+      path: enact
+      default: true
+      content:
+        directory: ./

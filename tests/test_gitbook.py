@@ -4,9 +4,14 @@ import re
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[1]
 GITBOOK_YAML = ROOT / ".gitbook.yaml"
 BOOK = ROOT / "docs" / "book"
+GITBOOK_DOCS_YAML = BOOK / "gitbook-docs.yaml"
+GITBOOK_DOCS_SCHEMA = "https://api.gitbook.com/gitbook-docs.yaml"
+PATH_FIELDS = frozenset({"directory", "readme", "summary", "root"})
 
 SCREENSHOTS = (
     "landing.png",
@@ -21,18 +26,36 @@ MD_LINK = re.compile(r"!?\[([^\]]*)\]\(([^)]+)\)")
 SUMMARY_ITEM = re.compile(r"^\s*\*\s+\[([^\]]+)\]\(([^)]+)\)\s*$")
 
 
-def _parse_gitbook_yaml(text: str) -> dict[str, str]:
-    values: dict[str, str] = {}
-    for raw in text.splitlines():
-        line = raw.split("#", 1)[0].rstrip()
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        key = key.strip()
-        value = value.strip().strip("'\"")
-        if key and value:
-            values[key] = value
-    return values
+def _referenced_fs_paths(node: object) -> list[str]:
+    found: list[str] = []
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key in PATH_FIELDS and isinstance(value, str):
+                found.append(value)
+            found.extend(_referenced_fs_paths(value))
+    elif isinstance(node, list):
+        for item in node:
+            found.extend(_referenced_fs_paths(item))
+    return found
+
+
+def _resolve_project_path(raw: str) -> Path:
+    if raw.startswith("/") and not raw.startswith("//"):
+        return (ROOT / raw.lstrip("/")).resolve()
+    return (BOOK / raw).resolve()
+
+
+def _spaces(nodes: object) -> list[dict[str, object]]:
+    found: list[dict[str, object]] = []
+    if isinstance(nodes, dict):
+        if nodes.get("type") == "space":
+            found.append(nodes)
+        for value in nodes.values():
+            found.extend(_spaces(value))
+    elif isinstance(nodes, list):
+        for item in nodes:
+            found.extend(_spaces(item))
+    return found
 
 
 def _href_target(href: str) -> str:
@@ -63,12 +86,50 @@ def _relative_links(path: Path) -> list[tuple[str, Path]]:
 
 def test_gitbook_yaml_points_at_book() -> None:
     assert GITBOOK_YAML.is_file()
-    values = _parse_gitbook_yaml(GITBOOK_YAML.read_text(encoding="utf-8"))
+    values = yaml.safe_load(GITBOOK_YAML.read_text(encoding="utf-8"))
     assert values["root"].rstrip("/") in {"./docs/book", "docs/book"}
-    assert values["readme"] == "README.md"
-    assert values["summary"] == "SUMMARY.md"
+    assert values["structure"]["readme"] == "README.md"
+    assert values["structure"]["summary"] == "SUMMARY.md"
     assert (BOOK / "README.md").is_file()
     assert (BOOK / "SUMMARY.md").is_file()
+
+
+def test_gitbook_docs_yaml_exists_parses_and_paths_resolve() -> None:
+    assert GITBOOK_DOCS_YAML.is_file()
+    data = yaml.safe_load(GITBOOK_DOCS_YAML.read_text(encoding="utf-8"))
+    assert isinstance(data, dict)
+    assert data["$schema"] == GITBOOK_DOCS_SCHEMA
+    site = data["site"]
+    assert isinstance(site, dict)
+    assert site["title"] == "Enact"
+    structure = site["structure"]
+    assert isinstance(structure, list) and structure
+
+    spaces = _spaces(structure)
+    assert spaces, "gitbook-docs.yaml must map at least one space"
+    defaults = [space for space in spaces if space.get("default") is True]
+    assert len(defaults) == 1
+    for space in spaces:
+        content = space.get("content")
+        assert isinstance(content, dict), "each space needs content.directory"
+        directory = content.get("directory")
+        assert isinstance(directory, str) and directory, "content.directory must be a repository path"
+
+    referenced = _referenced_fs_paths(data)
+    assert referenced, "gitbook-docs.yaml must reference at least one repository path"
+
+    missing: list[str] = []
+    for raw in referenced:
+        target = _resolve_project_path(raw)
+        if not target.exists():
+            missing.append(raw)
+            continue
+        if target.is_dir():
+            for name in ("README.md", "SUMMARY.md"):
+                page = target / name
+                if not page.is_file():
+                    missing.append(f"{raw.rstrip('/')}/{name}")
+    assert not missing, f"gitbook-docs.yaml references missing paths: {missing}"
 
 
 def test_summary_lists_existing_pages_and_covers_the_book() -> None:

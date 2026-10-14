@@ -6,6 +6,8 @@ All notable changes to Enact are documented here. Dates are UTC.
 
 ### Added
 
+- Site-level [`docs/book/gitbook-docs.yaml`](docs/book/gitbook-docs.yaml) for GitBook **Site** Git Sync (project directory `docs/book`, branch `main`). The existing book is the site’s one space; repo-root [`.gitbook.yaml`](.gitbook.yaml) is unchanged. See [Content configuration](https://gitbook.com/docs/docs-as-code/git-sync/content-configuration) and [Monorepos](https://gitbook.com/docs/docs-as-code/git-sync/monorepos).
+
 - GitBook-ready user and contributor guide under [`docs/book/`](docs/book/README.md). Repo-root [`.gitbook.yaml`](.gitbook.yaml) publishes only that folder (`root: ./docs/book/`). Fresh screenshots of the live Pages app are in `docs/book/assets/`. A pytest check walks relative links and screenshot files. See the book [Introduction](docs/book/README.md).
 
 - Headless-agent workflow: adapted TDD, diagnosing-bugs, and code-review skills from [mattpocock/skills](https://github.com/mattpocock/skills) (MIT, `49dd158d1076134a641b33efb035946536778336`) under `.cursor/skills/`. PR template now asks for a summary sketch, before/after evidence, and merge danger (one-way vs two-way door + blast radius). See [docs/prds/agent-skills.md](docs/prds/agent-skills.md) and [ADR 0016](docs/adr/0016-agent-skills-progressive-disclosure.md). Attribution: [THIRD_PARTY.md](THIRD_PARTY.md).

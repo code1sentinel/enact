@@ -43,4 +43,4 @@ No new outbound calls in product code. Servers bind `127.0.0.1`. The Pages app d
 
 ## This book
 
-User and contributor pages live under `docs/book/`. GitBook Git Sync reads `.gitbook.yaml` at the repo root and publishes only that folder. Keep pages accurate against the current CLI and app — do not invent features. A pytest check walks relative links and screenshots; keep it green.
+User and contributor pages live under `docs/book/`. GitBook **Site** Git Sync reads [`gitbook-docs.yaml`](gitbook-docs.yaml) in this folder (project directory `docs/book`, branch `main`) and publishes the one space mapped here. Single-space Git Sync still reads `.gitbook.yaml` at the repo root (`root: ./docs/book/`). Keep pages accurate against the current CLI and app — do not invent features. A pytest check walks relative links, screenshots, and the site mapping file; keep it green.
