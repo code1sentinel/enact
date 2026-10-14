@@ -13,7 +13,8 @@ The repo has a PRD, ADRs, and a long README. There is no curated GitBook space. 
 ## Goals
 
 - A dedicated book folder (`docs/book/`) with `SUMMARY.md` and GitBook-compatible pages.
-- Repo-root `.gitbook.yaml` whose `root` is that folder, so only the curated book is published.
+- Repo-root `.gitbook.yaml` whose `root` is that folder, so only the curated book is published (single-space Git Sync).
+- Site-level [`docs/book/gitbook-docs.yaml`](../book/gitbook-docs.yaml) so GitBook **Site** Git Sync can use project directory `docs/book` on branch `main`.
 - User pages in plain language; contributor pages short and linked to AGENTS.md / rules / skills.
 - Fresh screenshots of the live Pages app (bundled sample only).
 - A cheap relative-link check in pytest. README points at the book.
@@ -35,10 +36,13 @@ N/A — documentation only. Screenshots are of the existing Pages app.
 
 ## Shape
 
-`.gitbook.yaml` → `docs/book/` → Introduction, Quick start, walk-through, outputs, concepts, custom checks, CLI, Codify, privacy, contributing, ADR index, changelog pointer.
+Site Git Sync: `docs/book/gitbook-docs.yaml` (project directory `docs/book`) maps one space at `./` → README.md + SUMMARY.md.
+
+Single-space Git Sync: `.gitbook.yaml` → `docs/book/` → Introduction, Quick start, walk-through, outputs, concepts, custom checks, CLI, Codify, privacy, contributing, ADR index, changelog pointer.
 
 ## Slices
 
 | # | Slice | Issue | Given / When / Then (summary) |
 | --- | --- | --- | --- |
-| 1 | Curated book | this PR | Given the repo, when Git Sync reads `.gitbook.yaml`, then it publishes only `docs/book/`, and pytest fails if a SUMMARY or page relative link is broken. |
+| 1 | Curated book | #20 | Given the repo, when Git Sync reads `.gitbook.yaml`, then it publishes only `docs/book/`, and pytest fails if a SUMMARY or page relative link is broken. |
+| 2 | Site Git Sync mapping | this PR | Given GitBook Site Git Sync with repo, branch `main`, and project directory `docs/book`, when GitBook looks for `docs/book/gitbook-docs.yaml`, then that file exists, names the site Enact, maps the existing book as its one space (README.md + SUMMARY.md), and pytest fails if the file is missing, invalid YAML, or a referenced path is missing. |

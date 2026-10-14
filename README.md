@@ -6,7 +6,7 @@
 
 **Enact:** https://code1sentinel.github.io/enact/
 
-User and contributor docs for GitBook live in [docs/book/](docs/book/README.md).
+User and contributor docs for GitBook live in [docs/book/](docs/book/README.md). Site Git Sync uses [`docs/book/gitbook-docs.yaml`](docs/book/gitbook-docs.yaml) (repository, branch `main`, project directory `docs/book`).
 
 Open the site, pick the bundled catalog (or your own catalog JSON and evidence JSON — nothing is uploaded), run the library checks, and download OSCAL assessment-results plus the HTML report. The example load lists what was filled in and offers **Run**. Custom checks? Use the Enact CLI (under Advanced on the site). See [docs/prds/ui-first.md](docs/prds/ui-first.md) and [ADR 0014](docs/adr/0014-browser-app-is-primary.md).
 
